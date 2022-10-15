@@ -1,5 +1,17 @@
 #include "util/std.h"
 #include "util/parser.h"
+#include "image/image.h"
+
+/**
+ * Brett Terpstra 6920201
+ * Hello TA / Marker! Welcome to the mess that is C++!
+ * I'm still quite new to it (who isn't), and my laptop is setup
+ * differently from my main computer. You'll notice comments generated
+ * here are more detailed and very similar to Javadocs.
+ * Half the comments are just reminders to myself for when I come back to do the parallel stuff anyways.
+ * The formatting differences are also due to this, my computer is setup much nicer and closer to Java
+ * while my laptop is just stock clion.
+ */
 
 int main(int argc, char** args) {
     // not a feature full parser but it'll work for what I need.
@@ -34,6 +46,18 @@ int main(int argc, char** args) {
     tlog << "Parsing complete! Starting raytracer with options:" << std::endl;
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
+
+    Raytracing::Image image(512, 512);
+
+    for (int i = 0; i < image.getWidth(); i++){
+        for (int j = 0; j < image.getHeight(); j++){
+            image.setPixelColor(i, j, Raytracing::vec4(double(i) / double(image.getWidth()-1), double(j) / double(image.getHeight()-1), 0.25, 1.0));
+        }
+    }
+
+    Raytracing::ImageOutput imageOutput(image);
+
+    imageOutput.write("hello", "png");
 
     return 0;
 }

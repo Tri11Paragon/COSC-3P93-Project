@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/laptop/Documents/Brock/CS 3P93/Project/Step 2/cmake-build-debug"
+			"value" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -103,7 +103,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/laptop/Documents/clion/clion-2021.3.3/bin/cmake/linux/bin/cmake"
+			"value" : "/opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/bin/cmake"
 		},
 		{
 			"name" : "CMAKE_CPACK_COMMAND",
@@ -115,7 +115,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/laptop/Documents/clion/clion-2021.3.3/bin/cmake/linux/bin/cpack"
+			"value" : "/opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/bin/cpack"
 		},
 		{
 			"name" : "CMAKE_CTEST_COMMAND",
@@ -127,7 +127,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/laptop/Documents/clion/clion-2021.3.3/bin/cmake/linux/bin/ctest"
+			"value" : "/opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/bin/ctest"
 		},
 		{
 			"name" : "CMAKE_CXX_COMPILER",
@@ -139,11 +139,11 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "CXX compiler"
 				}
 			],
-			"type" : "UNINITIALIZED",
-			"value" : "/usr/bin/g++-12"
+			"type" : "FILEPATH",
+			"value" : "/usr/bin/c++"
 		},
 		{
 			"name" : "CMAKE_CXX_COMPILER_AR",
@@ -267,11 +267,11 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "C compiler"
 				}
 			],
-			"type" : "UNINITIALIZED",
-			"value" : "/usr/bin/gcc-12"
+			"type" : "FILEPATH",
+			"value" : "/usr/bin/cc"
 		},
 		{
 			"name" : "CMAKE_C_COMPILER_AR",
@@ -411,7 +411,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/laptop/Documents/clion/clion-2021.3.3/bin/cmake/linux/bin/ccmake"
+			"value" : "/opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/bin/ccmake"
 		},
 		{
 			"name" : "CMAKE_EXECUTABLE_FORMAT",
@@ -591,7 +591,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/laptop/Documents/Brock/CS 3P93/Project/Step 2"
+			"value" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 2"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -643,7 +643,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "/home/laptop/Documents/clion/clion-2021.3.3/bin/ninja/linux/ninja"
+			"value" : "/opt/netbrains/clion/clion-2022.1.3/bin/ninja/linux/ninja"
 		},
 		{
 			"name" : "CMAKE_MODULE_LINKER_FLAGS",
@@ -875,7 +875,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/laptop/Documents/clion/clion-2021.3.3/bin/cmake/linux/share/cmake-3.23"
+			"value" : "/opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23"
 		},
 		{
 			"name" : "CMAKE_SHARED_LINKER_FLAGS",
@@ -1123,7 +1123,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/laptop/Documents/Brock/CS 3P93/Project/Step 2/cmake-build-debug"
+			"value" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/cmake-build-debug"
 		},
 		{
 			"name" : "Step_2_IS_TOP_LEVEL",
@@ -1147,7 +1147,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/laptop/Documents/Brock/CS 3P93/Project/Step 2"
+			"value" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 2"
 		}
 	],
 	"kind" : "cache",

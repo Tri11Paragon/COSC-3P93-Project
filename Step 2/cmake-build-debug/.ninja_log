@@ -1,4 +1,4 @@
 # ninja log v5
-1	1209	1665785962773135775	CMakeFiles/Step_2.dir/src/main.cpp.o	e9fdde60b585ad94
-1	1482	1665785963045137348	CMakeFiles/Step_2.dir/src/util/parser.cpp.o	7789d7d281320d24
-1482	1591	1665785963153137973	Step_2	113c55c20a0bd7bc
+0	641	1665866052497865386	CMakeFiles/Step_2.dir/src/image/image.cpp.o	13adbb05fcabbeec
+0	664	1665866052521866039	CMakeFiles/Step_2.dir/src/main.cpp.o	2fb1ddffcef25127
+0	746	1665866052601868219	CMakeFiles/Step_2.dir/src/util/parser.cpp.o	dc1044c577ff67b5

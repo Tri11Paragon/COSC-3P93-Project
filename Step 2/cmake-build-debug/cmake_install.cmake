@@ -1,4 +1,4 @@
-# Install script for directory: /home/laptop/Documents/Brock/CS 3P93/Project/Step 2
+# Install script for directory: /home/brett/Documents/Brock/CS 3P93/Project/Step 2
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/laptop/Documents/Brock/CS 3P93/Project/Step 2/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

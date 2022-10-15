@@ -18,79 +18,99 @@ namespace Raytracing {
     typedef double PRECISION_TYPE;
 
     class vec4 {
-    private:
-        union xType {PRECISION_TYPE x; PRECISION_TYPE r; };
-        union yType {PRECISION_TYPE y; PRECISION_TYPE g; };
-        union zType {PRECISION_TYPE z; PRECISION_TYPE b; };
-        union wType {PRECISION_TYPE w; PRECISION_TYPE a; };
-        struct valueType {xType v1; yType v2; zType v3; wType v4;};
-    public:
-        // isn't much of a reason to do it this way
-        // beyond I wanted an explicit immutable vector type of length 4
-        // that could be used as both x,y,z + w? and rgba
-        // it's unlikely that we'll need to use the w component
-        // but it helps better line up with the GPU
-        // and floating point units (especially on GPUs) tend to be aligned to 4*sizeof(float)
-        const valueType value;
+        private:
+            union xType {
+                PRECISION_TYPE x;
+                PRECISION_TYPE r;
+            };
+            union yType {
+                PRECISION_TYPE y;
+                PRECISION_TYPE g;
+            };
+            union zType {
+                PRECISION_TYPE z;
+                PRECISION_TYPE b;
+            };
+            union wType {
+                PRECISION_TYPE w;
+                PRECISION_TYPE a;
+            };
 
-        vec4(): value{0,0,0,0} {}
-        vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z): value{x,y,z,0} {}
-        vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z, PRECISION_TYPE w): value{x,y,z,w} {}
-        vec4(const vec4& vec): value{vec.x(), vec.y(), vec.z(), vec.w()} {}
-        vec4 operator=(const vec4& other) { return {other.x(), other.y(), other.z(), other.w()}; }
+            struct valueType {
+                xType v1;
+                yType v2;
+                zType v3;
+                wType v4;
+            };
+            // isn't much of a reason to do it this way
+            // beyond I wanted an explicit immutable vector type of length 4
+            // that could be used as both x,y,z + w? and rgba
+            // it's unlikely that we'll need to use the w component
+            // but it helps better line up with the GPU
+            // and floating point units (especially on GPUs) tend to be aligned to 4*sizeof(float)
+            valueType value;
+        public:
+            vec4() : value{0, 0, 0, 0} {}
+            vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z) : value{x, y, z, 0} {}
+            vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z, PRECISION_TYPE w) : value{x, y, z, w} {}
+            vec4(const vec4& vec) : value{vec.x(), vec.y(), vec.z(), vec.w()} {}
 
-        // I remember reading somewhere that if you can make it constant you should (Helps with -o flags?)
-        // I'm still a little new to C++. TODO: compare compiler output
-        // this is my second major project in it (the first being my java game engine i ported to c++)
-        // since value is constant it's unlikely we actually need to
-        const inline PRECISION_TYPE x() const {return value.v1.x;}
-        const inline PRECISION_TYPE y() const {return value.v2.y;}
-        const inline PRECISION_TYPE z() const {return value.v3.z;}
-        const inline PRECISION_TYPE w() const {return value.v4.w;}
 
-        const inline PRECISION_TYPE r() const {return value.v1.r;}
-        const inline PRECISION_TYPE g() const {return value.v2.g;}
-        const inline PRECISION_TYPE b() const {return value.v3.b;}
-        const inline PRECISION_TYPE a() const {return value.v4.a;}
+            // most of the modern c++ here is because clang tidy was annoying me
+            [[nodiscard]] inline PRECISION_TYPE x() const { return value.v1.x; }
 
-        // negation operator
-        const vec4 operator-() const { return vec4(-x(), -y(), -z(), -w()); }
+            [[nodiscard]] inline PRECISION_TYPE y() const { return value.v2.y; }
 
-        const inline PRECISION_TYPE magnitude() const {
-            return sqrt(length_squared());
-        }
+            [[nodiscard]] inline PRECISION_TYPE z() const { return value.v3.z; }
 
-        const inline PRECISION_TYPE length_squared() const {
-            return x() * x() + y() * y() + z() * z() + w() * w();
-        }
+            [[nodiscard]] inline PRECISION_TYPE w() const { return value.v4.w; }
 
-        // returns the unit-vector.
-        const inline vec4 normalize(){
-            PRECISION_TYPE mag = magnitude();
-            return vec4(x() / mag, y() / mag, z() / mag, w() / mag);
-        }
+            [[nodiscard]] inline PRECISION_TYPE r() const { return value.v1.r; }
 
-        // add operator before the vec returns the magnitude
-        PRECISION_TYPE operator+() const {
-            return magnitude();
-        }
+            [[nodiscard]] inline PRECISION_TYPE g() const { return value.v2.g; }
 
-        // preforms the dot product of left * right
-        static inline const PRECISION_TYPE dot(const vec4& left, const vec4& right) {
-            return left.x() * right.x()
-                   + left.y() * right.y()
-                   + left.z() * right.z()
-                   + left.w() * right.w();
-        }
+            [[nodiscard]] inline PRECISION_TYPE b() const { return value.v3.b; }
 
-        // preforms the cross product of left X right
-        // since a general solution to the cross product doesn't exist in 4d
-        // we are going to ignore the w.
-        static inline const vec4 cross(const vec4& left, const vec4& right) {
-            return vec4(left.y() * right.z() - left.z() * right.y(),
-                        left.z() * right.x() - left.x() * right.z(),
-                        left.x() * right.y() - left.y() * right.x());
-        }
+            [[nodiscard]] inline PRECISION_TYPE a() const { return value.v4.a; }
+
+            // negation operator
+            vec4 operator-() const { return {-x(), -y(), -z(), -w()}; }
+
+            [[nodiscard]] inline PRECISION_TYPE magnitude() const {
+                return sqrt(length_squared());
+            }
+
+            [[nodiscard]] inline PRECISION_TYPE length_squared() const {
+                return x() * x() + y() * y() + z() * z() + w() * w();
+            }
+
+            // returns the unit-vector.
+            [[nodiscard]] inline vec4 normalize() const {
+                PRECISION_TYPE mag = magnitude();
+                return {x() / mag, y() / mag, z() / mag, w() / mag};
+            }
+
+            // add operator before the vec returns the magnitude
+            PRECISION_TYPE operator+() const {
+                return magnitude();
+            }
+
+            // preforms the dot product of left * right
+            static inline PRECISION_TYPE dot(const vec4& left, const vec4& right) {
+                return left.x() * right.x()
+                       + left.y() * right.y()
+                       + left.z() * right.z()
+                       + left.w() * right.w();
+            }
+
+            // preforms the cross product of left X right
+            // since a general solution to the cross product doesn't exist in 4d
+            // we are going to ignore the w.
+            static inline vec4 cross(const vec4& left, const vec4& right) {
+                return {left.y() * right.z() - left.z() * right.y(),
+                            left.z() * right.x() - left.x() * right.z(),
+                            left.x() * right.y() - left.y() * right.x()};
+            }
 
     };
 

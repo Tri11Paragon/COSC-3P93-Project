@@ -11,35 +11,41 @@
 
 namespace Raytracing {
 
-    class Image{
-    private:
-        int width;
-        int height;
-        vec4* pixelData;
-    public:
-        Image(int width, int height);
-        Image(const Image& image);
+    class Image {
+        private:
+            int width;
+            int height;
+            vec4 *pixelData;
+        public:
+            Image(int width, int height);
+            Image(const Image &image);
 
-        inline void setPixelColor(int x, int y, const vec4& color){
-            pixelData[x * width + y] = color;
-        }
-        inline vec4 getPixelColor(int x, int y){
-            return pixelData[x * width + y];
-        }
-        int getPixelR(int x, int y);
-        int getPixelG(int x, int y);
-        int getPixelB(int x, int y);
-        int getPixelA(int x, int y);
+            inline void setPixelColor(int x, int y, const vec4 &color) {
+                pixelData[(x * height) + y] = color;
+            }
 
-        [[nodiscard]] inline int getWidth() const {return width;}
-        [[nodiscard]] inline int getHeight() const {return height;}
+            [[nodiscard]] inline vec4 getPixelColor(int x, int y) const {
+                return pixelData[(x * height) + y];
+            }
 
-        ~Image();
+            [[nodiscard]] int getPixelR(int x, int y) const;
+            [[nodiscard]] int getPixelG(int x, int y) const;
+            [[nodiscard]] int getPixelB(int x, int y) const;
+            [[nodiscard]] int getPixelA(int x, int y) const;
+
+            [[nodiscard]] inline int getWidth() const { return width; }
+
+            [[nodiscard]] inline int getHeight() const { return height; }
+
+            ~Image();
     };
 
     class ImageOutput {
-    private:
-        
+        private:
+            const Image& image;
+        public:
+            explicit ImageOutput(const Image& image): image(image) {}
+            virtual void write(const std::string& file, const  std::string& formatExtension);
     };
 
 }
