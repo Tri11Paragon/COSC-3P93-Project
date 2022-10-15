@@ -5,6 +5,7 @@
 #include "image/image.h"
 #include <ios>
 #include <fstream>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <image/stb_image_write.h>
 
 namespace Raytracing {
@@ -17,7 +18,7 @@ namespace Raytracing {
         pixelData = new vec4[image.width * image.height];
         for (int i = 0; i < image.width; i++) {
             for (int j = 0; j < image.height; j++) {
-                this->setPixelColor(i, j, image.pixelData[i * image.width + j]);
+                this->setPixelColor(i, j, image.pixelData[i * image.height + j]);
             }
         }
     }
@@ -25,19 +26,19 @@ namespace Raytracing {
     int Image::getPixelR(int x, int y) const {
         // values are stored as a floating point number [0, 1)
         // but most formats want an int [0, 255]
-        return (int) (255.999 * getPixelColor(x, y).r());
+        return int(255.0 * getPixelColor(x, y).r());
     }
 
     int Image::getPixelG(int x, int y) const {
-        return (int) (255.999 * getPixelColor(x, y).g());
+        return int(255.0 * getPixelColor(x, y).g());
     }
 
     int Image::getPixelB(int x, int y) const {
-        return (int) (255.999 * getPixelColor(x, y).b());
+        return int(255.0 * getPixelColor(x, y).b());
     }
 
     int Image::getPixelA(int x, int y) const {
-        return (int) (255.999 * getPixelColor(x, y).a());
+        return int(255.0 * getPixelColor(x, y).a());
     }
 
     Image::~Image() {
@@ -46,17 +47,17 @@ namespace Raytracing {
 
     void ImageOutput::write(const std::string& file, const std::string& formatExtension) {
         auto lowerExtension = Raytracing::String::toLowerCase(formatExtension);
-        auto fullFile = file + lowerExtension;
+        auto fullFile = file + "." + lowerExtension;
 
         if (!lowerExtension.ends_with("hdr")) {
             // unfortunately we do have to put the data into a format that STB can read
-            int data[image.getWidth() * image.getHeight() * 3];
+            unsigned char data[image.getWidth() * image.getHeight() * 3];
             int pixelIndex = 0;
-            for (int i = 0; i < image.getWidth(); i++) {
-                for (int j = 0; j < image.getHeight(); j++) {
+            for (int j = image.getHeight()-1; j >= 0; j--) {
+                for (int i = 0; i < image.getWidth(); i++) {
                     data[pixelIndex++] = image.getPixelR(i, j);
-                    data[pixelIndex++] = image.getPixelR(i, j);
-                    data[pixelIndex++] = image.getPixelR(i, j);
+                    data[pixelIndex++] = image.getPixelG(i, j);
+                    data[pixelIndex++] = image.getPixelB(i, j);
                 }
             }
 
@@ -67,7 +68,9 @@ namespace Raytracing {
             if (lowerExtension.ends_with("bmp")) {
                 stbi_write_bmp(fullFile.c_str(), image.getWidth(), image.getHeight(), 3, data);
             } else if (lowerExtension.ends_with("png")) {
-                stbi_write_png(fullFile.c_str(), image.getWidth(), image.getHeight(), 3, data, 3 * sizeof(int));
+                // stride here isn't clearly defined in the docs for some reason,
+                // but it's just the image's width times the number of channels
+                stbi_write_png(fullFile.c_str(), image.getWidth(), image.getHeight(), 3, data, image.getWidth() * 3);
             } else if (lowerExtension.ends_with("jpg")) {
                 stbi_write_jpg(fullFile.c_str(), image.getWidth(), image.getHeight(), 3, data, 90);
             } else

@@ -49,15 +49,11 @@ int main(int argc, char** args) {
 
     Raytracing::Image image(512, 512);
 
-    for (int i = 0; i < image.getWidth(); i++){
-        for (int j = 0; j < image.getHeight(); j++){
-            image.setPixelColor(i, j, Raytracing::vec4(double(i) / double(image.getWidth()-1), double(j) / double(image.getHeight()-1), 0.25, 1.0));
-        }
-    }
+    
 
     Raytracing::ImageOutput imageOutput(image);
 
-    imageOutput.write("hello", "png");
+    imageOutput.write("test", "hdr");
 
     return 0;
 }

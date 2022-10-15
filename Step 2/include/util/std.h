@@ -41,14 +41,14 @@ namespace Raytracing {
             static inline std::string toLowerCase(const std::string& s){
                 std::stringstream str;
                 std::for_each(s.begin(), s.end(), [&str](unsigned char ch) {
-                    str << std::tolower(ch);
+                    str << (char) std::tolower(ch);
                 });
                 return str.str();
             }
             static inline std::string toUpperCase(const std::string& s){
                 std::stringstream str;
                 std::for_each(s.begin(), s.end(), [&str](unsigned char ch) {
-                    str << std::toupper(ch);
+                    str << (char) std::toupper(ch);
                 });
                 return str.str();
             }
