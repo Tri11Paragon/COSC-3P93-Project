@@ -35,6 +35,11 @@
 /**
  * classes
  */
+
+static inline double degreeeToRadian(double deg){
+    return deg * 3.1415/180;
+}
+
 namespace Raytracing {
     class String {
         public:

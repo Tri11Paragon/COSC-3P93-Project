@@ -19,6 +19,7 @@ namespace Raytracing {
         public:
             Image(int width, int height);
             Image(const Image &image);
+            Image(const Image&& image) = delete;
 
             inline void setPixelColor(int x, int y, const vec4 &color) {
                 pixelData[(x * height) + y] = color;
@@ -42,7 +43,7 @@ namespace Raytracing {
 
     class ImageOutput {
         private:
-            const Image& image;
+            Image image;
         public:
             explicit ImageOutput(const Image& image): image(image) {}
             virtual void write(const std::string& file, const  std::string& formatExtension);

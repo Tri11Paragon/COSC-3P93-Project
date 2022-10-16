@@ -77,10 +77,10 @@ namespace Raytracing {
             vec4 operator-() const { return {-x(), -y(), -z(), -w()}; }
 
             [[nodiscard]] inline PRECISION_TYPE magnitude() const {
-                return sqrt(length_squared());
+                return sqrt(lengthSquared());
             }
 
-            [[nodiscard]] inline PRECISION_TYPE length_squared() const {
+            [[nodiscard]] inline PRECISION_TYPE lengthSquared() const {
                 return x() * x() + y() * y() + z() * z() + w() * w();
             }
 
@@ -99,8 +99,7 @@ namespace Raytracing {
             static inline PRECISION_TYPE dot(const vec4& left, const vec4& right) {
                 return left.x() * right.x()
                        + left.y() * right.y()
-                       + left.z() * right.z()
-                       + left.w() * right.w();
+                       + left.z() * right.z();
             }
 
             // preforms the cross product of left X right

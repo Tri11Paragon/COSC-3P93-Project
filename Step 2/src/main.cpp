@@ -1,17 +1,24 @@
 #include "util/std.h"
 #include "util/parser.h"
 #include "image/image.h"
+#include <raytracing.h>
 
 /**
  * Brett Terpstra 6920201
- * Hello TA / Marker! Welcome to the mess that is C++!
- * I'm still quite new to it (who isn't), and my laptop is setup
- * differently from my main computer. You'll notice comments generated
- * here are more detailed and very similar to Javadocs.
- * Half the comments are just reminders to myself for when I come back to do the parallel stuff anyways.
- * The formatting differences are also due to this, my computer is setup much nicer and closer to Java
- * while my laptop is just stock clion.
+ *
  */
+
+Raytracing::vec4 getRayColor(const Raytracing::Ray& ray){
+    Raytracing::SphereObject obj(Raytracing::vec4(0,0,-1,0), 0.5);
+    auto hit = obj.checkIfHit(ray, 0, 1000);
+    if (hit.hit) {
+        return 0.5*Raytracing::vec4(hit.normal.x()+1, hit.normal.y()+1, hit.normal.z()+1);
+    }
+
+    Raytracing::vec4 dir = ray.getDirection().normalize();
+    auto t = 0.5f * (dir.y() + 1.0);
+    return (1.0 - t) * Raytracing::vec4(1.0, 1.0, 1.0) + t * Raytracing::vec4(0.5, 0.7, 1.0);
+}
 
 int main(int argc, char** args) {
     // not a feature full parser but it'll work for what I need.
@@ -47,13 +54,20 @@ int main(int argc, char** args) {
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
 
-    Raytracing::Image image(512, 512);
+    Raytracing::Image image(1366, 768);
 
-    
+    Raytracing::Camera camera(90, image);
+    camera.lookAt(Raytracing::vec4(0,2,0), Raytracing::vec4(0, 0, -1), Raytracing::vec4(0, 1, 0));
+
+    for (int i = 0; i < image.getWidth(); i++){
+        for (int j = 0; j < image.getHeight(); j++){
+            image.setPixelColor(i, j, getRayColor(camera.projectRay(i, j)));
+        }
+    }
 
     Raytracing::ImageOutput imageOutput(image);
 
-    imageOutput.write("test", "hdr");
+    imageOutput.write("test", "png");
 
     return 0;
 }
