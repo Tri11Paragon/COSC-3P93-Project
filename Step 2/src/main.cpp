@@ -2,15 +2,15 @@
 #include "util/parser.h"
 #include "image/image.h"
 #include <raytracing.h>
+#include <world.h>
 
 /**
  * Brett Terpstra 6920201
  *
  */
 
-Raytracing::vec4 getRayColor(const Raytracing::Ray& ray){
-    Raytracing::SphereObject obj(Raytracing::vec4(0,0,-1,0), 0.5);
-    auto hit = obj.checkIfHit(ray, 0, 1000);
+Raytracing::vec4 getRayColor(const Raytracing::World& world, const Raytracing::Ray& ray){
+    auto hit = world.checkIfHit(ray, 0, 1000);
     if (hit.hit) {
         return 0.5*Raytracing::vec4(hit.normal.x()+1, hit.normal.y()+1, hit.normal.z()+1);
     }
@@ -57,11 +57,15 @@ int main(int argc, char** args) {
     Raytracing::Image image(1366, 768);
 
     Raytracing::Camera camera(90, image);
-    camera.lookAt(Raytracing::vec4(0,2,0), Raytracing::vec4(0, 0, -1), Raytracing::vec4(0, 1, 0));
+    camera.lookAt(Raytracing::vec4(0,1,0), Raytracing::vec4(0, 0, -1), Raytracing::vec4(0, 1, 0));
+
+    Raytracing::World world;
+    world.add(new Raytracing::SphereObject(Raytracing::vec4(0,0,-1,0), 0.5));
+    world.add(new Raytracing::SphereObject(Raytracing::vec4(0,-100.5,-1,0), 100));
 
     for (int i = 0; i < image.getWidth(); i++){
         for (int j = 0; j < image.getHeight(); j++){
-            image.setPixelColor(i, j, getRayColor(camera.projectRay(i, j)));
+            image.setPixelColor(i, j, getRayColor(world, camera.projectRay(i, j)));
         }
     }
 

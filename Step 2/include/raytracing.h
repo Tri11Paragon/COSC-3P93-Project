@@ -85,7 +85,8 @@ namespace Raytracing {
                 PRECISION_TYPE length{0};
             };
             // return true if the ray intersects with this object, only between min and max
-            virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) = 0;
+            [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const = 0;
+            virtual ~Object() = default;
     };
 
     class SphereObject : public Object {
@@ -96,7 +97,7 @@ namespace Raytracing {
         public:
             SphereObject(const vec4& position, PRECISION_TYPE radius): position(position), radius(radius) {}
 
-            virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max);
+            [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
     };
 
 }

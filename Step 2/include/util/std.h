@@ -23,6 +23,7 @@
 #include <locale>
 #include <sstream>
 #include <algorithm>
+#include <limits>
 
 /**
  * defines
@@ -33,11 +34,17 @@
 #define RAYTRACING_VERSION_STRING "0.0.1"
 
 /**
+ * Constants
+ */
+const double infinity = std::numeric_limits<double>::infinity();
+const double PI = 3.1415926535897932385;
+
+/**
  * classes
  */
 
 static inline double degreeeToRadian(double deg){
-    return deg * 3.1415/180;
+    return deg * PI/180.0;
 }
 
 namespace Raytracing {
