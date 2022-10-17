@@ -38,8 +38,6 @@ namespace Raytracing {
                 // TODO: profile for speed;
                 for (int s = 0; s < raysPerPixel; s++){
                     // simulate anti aliasing by generating rays with very slight random directions
-                    // TODO: this should be updated with a [-1, 1] generator as this currently only produces [0, 1]
-                    // and therefore lacks true aliasing
                     color = color + raycast(camera.projectRay(i + rnd.getDouble(), j + rnd.getDouble()), 0);
                 }
                 PRECISION_TYPE sf = 1.0 / raysPerPixel;
@@ -57,10 +55,10 @@ namespace Raytracing {
 
         if (hit.hit) {
             // randomly cast our bounce rays to simulate diffuse lighting
-            vec4 newRay = hit.hitPoint + hit.normal + randomInSphere();
+            vec4 newRay = hit.normal + randomUnitVector().normalize();
             // recursion is the only good way to do this
             // TODO: maybe without the recursion, clang tidy is annoying me.
-            return 0.5* raycast({hit.hitPoint, newRay - hit.hitPoint}, depth + 1);
+            return 0.5* raycast({hit.hitPoint, newRay}, depth + 1);
         }
 
         vec4 dir = ray.getDirection().normalize();

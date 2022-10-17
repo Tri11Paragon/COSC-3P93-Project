@@ -43,7 +43,7 @@ int main(int argc, char** args) {
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
 
-    Raytracing::Image image(256, 256);
+    Raytracing::Image image(445, 256);
 
     Raytracing::Camera camera(90, image);
     //camera.lookAt(Raytracing::vec4(0,1,0), Raytracing::vec4(0, 0, -1), Raytracing::vec4(0, 1, 0));

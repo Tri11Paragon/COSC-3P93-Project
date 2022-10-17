@@ -70,7 +70,7 @@ namespace Raytracing {
             World& world;
             Random rnd{-1, 1};
 
-            vec4 randomInSphere() {
+            vec4 randomUnitVector() {
                 // there are two methods to generating a random unit sphere
                 // one which is fast and approximate:
                 //auto v = vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble());
@@ -84,6 +84,14 @@ namespace Raytracing {
                 }
                 // the second creates better results but is 18% slower (better defined shadows)
                 // likely due to not over generating unit vectors biased towards the corners
+            }
+            // unused but provides another method of diffuse rendering
+            vec4 randomUnitHemisphere(const vec4& normal){
+                vec4 v = randomUnitVector().normalize();
+                if (vec4::dot(v, normal) > 0.0)
+                    return v;
+                else
+                    return -v;
             }
 
             vec4 raycast(const Ray& ray, int depth);
