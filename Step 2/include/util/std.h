@@ -38,7 +38,10 @@
  * Constants
  */
 const double infinity = std::numeric_limits<double>::infinity();
+// PI, to a large # of digits
 const double PI = 3.1415926535897932385;
+// very small number
+const double EPSILON = 0.0000001;
 
 /**
  * classes

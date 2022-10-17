@@ -60,6 +60,8 @@ namespace Raytracing {
 
     };
 
+    static Random rnd{-1, 1};
+
     class Raycaster {
         private:
             const int maxBounceDepth = 50;
@@ -68,9 +70,10 @@ namespace Raytracing {
             Camera& camera;
             Image& image;
             World& world;
-            Random rnd{-1, 1};
 
-            vec4 randomUnitVector() {
+            vec4 raycast(const Ray& ray, int depth);
+        public:
+            inline static vec4 randomUnitVector() {
                 // there are two methods to generating a random unit sphere
                 // one which is fast and approximate:
                 //auto v = vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble());
@@ -86,16 +89,13 @@ namespace Raytracing {
                 // likely due to not over generating unit vectors biased towards the corners
             }
             // unused but provides another method of diffuse rendering
-            vec4 randomUnitHemisphere(const vec4& normal){
+            inline static vec4 randomUnitHemisphere(const vec4& normal){
                 vec4 v = randomUnitVector().normalize();
                 if (vec4::dot(v, normal) > 0.0)
                     return v;
                 else
                     return -v;
             }
-
-            vec4 raycast(const Ray& ray, int depth);
-        public:
             Raycaster(Camera& c, Image& i, World& world, const Parser& p): camera(c), image(i), world(world) {}
 
             void run();

@@ -70,6 +70,13 @@ build CMakeFiles/Step_2.dir/src/raytracing.cpp.o: CXX_COMPILER__Step_2_Debug /ho
   OBJECT_DIR = CMakeFiles/Step_2.dir
   OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src
 
+build CMakeFiles/Step_2.dir/src/util/models.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 2/src/util/models.cpp || cmake_object_order_depends_target_Step_2
+  DEP_FILE = CMakeFiles/Step_2.dir/src/util/models.cpp.o.d
+  FLAGS = -g -std=gnu++20
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include"
+  OBJECT_DIR = CMakeFiles/Step_2.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src/util
+
 build CMakeFiles/Step_2.dir/src/util/parser.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 2/src/util/parser.cpp || cmake_object_order_depends_target_Step_2
   DEP_FILE = CMakeFiles/Step_2.dir/src/util/parser.cpp.o.d
   FLAGS = -g -std=gnu++20
@@ -92,7 +99,7 @@ build CMakeFiles/Step_2.dir/src/world.cpp.o: CXX_COMPILER__Step_2_Debug /home/br
 #############################################
 # Link the executable Step_2
 
-build Step_2: CXX_EXECUTABLE_LINKER__Step_2_Debug CMakeFiles/Step_2.dir/src/image/image.cpp.o CMakeFiles/Step_2.dir/src/main.cpp.o CMakeFiles/Step_2.dir/src/raytracing.cpp.o CMakeFiles/Step_2.dir/src/util/parser.cpp.o CMakeFiles/Step_2.dir/src/world.cpp.o
+build Step_2: CXX_EXECUTABLE_LINKER__Step_2_Debug CMakeFiles/Step_2.dir/src/image/image.cpp.o CMakeFiles/Step_2.dir/src/main.cpp.o CMakeFiles/Step_2.dir/src/raytracing.cpp.o CMakeFiles/Step_2.dir/src/util/models.cpp.o CMakeFiles/Step_2.dir/src/util/parser.cpp.o CMakeFiles/Step_2.dir/src/world.cpp.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/Step_2.dir
   POST_BUILD = :

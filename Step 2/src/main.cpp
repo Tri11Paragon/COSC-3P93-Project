@@ -45,12 +45,25 @@ int main(int argc, char** args) {
 
     Raytracing::Image image(445, 256);
 
-    Raytracing::Camera camera(90, image);
+    Raytracing::Camera camera(140, image);
+    camera.setPosition({0, 0, 0});
     //camera.lookAt(Raytracing::vec4(0,1,0), Raytracing::vec4(0, 0, -1), Raytracing::vec4(0, 1, 0));
 
     Raytracing::World world;
-    world.add(new Raytracing::SphereObject(Raytracing::vec4(0,0,-1,0), 0.5));
-    world.add(new Raytracing::SphereObject(Raytracing::vec4(0,-100.5,-1,0), 100));
+
+    world.addMaterial("greenDiffuse", new Raytracing::DiffuseMaterial{Raytracing::vec4{0, 1.0, 0, 1}});
+    world.addMaterial("redDiffuse", new Raytracing::DiffuseMaterial{Raytracing::vec4{1.0, 0, 0, 1}});
+    world.addMaterial("blueDiffuse", new Raytracing::DiffuseMaterial{Raytracing::vec4{0, 0, 1.0, 1}});
+
+    world.addMaterial("greenMetal", new Raytracing::MetalMaterial{Raytracing::vec4{0.4, 1.0, 0.4, 1}});
+    world.addMaterial("redMetal", new Raytracing::BrushedMetalMaterial{Raytracing::vec4{1.0, 0.4, 0.4, 1}, 0.6f});
+    world.addMaterial("blueMetal", new Raytracing::MetalMaterial{Raytracing::vec4{0.4, 0.4, 1.0, 1}});
+
+    world.add(new Raytracing::SphereObject(Raytracing::vec4(0,0,-1,0), 0.5, world.getMaterial("redDiffuse")));
+    world.add(new Raytracing::SphereObject(Raytracing::vec4(-1,0,-1,0), 0.5, world.getMaterial("blueMetal")));
+    world.add(new Raytracing::SphereObject(Raytracing::vec4(1,0,-1,0), 0.5, world.getMaterial("redMetal")));
+    world.add(new Raytracing::SphereObject(Raytracing::vec4(0,-100.5,-1,0), 100, world.getMaterial("greenDiffuse")));
+    world.add(new Raytracing::TriangleObject(Raytracing::vec4(0,0.1,-0.5f,0), {{-0.5, -0.5, 0.0}, {0.5, -0.5, 0.0}, {0.0,  0.5, 0.0}}, world.getMaterial("greenDiffuse")));
 
     Raytracing::Raycaster raycaster {camera, image, world, parser};
 

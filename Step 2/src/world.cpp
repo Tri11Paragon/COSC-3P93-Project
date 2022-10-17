@@ -3,15 +3,18 @@
  * Copyright (c) 2022 Brett Terpstra. All Rights Reserved.
  */
 #include <world.h>
+#include <raytracing.h>
 
 namespace Raytracing {
 
     World::~World() {
-        for (auto* p : objects)
-            delete(p);
+        for (auto* p: objects)
+            delete (p);
+        for (const auto& p: materials)
+            delete (p.second);
     }
 
-    Object::HitData SphereObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
+    HitData SphereObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
         PRECISION_TYPE radiusSquared = radius * radius;
         // move the ray to be with respects to the sphere
         vec4 RayWRTSphere = ray.getStartingPoint() - position;
@@ -52,15 +55,87 @@ namespace Raytracing {
         return {true, RayAtRoot, normal, root};
     }
 
-    Object::HitData World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
-        auto hResult = Object::HitData{false, vec4(), vec4(), max};
-        for (auto* obj : objects){
+    std::pair<HitData, Object*> World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
+        auto hResult = HitData{false, vec4(), vec4(), max};
+        Object* objPtr = nullptr;
+        for (auto* obj: objects) {
             // check up to the point of the last closest hit,
             // will give the closest object's hit result
             auto cResult = obj->checkIfHit(ray, min, hResult.length);
-            if (cResult.hit)
+            if (cResult.hit) {
                 hResult = cResult;
+                objPtr = obj;
+            }
         }
-        return hResult;
+        return {hResult, objPtr};
+    }
+
+    ScatterResults DiffuseMaterial::scatter(const Ray& ray, const HitData& hitData) const {
+        vec4 newRay = hitData.normal + Raytracing::Raycaster::randomUnitVector().normalize();
+
+        // rays that are close to zero are liable to floating point precision errors
+        if (newRay.x() < EPSILON && newRay.y() < EPSILON && newRay.z() < EPSILON && newRay.w() < EPSILON)
+            newRay = hitData.normal;
+
+        return {true, Ray{hitData.hitPoint, newRay}, getBaseColor()};
+    }
+
+    ScatterResults MetalMaterial::scatter(const Ray& ray, const HitData& hitData) const {
+        // create a ray reflection
+        vec4 newRay = reflect(ray.getDirection().normalize(), hitData.normal);
+        // make sure our reflected ray is outside the sphere and doesn't point inwards
+        bool shouldReflect = vec4::dot(newRay, hitData.normal) > 0;
+        return {shouldReflect, Ray{hitData.hitPoint, newRay}, getBaseColor()};
+    }
+
+    ScatterResults BrushedMetalMaterial::scatter(const Ray& ray, const HitData& hitData) const {
+        // create a ray reflection
+        vec4 newRay = reflect(ray.getDirection().normalize(), hitData.normal);
+        // make sure our reflected ray is outside the sphere and doesn't point inwards
+        bool shouldReflect = vec4::dot(newRay, hitData.normal) > 0;
+        return {shouldReflect, Ray{hitData.hitPoint, newRay + Raycaster::randomUnitVector() * fuzzyness}, getBaseColor()};
+    }
+
+    HitData TriangleObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
+        // Möller–Trumbore intersection algorithm
+        vec4 edge1, edge2, h, s, q;
+        PRECISION_TYPE a, f, u, v;
+        edge1 = (theTriangle.vertex2 + position) - (theTriangle.vertex1 + position);
+        edge2 = (theTriangle.vertex3 + position) - (theTriangle.vertex1 + position);
+
+        h = vec4::cross(ray.getDirection(), edge2);
+        a = vec4::dot(edge1, h);
+
+        if (a > -EPSILON && a < EPSILON)
+            return {false, vec4(), vec4(), 0}; //parallel to triangle
+
+        f = 1.0 / a;
+        s = ray.getStartingPoint() - (theTriangle.vertex1 + position);
+        u = f * vec4::dot(s, h);
+
+        if (u < 0.0 || u > 1.0)
+            return {false, vec4(), vec4(), 0};
+
+        q = vec4::cross(s, edge1);
+        v = f * vec4::dot(ray.getDirection(), q);
+        if (v < 0.0 || u + v > 1.0)
+            return {false, vec4(), vec4(), 0};
+
+        // At this stage we can compute t to find out where the intersection point is on the line.
+        PRECISION_TYPE t = f * vec4::dot(edge2, q);
+        if (t > EPSILON) {
+            // ray intersects
+            vec4 rayIntersectionPoint = ray.along(t);
+            vec4 normal;
+            if (theTriangle.hasNormals) // TODO: deal with n2 and n3
+                normal = theTriangle.normal1;
+            else {
+                // standard points to normal algorithm but using already computed edges
+                normal = vec4{edge1.y() * edge2.z(), edge1.z() * edge2.x(), edge1.x() * edge2.y()} -
+                         vec4{edge1.z() * edge2.y(), edge1.x() * edge2.z(), edge1.y() * edge2.x()};
+            }
+            return {true, rayIntersectionPoint, normal, t};
+        }
+        return {false, vec4(), vec4(), 0};
     }
 }

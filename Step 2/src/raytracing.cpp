@@ -53,12 +53,13 @@ namespace Raytracing {
 
         auto hit = world.checkIfHit(ray, 0.001, infinity);
 
-        if (hit.hit) {
-            // randomly cast our bounce rays to simulate diffuse lighting
-            vec4 newRay = hit.normal + randomUnitVector().normalize();
-            // recursion is the only good way to do this
-            // TODO: maybe without the recursion, clang tidy is annoying me.
-            return 0.5* raycast({hit.hitPoint, newRay}, depth + 1);
+        if (hit.first.hit) {
+            auto object = hit.second;
+            auto scatterResults = object->getMaterial()->scatter(ray, hit.first);
+            // if the material scatters the ray, ie casts a new one,
+            if (scatterResults.scattered) // attenuate the recursive raycast by the material's color
+                return scatterResults.attenuationColor * raycast(scatterResults.newRay, depth + 1);
+            return {0,0,0};
         }
 
         vec4 dir = ray.getDirection().normalize();

@@ -142,7 +142,7 @@
 					"value" : "CXX compiler"
 				}
 			],
-			"type" : "FILEPATH",
+			"type" : "STRING",
 			"value" : "/usr/bin/c++"
 		},
 		{
@@ -210,6 +210,22 @@
 			"value" : "-g"
 		},
 		{
+			"name" : "CMAKE_CXX_FLAGS_DEUG",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Flags used by the CXX compiler during DEUG builds."
+				}
+			],
+			"type" : "STRING",
+			"value" : ""
+		},
+		{
 			"name" : "CMAKE_CXX_FLAGS_MINSIZEREL",
 			"properties" : 
 			[
@@ -270,7 +286,7 @@
 					"value" : "C compiler"
 				}
 			],
-			"type" : "FILEPATH",
+			"type" : "STRING",
 			"value" : "/usr/bin/cc"
 		},
 		{
@@ -336,6 +352,22 @@
 			],
 			"type" : "STRING",
 			"value" : "-g"
+		},
+		{
+			"name" : "CMAKE_C_FLAGS_DEUG",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Flags used by the C compiler during DEUG builds."
+				}
+			],
+			"type" : "STRING",
+			"value" : ""
 		},
 		{
 			"name" : "CMAKE_C_FLAGS_MINSIZEREL",
@@ -458,6 +490,22 @@
 			"value" : ""
 		},
 		{
+			"name" : "CMAKE_EXE_LINKER_FLAGS_DEUG",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Flags used by the linker during DEUG builds."
+				}
+			],
+			"type" : "STRING",
+			"value" : ""
+		},
+		{
 			"name" : "CMAKE_EXE_LINKER_FLAGS_MINSIZEREL",
 			"properties" : 
 			[
@@ -532,6 +580,18 @@
 			],
 			"type" : "INTERNAL",
 			"value" : ""
+		},
+		{
+			"name" : "CMAKE_FIND_PACKAGE_REDIRECTS_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake."
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/cmake-build-debug/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -672,6 +732,22 @@
 				{
 					"name" : "HELPSTRING",
 					"value" : "Flags used by the linker during the creation of modules during DEBUG builds."
+				}
+			],
+			"type" : "STRING",
+			"value" : ""
+		},
+		{
+			"name" : "CMAKE_MODULE_LINKER_FLAGS_DEUG",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Flags used by the linker during the creation of modules during DEUG builds."
 				}
 			],
 			"type" : "STRING",
@@ -910,6 +986,22 @@
 			"value" : ""
 		},
 		{
+			"name" : "CMAKE_SHARED_LINKER_FLAGS_DEUG",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Flags used by the linker during the creation of shared libraries during DEUG builds."
+				}
+			],
+			"type" : "STRING",
+			"value" : ""
+		},
+		{
 			"name" : "CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL",
 			"properties" : 
 			[
@@ -1022,6 +1114,22 @@
 			"value" : ""
 		},
 		{
+			"name" : "CMAKE_STATIC_LINKER_FLAGS_DEUG",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Flags used by the linker during the creation of static libraries during DEUG builds."
+				}
+			],
+			"type" : "STRING",
+			"value" : ""
+		},
+		{
 			"name" : "CMAKE_STATIC_LINKER_FLAGS_MINSIZEREL",
 			"properties" : 
 			[
@@ -1114,6 +1222,18 @@
 			"value" : "FALSE"
 		},
 		{
+			"name" : "Debug",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "No help, variable specified on the command line."
+				}
+			],
+			"type" : "UNINITIALIZED",
+			"value" : "true"
+		},
+		{
 			"name" : "Step_2_BINARY_DIR",
 			"properties" : 
 			[
@@ -1148,6 +1268,18 @@
 			],
 			"type" : "STATIC",
 			"value" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 2"
+		},
+		{
+			"name" : "_CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "linker supports push/pop state"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "TRUE"
 		}
 	],
 	"kind" : "cache",
