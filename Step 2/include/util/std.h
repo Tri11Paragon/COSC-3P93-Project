@@ -24,6 +24,7 @@
 #include <sstream>
 #include <algorithm>
 #include <limits>
+#include <random>
 
 /**
  * defines
@@ -42,12 +43,23 @@ const double PI = 3.1415926535897932385;
 /**
  * classes
  */
-
 static inline double degreeeToRadian(double deg){
     return deg * PI/180.0;
 }
 
 namespace Raytracing {
+    class Random {
+        private:
+            std::random_device rd; // obtain a random number from hardware
+            std::mt19937 gen;
+            std::uniform_real_distribution<double> doubleDistr {0, 1};
+        public:
+            Random(): gen(std::mt19937(long(rd.entropy() * 691 * 691))) {}
+            Random(double min, double max): gen(std::mt19937(long(rd.entropy() * 691 * 691))), doubleDistr{min, max} {}
+            double getDouble(){
+                return doubleDistr(gen);
+            }
+    };
     class String {
         public:
             static inline std::string toLowerCase(const std::string& s){
@@ -107,6 +119,20 @@ namespace Raytracing {
                 return s;
             }
     };
+}
+
+static Raytracing::Random rnd {};
+
+static inline double getRandomDouble(){
+    return rnd.getDouble();
+}
+
+static inline double clamp(double val, double min, double max) {
+    if (val < min)
+        return min;
+    if (val > max)
+        return max;
+    return val;
 }
 
 #endif //STEP_2_STD_H

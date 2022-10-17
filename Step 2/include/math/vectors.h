@@ -50,10 +50,10 @@ namespace Raytracing {
             // and floating point units (especially on GPUs) tend to be aligned to 4*sizeof(float)
             valueType value;
         public:
-            vec4() : value{0, 0, 0, 0} {}
-            vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z) : value{x, y, z, 0} {}
-            vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z, PRECISION_TYPE w) : value{x, y, z, w} {}
-            vec4(const vec4& vec) : value{vec.x(), vec.y(), vec.z(), vec.w()} {}
+            vec4(): value{0, 0, 0, 0} {}
+            vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z): value{x, y, z, 0} {}
+            vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z, PRECISION_TYPE w): value{x, y, z, w} {}
+            vec4(const vec4& vec): value{vec.x(), vec.y(), vec.z(), vec.w()} {}
 
 
             // most of the modern c++ here is because clang tidy was annoying me
@@ -107,8 +107,8 @@ namespace Raytracing {
             // we are going to ignore the w.
             static inline vec4 cross(const vec4& left, const vec4& right) {
                 return {left.y() * right.z() - left.z() * right.y(),
-                            left.z() * right.x() - left.x() * right.z(),
-                            left.x() * right.y() - left.y() * right.x()};
+                        left.z() * right.x() - left.x() * right.z(),
+                        left.x() * right.y() - left.y() * right.x()};
             }
 
     };
@@ -154,6 +154,24 @@ namespace Raytracing {
     inline const PRECISION_TYPE operator/(PRECISION_TYPE c, const vec4& v) {
         return c / +v;
     }
+
+    class Ray {
+        private:
+            // the starting point for our ray
+            vec4 start;
+            // and the direction it is currently traveling
+            vec4 direction;
+        public:
+            Ray(const vec4& start, const vec4& direction): start(start), direction(direction) {}
+
+            [[nodiscard]] vec4 getStartingPoint() const { return start; }
+
+            [[nodiscard]] vec4 getDirection() const { return direction; }
+
+            // returns a point along the ray, extended away from start by the length.
+            [[nodiscard]] inline vec4 along(PRECISION_TYPE length) const { return start + length * direction; }
+
+    };
 
 }
 

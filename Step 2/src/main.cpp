@@ -9,17 +9,6 @@
  *
  */
 
-Raytracing::vec4 getRayColor(const Raytracing::World& world, const Raytracing::Ray& ray){
-    auto hit = world.checkIfHit(ray, 0, 1000);
-    if (hit.hit) {
-        return 0.5*Raytracing::vec4(hit.normal.x()+1, hit.normal.y()+1, hit.normal.z()+1);
-    }
-
-    Raytracing::vec4 dir = ray.getDirection().normalize();
-    auto t = 0.5f * (dir.y() + 1.0);
-    return (1.0 - t) * Raytracing::vec4(1.0, 1.0, 1.0) + t * Raytracing::vec4(0.5, 0.7, 1.0);
-}
-
 int main(int argc, char** args) {
     // not a feature full parser but it'll work for what I need.
     Raytracing::Parser parser;
@@ -54,20 +43,18 @@ int main(int argc, char** args) {
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
 
-    Raytracing::Image image(1366, 768);
+    Raytracing::Image image(256, 256);
 
     Raytracing::Camera camera(90, image);
-    camera.lookAt(Raytracing::vec4(0,1,0), Raytracing::vec4(0, 0, -1), Raytracing::vec4(0, 1, 0));
+    //camera.lookAt(Raytracing::vec4(0,1,0), Raytracing::vec4(0, 0, -1), Raytracing::vec4(0, 1, 0));
 
     Raytracing::World world;
     world.add(new Raytracing::SphereObject(Raytracing::vec4(0,0,-1,0), 0.5));
     world.add(new Raytracing::SphereObject(Raytracing::vec4(0,-100.5,-1,0), 100));
 
-    for (int i = 0; i < image.getWidth(); i++){
-        for (int j = 0; j < image.getHeight(); j++){
-            image.setPixelColor(i, j, getRayColor(world, camera.projectRay(i, j)));
-        }
-    }
+    Raytracing::Raycaster raycaster {camera, image, world, parser};
+
+    raycaster.run();
 
     Raytracing::ImageOutput imageOutput(image);
 

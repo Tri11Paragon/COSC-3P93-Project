@@ -10,26 +10,12 @@
 
 #include <math/vectors.h>
 #include <image/image.h>
+#include <util/parser.h>
+#include <world.h>
+
+#include <utility>
 
 namespace Raytracing {
-
-    class Ray {
-        private:
-            // the starting point for our ray
-            vec4 start;
-            // and the direction it is currently traveling
-            vec4 direction;
-        public:
-            Ray(const vec4& start, const vec4& direction): start(start), direction(direction) {}
-
-            vec4 getStartingPoint() const { return start; }
-
-            vec4 getDirection() const { return direction; }
-
-            // returns a point along the ray, extended away from start by the length.
-            inline vec4 along(PRECISION_TYPE length) const { return start + length * direction; }
-
-    };
 
     class Camera {
         private:
@@ -67,37 +53,45 @@ namespace Raytracing {
             Ray projectRay(PRECISION_TYPE x, PRECISION_TYPE y);
             // makes the camera look at the lookatpos from the position p, with respects to the up direction up. (set to 0,1,0)
             void lookAt(const vec4& pos, const vec4& lookAtPos, const vec4& up);
-            void setPosition(const vec4& pos) {this->position = pos;}
+
+            void setPosition(const vec4& pos) { this->position = pos; }
+
             void setRotation(PRECISION_TYPE yaw, PRECISION_TYPE pitch, PRECISION_TYPE roll);
 
     };
 
-    class Object {
-        public:
-            struct HitData {
-                // all the other values only matter if this is true
-                bool hit{false};
-                // the hit point on the object
-                vec4 hitPoint{};
-                // the normal of that hit point
-                vec4 normal{};
-                // the length of the vector from its origin in its direction.
-                PRECISION_TYPE length{0};
-            };
-            // return true if the ray intersects with this object, only between min and max
-            [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const = 0;
-            virtual ~Object() = default;
-    };
-
-    class SphereObject : public Object {
+    class Raycaster {
         private:
-            vec4 position;
-            PRECISION_TYPE radius;
+            const int maxBounceDepth = 50;
+            const int raysPerPixel = 50;
 
+            Camera& camera;
+            Image& image;
+            World& world;
+            Random rnd{-1, 1};
+
+            vec4 randomInSphere() {
+                // there are two methods to generating a random unit sphere
+                // one which is fast and approximate:
+                //auto v = vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble());
+                //return v.normalize();
+                // and the one which generates an actual unit vector
+                while (true) {
+                    auto v = vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble());
+                    if (v.lengthSquared() >= 1)
+                        continue;
+                    return v;
+                }
+                // the second creates better results but is 18% slower (better defined shadows)
+                // likely due to not over generating unit vectors biased towards the corners
+            }
+
+            vec4 raycast(const Ray& ray, int depth);
         public:
-            SphereObject(const vec4& position, PRECISION_TYPE radius): position(position), radius(radius) {}
+            Raycaster(Camera& c, Image& i, World& world, const Parser& p): camera(c), image(i), world(world) {}
 
-            [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
+            void run();
+
     };
 
 }
