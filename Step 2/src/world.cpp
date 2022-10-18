@@ -96,8 +96,9 @@ namespace Raytracing {
         return {shouldReflect, Ray{hitData.hitPoint, newRay + Raycaster::randomUnitVector() * fuzzyness}, getBaseColor()};
     }
 
-    HitData TriangleObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
+    static HitData checkIfTriangleGotHit(Triangle theTriangle, vec4 position, const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
         // Möller–Trumbore intersection algorithm
+        // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
         vec4 edge1, edge2, h, s, q;
         PRECISION_TYPE a, f, u, v;
         edge1 = (theTriangle.vertex2 + position) - (theTriangle.vertex1 + position);
@@ -127,7 +128,8 @@ namespace Raytracing {
             // ray intersects
             vec4 rayIntersectionPoint = ray.along(t);
             vec4 normal;
-            if (theTriangle.hasNormals) // TODO: deal with n2 and n3
+            // normal = theTriangle.findClosestNormal(rayIntersectionPoint - position);
+            if (theTriangle.hasNormals) // returning the closest normal is extra computation when n1 would likely be fine.
                 normal = theTriangle.normal1;
             else {
                 // standard points to normal algorithm but using already computed edges
@@ -137,5 +139,19 @@ namespace Raytracing {
             return {true, rayIntersectionPoint, normal, t};
         }
         return {false, vec4(), vec4(), 0};
+    }
+
+    HitData TriangleObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
+        return checkIfTriangleGotHit(theTriangle, position, ray, min, max);
+    }
+
+    HitData ModelObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
+        auto hResult = HitData{false, vec4(), vec4(), max};
+        for (const Triangle& t : triangles) {
+            auto cResult = checkIfTriangleGotHit(t, position, ray, min, hResult.length);
+            if (cResult.hit)
+                hResult = cResult;
+        }
+        return hResult;
     }
 }

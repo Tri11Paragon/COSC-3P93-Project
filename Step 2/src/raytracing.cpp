@@ -59,6 +59,7 @@ namespace Raytracing {
             // if the material scatters the ray, ie casts a new one,
             if (scatterResults.scattered) // attenuate the recursive raycast by the material's color
                 return scatterResults.attenuationColor * raycast(scatterResults.newRay, depth + 1);
+            tlog << "Not scattered? " << object->getMaterial();
             return {0,0,0};
         }
 

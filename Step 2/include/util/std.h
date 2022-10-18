@@ -79,6 +79,19 @@ namespace Raytracing {
                 });
                 return str.str();
             }
+            // taken from https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
+            // extended to return a vector
+            static inline std::vector<std::string> split(std::string s, const std::string& delim){
+                size_t pos = 0;
+                std::vector<std::string> tokens;
+                while ((pos = s.find(delim)) != std::string::npos) {
+                    auto token = s.substr(0, pos);
+                    tokens.push_back(token);
+                    s.erase(0, pos + delim.length());
+                }
+                tokens.push_back(s);
+                return tokens;
+            }
             // taken from https://stackoverflow.com/questions/216823/how-to-trim-an-stdstring
             // would've preferred to use boost lib but instructions said to avoid external libs
             // trim from start (in place)

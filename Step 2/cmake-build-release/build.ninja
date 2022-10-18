@@ -49,6 +49,13 @@ cmake_ninja_workdir = /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 2/cmake
 
 build cmake_object_order_depends_target_Step_2: phony || CMakeFiles/Step_2.dir
 
+build CMakeFiles/Step_2.dir/src/globals.cpp.o: CXX_COMPILER__Step_2_Release /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 2/src/globals.cpp || cmake_object_order_depends_target_Step_2
+  DEP_FILE = CMakeFiles/Step_2.dir/src/globals.cpp.o.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++20
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include"
+  OBJECT_DIR = CMakeFiles/Step_2.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src
+
 build CMakeFiles/Step_2.dir/src/image/image.cpp.o: CXX_COMPILER__Step_2_Release /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 2/src/image/image.cpp || cmake_object_order_depends_target_Step_2
   DEP_FILE = CMakeFiles/Step_2.dir/src/image/image.cpp.o.d
   FLAGS = -O3 -DNDEBUG -std=gnu++20
@@ -62,6 +69,13 @@ build CMakeFiles/Step_2.dir/src/main.cpp.o: CXX_COMPILER__Step_2_Release /home/b
   INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include"
   OBJECT_DIR = CMakeFiles/Step_2.dir
   OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src
+
+build CMakeFiles/Step_2.dir/src/math/colliders.cpp.o: CXX_COMPILER__Step_2_Release /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 2/src/math/colliders.cpp || cmake_object_order_depends_target_Step_2
+  DEP_FILE = CMakeFiles/Step_2.dir/src/math/colliders.cpp.o.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++20
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include"
+  OBJECT_DIR = CMakeFiles/Step_2.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src/math
 
 build CMakeFiles/Step_2.dir/src/raytracing.cpp.o: CXX_COMPILER__Step_2_Release /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 2/src/raytracing.cpp || cmake_object_order_depends_target_Step_2
   DEP_FILE = CMakeFiles/Step_2.dir/src/raytracing.cpp.o.d
@@ -99,7 +113,7 @@ build CMakeFiles/Step_2.dir/src/world.cpp.o: CXX_COMPILER__Step_2_Release /home/
 #############################################
 # Link the executable Step_2
 
-build Step_2: CXX_EXECUTABLE_LINKER__Step_2_Release CMakeFiles/Step_2.dir/src/image/image.cpp.o CMakeFiles/Step_2.dir/src/main.cpp.o CMakeFiles/Step_2.dir/src/raytracing.cpp.o CMakeFiles/Step_2.dir/src/util/models.cpp.o CMakeFiles/Step_2.dir/src/util/parser.cpp.o CMakeFiles/Step_2.dir/src/world.cpp.o
+build Step_2: CXX_EXECUTABLE_LINKER__Step_2_Release CMakeFiles/Step_2.dir/src/globals.cpp.o CMakeFiles/Step_2.dir/src/image/image.cpp.o CMakeFiles/Step_2.dir/src/main.cpp.o CMakeFiles/Step_2.dir/src/math/colliders.cpp.o CMakeFiles/Step_2.dir/src/raytracing.cpp.o CMakeFiles/Step_2.dir/src/util/models.cpp.o CMakeFiles/Step_2.dir/src/util/parser.cpp.o CMakeFiles/Step_2.dir/src/world.cpp.o
   FLAGS = -O3 -DNDEBUG
   OBJECT_DIR = CMakeFiles/Step_2.dir
   POST_BUILD = :
