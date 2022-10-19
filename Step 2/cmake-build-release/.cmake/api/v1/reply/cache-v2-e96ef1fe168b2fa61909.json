@@ -79,7 +79,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "23"
+			"value" : "24"
 		},
 		{
 			"name" : "CMAKE_CACHE_PATCH_VERSION",
@@ -103,7 +103,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/bin/cmake"
+			"value" : "/usr/bin/cmake"
 		},
 		{
 			"name" : "CMAKE_CPACK_COMMAND",
@@ -115,7 +115,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/bin/cpack"
+			"value" : "/usr/bin/cpack"
 		},
 		{
 			"name" : "CMAKE_CTEST_COMMAND",
@@ -127,7 +127,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/bin/ctest"
+			"value" : "/usr/bin/ctest"
 		},
 		{
 			"name" : "CMAKE_CXX_COMPILER",
@@ -142,7 +142,7 @@
 					"value" : "CXX compiler"
 				}
 			],
-			"type" : "FILEPATH",
+			"type" : "STRING",
 			"value" : "/usr/bin/c++"
 		},
 		{
@@ -270,7 +270,7 @@
 					"value" : "C compiler"
 				}
 			],
-			"type" : "FILEPATH",
+			"type" : "STRING",
 			"value" : "/usr/bin/cc"
 		},
 		{
@@ -532,6 +532,18 @@
 			],
 			"type" : "INTERNAL",
 			"value" : ""
+		},
+		{
+			"name" : "CMAKE_FIND_PACKAGE_REDIRECTS_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake."
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/cmake-build-release/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -875,7 +887,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23"
+			"value" : "/usr/share/cmake-3.24"
 		},
 		{
 			"name" : "CMAKE_SHARED_LINKER_FLAGS",
@@ -1148,6 +1160,18 @@
 			],
 			"type" : "STATIC",
 			"value" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 2"
+		},
+		{
+			"name" : "_CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "linker supports push/pop state"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "TRUE"
 		}
 	],
 	"kind" : "cache",

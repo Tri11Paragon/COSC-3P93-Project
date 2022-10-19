@@ -96,6 +96,13 @@ namespace Raytracing {
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const;
     };
 
+    class TexturedMaterial : public Material {
+        public:
+            TexturedMaterial(const std::string& file): Material({}) {
+                
+            }
+    };
+
     class World {
         private:
             // store all the objects in the world,

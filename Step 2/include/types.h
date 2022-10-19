@@ -76,7 +76,7 @@ namespace Raytracing {
     };
 
     class Material {
-        private:
+        protected:
             // most materials will need an albedo
             Vec4 baseColor;
         public:

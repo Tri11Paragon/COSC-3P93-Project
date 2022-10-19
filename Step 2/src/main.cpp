@@ -49,7 +49,7 @@ int main(int argc, char** args) {
 
     Raytracing::Camera camera(90, image);
     //camera.setPosition({0, 0, 1});
-    camera.lookAt(Raytracing::Vec4(-2,2,2), Raytracing::Vec4(0, 0, 0), Raytracing::Vec4(0, 1, 0));
+    camera.lookAt({2,2,-2}, {0, 0, 0}, {0, 1, 0});
 
     Raytracing::World world;
 
@@ -65,12 +65,12 @@ int main(int argc, char** args) {
     world.addMaterial("redMetal", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{1.0, 0.4, 0.4, 1}, 0.6f});
     world.addMaterial("blueMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 0.4, 1.0, 1}});
 
-    //world.add(new Raytracing::SphereObject(Raytracing::vec4(0,0,-1,0), 0.5, world.getMaterial("redDiffuse")));
-    //world.add(new Raytracing::SphereObject(Raytracing::vec4(-1,0,-1,0), 0.5, world.getMaterial("blueMetal")));
-    //world.add(new Raytracing::SphereObject(Raytracing::Vec4(1,0,-1,0), 0.5, world.getMaterial("redMetal")));
-    world.add(new Raytracing::SphereObject(Raytracing::Vec4(0,-100.5,-1,0), 100, world.getMaterial("greenDiffuse")));
-    //world.add(new Raytracing::TriangleObject(Raytracing::Vec4(0,0.1,-0.5f,0), {{-0.5, -0.5, 0.0}, {0.5, -0.5, 0.0}, {0.0,  0.5, 0}}, world.getMaterial("greenDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 1, -1}, spider, world.getMaterial("redDiffuse")));
+    //world.add(new Raytracing::SphereObject({0,0,-1,0{}, 0.5, world.getMaterial("redDiffuse")));
+    //world.add(new Raytracing::SphereObject({-1,0,-1,0}, 0.5, world.getMaterial("blueMetal")));
+    //world.add(new Raytracing::SphereObject({1,0,-1,0}, 0.5, world.getMaterial("redMetal")));
+    world.add(new Raytracing::SphereObject({0,-100.5,-1,0}, 100, world.getMaterial("greenDiffuse")));
+    //world.add(new Raytracing::TriangleObject({0,0.1,-0.5f,0}, {{-0.5, -0.5, 0.0}, {0.5, -0.5, 0.0}, {0.0,  0.5, 0}}, world.getMaterial("greenDiffuse")));
+    world.add(new Raytracing::ModelObject({0, 1, 0}, spider, world.getMaterial("redDiffuse")));
     world.add(new Raytracing::ModelObject({2, 0, 0}, house, world.getMaterial("blueDiffuse")));
     world.add(new Raytracing::ModelObject({5, 5, -10}, house, world.getMaterial("blueDiffuse")));
     world.add(new Raytracing::ModelObject({5, 0, -10}, house, world.getMaterial("blueDiffuse")));

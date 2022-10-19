@@ -65,6 +65,10 @@ namespace Raytracing {
     class Raycaster {
         private:
             const int maxBounceDepth = 50;
+            // 50 seems to be the magic number for the point of diminishing returns
+            // 100 looks like 50 but slightly clearer
+            // 25 is noisy
+            // 1 is VERY noisy.
             const int raysPerPixel = 50;
 
             Camera& camera;
@@ -76,25 +80,17 @@ namespace Raytracing {
             inline static Vec4 randomUnitVector() {
                 // there are two methods to generating a random unit sphere
                 // one which is fast and approximate:
-                //auto v = vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble());
-                //return v.normalize();
+                auto v = Vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble());
+                return v.normalize();
                 // and the one which generates an actual unit vector
-                while (true) {
+                /*while (true) {
                     auto v = Vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble());
                     if (v.lengthSquared() >= 1)
                         continue;
                     return v;
-                }
+                }*/
                 // the second creates better results but is 18% slower (better defined shadows)
                 // likely due to not over generating unit vectors biased towards the corners
-            }
-            // unused but provides another method of diffuse rendering
-            inline static Vec4 randomUnitHemisphere(const Vec4& normal){
-                Vec4 v = randomUnitVector().normalize();
-                if (Vec4::dot(v, normal) > 0.0)
-                    return v;
-                else
-                    return -v;
             }
             Raycaster(Camera& c, Image& i, World& world, const Parser& p): camera(c), image(i), world(world) {
                 world.generateBVH();
