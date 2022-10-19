@@ -33,7 +33,18 @@ int main(int argc, char** args) {
     parser.addOption("--output", "Output Directory\n"
                                  "\tSet the output directory for the rendered image. Defaults to the local directory.\n", "./");
     parser.addOption("--format", "Output Format\n"
-                                 "\tSets the output format to PPM, PNG, or JPEG. ", "PNG");
+                                 "\tSets the output format to BMP, PNG, or JPEG. \n", "PNG");
+    parser.addOption("-w", "Image Width\n"
+                           "\tSets the width of the output image.\n", "910");
+    parser.addOption("-h", "Image Height\n"
+                           "\tSets the height of the output image.\n", "512");
+    parser.addOption("--fov", "Camera FOV\n"
+                              "\tSets the FOV used to render the camera.\n", "90");
+    parser.addOption("--resources", "Resources Directory\n"
+                                    "\tSets the directory where the resources are stored.\n"
+                                    "\tThis can be relative.Must have trailing '/' \n", "../resources/");
+    // disabled because don't currently have a way to parse vectors. TODO
+    //parser.addOption("--position", "Camera Position\n\tSets the position used to render the scene with the camera.\n", "{0, 0, 0}");
 
     // if the parser returns non-zero then it wants us to stop execution
     // likely due to a help function being called.
@@ -45,17 +56,19 @@ int main(int argc, char** args) {
     parser.printAllInInfo();
 
     //Raytracing::Image image(445, 256);
-    Raytracing::Image image(910, 512);
+    Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
 
-    Raytracing::Camera camera(90, image);
+    Raytracing::Camera camera(std::stoi(parser.getOptionValue("--fov")), image);
     //camera.setPosition({0, 0, 1});
-    camera.lookAt({2,2,-2}, {0, 0, 0}, {0, 1, 0});
+    camera.lookAt({6,5,6}, {0, 0, 0}, {0, 1, 0});
 
     Raytracing::World world;
 
     Raytracing::OBJLoader loader;
-    Raytracing::ModelData spider = loader.loadModel("spider.obj");
-    Raytracing::ModelData house = loader.loadModel("house.obj");
+    // assumes you are running it from a subdirectory, "build" or "cmake-build-release", etc.
+    Raytracing::ModelData spider = loader.loadModel(parser.getOptionValue("--resources") + "spider.obj");
+    Raytracing::ModelData house = loader.loadModel(parser.getOptionValue("--resources") + "house.obj");
+    Raytracing::ModelData plane = loader.loadModel(parser.getOptionValue("--resources") + "plane.obj");
 
     world.addMaterial("greenDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 1.0, 0, 1}});
     world.addMaterial("redDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{1.0, 0, 0, 1}});
@@ -71,10 +84,10 @@ int main(int argc, char** args) {
     world.add(new Raytracing::SphereObject({0,-100.5,-1,0}, 100, world.getMaterial("greenDiffuse")));
     //world.add(new Raytracing::TriangleObject({0,0.1,-0.5f,0}, {{-0.5, -0.5, 0.0}, {0.5, -0.5, 0.0}, {0.0,  0.5, 0}}, world.getMaterial("greenDiffuse")));
     world.add(new Raytracing::ModelObject({0, 1, 0}, spider, world.getMaterial("redDiffuse")));
-    world.add(new Raytracing::ModelObject({2, 0, 0}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({5, 5, -10}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({5, 0, -10}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({5, 5, 0}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({-5, 0.5, 0}, plane, world.getMaterial("greenMetal")));
+    world.add(new Raytracing::ModelObject({5, 1, 0}, house, world.getMaterial("redDiffuse")));
+    world.add(new Raytracing::ModelObject({0, 0, -5}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({0, 0, 5}, house, world.getMaterial("blueDiffuse")));
 
     Raytracing::Raycaster raycaster {camera, image, world, parser};
 

@@ -9,7 +9,7 @@
 #include <math/vectors.h>
 
 namespace Raytracing {
-    // 3D Axis Aligned Bounding Box
+    // 3D Axis Aligned Bounding Box for use in a BVH
     class AABB {
         protected:
             Vec4 min;

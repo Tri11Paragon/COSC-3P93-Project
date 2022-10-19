@@ -11,6 +11,7 @@
 
 namespace Raytracing {
 
+    // glorified structure to store our image data.
     class Image {
         private:
             int width;
@@ -41,6 +42,7 @@ namespace Raytracing {
             ~Image();
     };
 
+    // image writer class used to output the image to a file.
     class ImageOutput {
         private:
             Image image;

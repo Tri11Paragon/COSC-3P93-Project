@@ -71,10 +71,10 @@ namespace Raytracing {
                 // stride here isn't clearly defined in the docs for some reason,
                 // but it's just the image's width times the number of channels
                 stbi_write_png(fullFile.c_str(), image.getWidth(), image.getHeight(), 3, data, image.getWidth() * 3);
-            } else if (lowerExtension.ends_with("jpg")) {
+            } else if (lowerExtension.ends_with("jpg") || lowerExtension.ends_with("jpeg")) {
                 stbi_write_jpg(fullFile.c_str(), image.getWidth(), image.getHeight(), 3, data, 90);
             } else
-                throw std::runtime_error("Invalid format! Please use ppm, png, or jpg");
+                throw std::runtime_error("Invalid format! Please use bmp, png, or jpg");
         } else {
             // the TODO: here is to check if HDR is in [0,1] or if we need to transform the value.
             float data[image.getWidth() * image.getHeight() * 3];

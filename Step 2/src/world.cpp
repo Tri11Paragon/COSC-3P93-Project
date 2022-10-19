@@ -135,6 +135,7 @@ namespace Raytracing {
 
     static HitData checkIfTriangleGotHit(const Triangle& theTriangle, const Vec4& position, const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
         // Möller–Trumbore intersection algorithm
+        // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
         // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
         Vec4 edge1, edge2, h, s, q;
         PRECISION_TYPE a, f, u, v;
@@ -185,22 +186,14 @@ namespace Raytracing {
 
     HitData ModelObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
         auto hResult = HitData{false, Vec4(), Vec4(), max};
+        // must check through all the triangles in the object
+        // respecting depth along the way
+        // but reducing the max it can reach my the last longest vector length.
         for (const Triangle& t : triangles) {
             auto cResult = checkIfTriangleGotHit(t, position, ray, min, hResult.length);
             if (cResult.hit)
                 hResult = cResult;
         }
-        // if you've made it to this point this will be in the parallel step version
-        // I've run out of time to mess with this
-        // and I hate that he made this due in the middle of exam / assignment season
-        // it's really hard for me to get in there and obsess over this
-        // when i got 4 other classes cram-ing as much useless bullshit into the next week and a half for no reason other than
-        // "hahahahha I rambled about nonsense in class for the last few weeks let's test your knowledge with a tedious assignment!!! woooooo!!!!!"
-        // this is honestly the only good 3rd year class I've taken so far
-        // Only if I had more time. THINK OF THE GRAPHS I COULD'VE MADE!!!
-        // I had plans (and still do) to make graphs of every little performance bottleneck
-        // but it's impossible when you got all this stuff due, C++ decides it hates you and wants to segfault for dumb reasons, and the program takes 20 MINUTES TO RUN!
-        // would've been able to get the GUI stuff in and fix the BVH by visualizing the bounding boxes
         /*auto hResult = HitData{false, Vec4(), Vec4(), max};
         
         auto intersected = tree->rayIntersect(ray, min, max);

@@ -35,10 +35,15 @@ namespace Raytracing {
         public:
             Camera(PRECISION_TYPE fov, const Image& image): image(image),
                                                             aspectRatio(double(image.getWidth()) / double(image.getHeight())) {
+                // scale the viewport height based on the camera's FOV
                 viewportHeight = (2.0 * tan(degreeeToRadian(fov) / 2));
+                // with must respect the aspect ratio of the image, otherwise we'd get funky results
                 viewportWidth = (aspectRatio * viewportHeight);
+                // horizontal direction from the camera. used to translate the camera
                 horizontalAxis = (Vec4{viewportWidth, 0, 0, 0});
+                // virtual direction, also used to translate the camera
                 verticalAxis = (Vec4{0, viewportHeight, 0, 0});
+                // lower left of the camera's view port. used to project our vectors from image space to world space
                 imageOrigin = (position - horizontalAxis / 2 - verticalAxis / 2 - Vec4(0, 0, focalLength, 0));
 
                 tlog << viewportHeight << "\n";
