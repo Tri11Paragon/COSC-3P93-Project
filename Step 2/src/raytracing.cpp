@@ -15,11 +15,11 @@ namespace Raytracing {
         return {position, imageOrigin + transformedX * horizontalAxis + transformedY * verticalAxis - position};
     }
 
-    void Camera::lookAt(const vec4& pos, const vec4& lookAtPos, const vec4& up) {
+    void Camera::lookAt(const Vec4& pos, const Vec4& lookAtPos, const Vec4& up) {
         // standard camera lookAt function
         auto w = (pos - lookAtPos).normalize();
-        auto u = (vec4::cross(up, w)).normalize();
-        auto v = vec4::cross(w, u);
+        auto u = (Vec4::cross(up, w)).normalize();
+        auto v = Vec4::cross(w, u);
 
         position = pos;
         horizontalAxis = viewportWidth * u;
@@ -34,7 +34,7 @@ namespace Raytracing {
     void Raycaster::run() {
         for (int i = 0; i < image.getWidth(); i++){
             for (int j = 0; j < image.getHeight(); j++){
-                Raytracing::vec4 color;
+                Raytracing::Vec4 color;
                 // TODO: profile for speed;
                 for (int s = 0; s < raysPerPixel; s++){
                     // simulate anti aliasing by generating rays with very slight random directions
@@ -47,7 +47,7 @@ namespace Raytracing {
         }
     }
 
-    vec4 Raycaster::raycast(const Ray& ray, int depth) {
+    Vec4 Raycaster::raycast(const Ray& ray, int depth) {
         if (depth > maxBounceDepth)
             return {0,0,0};
 
@@ -63,8 +63,8 @@ namespace Raytracing {
             return {0,0,0};
         }
 
-        vec4 dir = ray.getDirection().normalize();
+        Vec4 dir = ray.getDirection().normalize();
         auto t = 0.5f * (dir.y() + 1.0);
-        return (1.0 - t) * vec4(1.0, 1.0, 1.0) + t * vec4(0.5, 0.7, 1.0);
+        return (1.0 - t) * Vec4(1.0, 1.0, 1.0) + t * Vec4(0.5, 0.7, 1.0);
     }
 }

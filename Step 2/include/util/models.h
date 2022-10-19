@@ -9,43 +9,9 @@
 #include <util/std.h>
 #include <math/vectors.h>
 #include <math/colliders.h>
+#include <math/bvh.h>
 
 namespace Raytracing {
-
-    struct Triangle {
-        public:
-            vec4 vertex1, vertex2, vertex3;
-            bool hasNormals = false;
-            vec4 normal1, normal2, normal3;
-            vec4 uv1, uv2, uv3;
-            AABB aabb;
-
-            Triangle(const vec4& v1, const vec4& v2, const vec4& v3): vertex1(v1), vertex2(v2), vertex3(v3) {}
-
-            Triangle(const vec4& v1, const vec4& v2, const vec4& v3,
-                     const vec4& n1, const vec4& n2, const vec4& n3): vertex1(v1), vertex2(v2), vertex3(v3),
-                                                                      hasNormals(true), normal1(n1), normal2(n2), normal3(n3) {}
-
-            Triangle(const vec4& v1, const vec4& v2, const vec4& v3,
-                     const vec4& uv1, const vec4& uv2, const vec4& uv3,
-                     const vec4& n1, const vec4& n2, const vec4& n3): vertex1(v1), vertex2(v2), vertex3(v3),
-                                                                      uv1(uv1), uv2(uv2), uv3(uv3),
-                                                                      hasNormals(true), normal1(n1), normal2(n2), normal3(n3) {}
-
-            [[nodiscard]] vec4 findClosestNormal(const vec4& point) const {
-                // no need to sqrt as exact distance doesn't matter
-                auto n1Dist = (point - normal1).lengthSquared();
-                auto n2Dist = (point - normal2).lengthSquared();
-                auto n3Dist = (point - normal3).lengthSquared();
-                return (n1Dist < n2Dist && n1Dist < n3Dist) ? normal1 : (n2Dist < n3Dist ? normal2 : normal3);
-            }
-    };
-
-    struct face {
-        int v1, v2, v3;
-        int uv1, uv2, uv3;
-        int n1, n2, n3;
-    };
 
     struct ModelData {
         public:
@@ -53,23 +19,23 @@ namespace Raytracing {
             // since normals and vertices are only vec3s
             // and uvs are vec2s
             // TODO: create lower order vector classes
-            std::vector<vec4> vertices;
-            std::vector<vec4> uvs;
-            std::vector<vec4> normals;
+            std::vector<Vec4> vertices;
+            std::vector<Vec4> uvs;
+            std::vector<Vec4> normals;
             std::vector<face> faces;
             AABB aabb;
 
             std::vector<Triangle> toTriangles() {
                 std::vector<Triangle> triangles;
 
-                PRECISION_TYPE minX = INFINITY, minY = INFINITY, minZ = INFINITY, maxX = -INFINITY, maxY = -INFINITY, maxZ = -INFINITY;
+                PRECISION_TYPE minX = infinity, minY = infinity, minZ = infinity, maxX = ninfinity, maxY = ninfinity, maxZ = ninfinity;
 
                 for (face f: faces) {
                     Triangle t {vertices[f.v1], vertices[f.v2], vertices[f.v3],
                                 uvs[f.uv1], uvs[f.uv2], uvs[f.uv3],
                                 normals[f.n1], normals[f.n2], normals[f.n3]};
 
-                    PRECISION_TYPE tMinX = INFINITY, tMinY = INFINITY, tMinZ = INFINITY, tMaxX = -INFINITY, tMaxY = -INFINITY, tMaxZ = -INFINITY;
+                    PRECISION_TYPE tMinX = infinity, tMinY = infinity, tMinZ = infinity, tMaxX = ninfinity, tMaxY = ninfinity, tMaxZ = ninfinity;
                     // find the min and max of all the triangles
                     tMinX = std::min(t.vertex1.x(), std::min(t.vertex2.x(), std::min(t.vertex3.x(), tMinX)));
                     tMinY = std::min(t.vertex1.y(), std::min(t.vertex2.y(), std::min(t.vertex3.y(), tMinY)));
@@ -97,6 +63,16 @@ namespace Raytracing {
                 aabb = {minX, minY, minZ, maxX, maxY, maxZ};
 
                 return triangles;
+            }
+        
+            // creates a BVH tree and returns the list of objects we created. make sure to delete them.
+            static std::vector<Object*> createBVHTree(std::vector<Triangle>& triangles, const Vec4& pos) {
+                std::vector<Object*> objects;
+                for (auto& tri : triangles){
+                    Object* obj = new EmptyObject(pos, tri.aabb, tri);
+                    objects.push_back(obj);
+                }
+                return objects;
             }
     };
 

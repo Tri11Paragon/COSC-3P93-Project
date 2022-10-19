@@ -12,15 +12,16 @@ namespace Raytracing {
             delete (p);
         for (const auto& p: materials)
             delete (p.second);
+        delete(bvhTree);
     }
 
     HitData SphereObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
         PRECISION_TYPE radiusSquared = radius * radius;
         // move the ray to be with respects to the sphere
-        vec4 RayWRTSphere = ray.getStartingPoint() - position;
+        Vec4 RayWRTSphere = ray.getStartingPoint() - position;
         // now determine the discriminant for the quadratic formula for the function of line sphere intercept
         PRECISION_TYPE a = ray.getDirection().lengthSquared();
-        PRECISION_TYPE b = Raytracing::vec4::dot(RayWRTSphere, ray.getDirection());
+        PRECISION_TYPE b = Raytracing::Vec4::dot(RayWRTSphere, ray.getDirection());
         PRECISION_TYPE c = RayWRTSphere.lengthSquared() - radiusSquared;
         // > 0: the hit has two roots, meaning we hit both sides of the sphere
         // = 0: the ray has one root, we hit the edge of the sphere
@@ -29,7 +30,7 @@ namespace Raytracing {
 
         // < 0: ray isn't inside the sphere. Don't need to bother calculating the roots.
         if (discriminant < 0)
-            return {false, vec4(), vec4(), 0};
+            return {false, Vec4(), Vec4(), 0};
 
         // now we have to find the root which exists inside our range [min,max]
         auto root = (-b - std::sqrt(discriminant)) / a;
@@ -39,7 +40,7 @@ namespace Raytracing {
             root = (-b + std::sqrt(discriminant)) / a;
             if (root < min || root > max) {
                 // if the second isn't in the range then we also must return false.
-                return {false, vec4(), vec4(), 0};
+                return {false, Vec4(), Vec4(), 0};
             }
         }
         // the hit point is where the ray is when extended to the root
@@ -56,22 +57,58 @@ namespace Raytracing {
     }
 
     std::pair<HitData, Object*> World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
-        auto hResult = HitData{false, vec4(), vec4(), max};
-        Object* objPtr = nullptr;
-        for (auto* obj: objects) {
-            // check up to the point of the last closest hit,
-            // will give the closest object's hit result
-            auto cResult = obj->checkIfHit(ray, min, hResult.length);
-            if (cResult.hit) {
-                hResult = cResult;
-                objPtr = obj;
+        if (bvhTree != nullptr){
+            auto hResult = HitData{false, Vec4(), Vec4(), max};
+            Object* objPtr = nullptr;
+            
+            auto intersected = bvhTree->rayIntersect(ray, min, max);
+            
+            //dlog << "Intersections " << intersected.size() << " " << ray << "\n";
+            
+            for (auto* ptr : intersected) {
+                auto cResult = ptr->checkIfHit(ray, min, hResult.length);
+                if (cResult.hit) {
+                    hResult = cResult;
+                    objPtr = ptr;
+                }
             }
+            // after we check the BVH, we have to check for other missing objects
+            // since stuff like spheres currently don't have AABB and AABB isn't a requirement
+            // for the object class (to be assigned)
+            for (auto* obj: bvhTree->noAABBObjects) {
+                // check up to the point of the last closest hit,
+                // will give the closest object's hit result
+                auto cResult = obj->checkIfHit(ray, min, hResult.length);
+                if (cResult.hit) {
+                    hResult = cResult;
+                    objPtr = obj;
+                }
+            }
+            
+            return {hResult, objPtr};
+        } else {
+            // rejection algo without using a binary space partitioning data structure
+            auto hResult = HitData{false, Vec4(), Vec4(), max};
+            Object* objPtr = nullptr;
+            for (auto* obj: objects) {
+                // check up to the point of the last closest hit,
+                // will give the closest object's hit result
+                auto cResult = obj->checkIfHit(ray, min, hResult.length);
+                if (cResult.hit) {
+                    hResult = cResult;
+                    objPtr = obj;
+                }
+            }
+            return {hResult, objPtr};
         }
-        return {hResult, objPtr};
+    }
+
+    void World::generateBVH() {
+        bvhTree = new BVHTree(objects);
     }
 
     ScatterResults DiffuseMaterial::scatter(const Ray& ray, const HitData& hitData) const {
-        vec4 newRay = hitData.normal + Raytracing::Raycaster::randomUnitVector().normalize();
+        Vec4 newRay = hitData.normal + Raytracing::Raycaster::randomUnitVector().normalize();
 
         // rays that are close to zero are liable to floating point precision errors
         if (newRay.x() < EPSILON && newRay.y() < EPSILON && newRay.z() < EPSILON && newRay.w() < EPSILON)
@@ -82,63 +119,63 @@ namespace Raytracing {
 
     ScatterResults MetalMaterial::scatter(const Ray& ray, const HitData& hitData) const {
         // create a ray reflection
-        vec4 newRay = reflect(ray.getDirection().normalize(), hitData.normal);
+        Vec4 newRay = reflect(ray.getDirection().normalize(), hitData.normal);
         // make sure our reflected ray is outside the sphere and doesn't point inwards
-        bool shouldReflect = vec4::dot(newRay, hitData.normal) > 0;
+        bool shouldReflect = Vec4::dot(newRay, hitData.normal) > 0;
         return {shouldReflect, Ray{hitData.hitPoint, newRay}, getBaseColor()};
     }
 
     ScatterResults BrushedMetalMaterial::scatter(const Ray& ray, const HitData& hitData) const {
         // create a ray reflection
-        vec4 newRay = reflect(ray.getDirection().normalize(), hitData.normal);
+        Vec4 newRay = reflect(ray.getDirection().normalize(), hitData.normal);
         // make sure our reflected ray is outside the sphere and doesn't point inwards
-        bool shouldReflect = vec4::dot(newRay, hitData.normal) > 0;
+        bool shouldReflect = Vec4::dot(newRay, hitData.normal) > 0;
         return {shouldReflect, Ray{hitData.hitPoint, newRay + Raycaster::randomUnitVector() * fuzzyness}, getBaseColor()};
     }
 
-    static HitData checkIfTriangleGotHit(Triangle theTriangle, vec4 position, const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
+    static HitData checkIfTriangleGotHit(const Triangle& theTriangle, const Vec4& position, const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
         // Möller–Trumbore intersection algorithm
         // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
-        vec4 edge1, edge2, h, s, q;
+        Vec4 edge1, edge2, h, s, q;
         PRECISION_TYPE a, f, u, v;
         edge1 = (theTriangle.vertex2 + position) - (theTriangle.vertex1 + position);
         edge2 = (theTriangle.vertex3 + position) - (theTriangle.vertex1 + position);
 
-        h = vec4::cross(ray.getDirection(), edge2);
-        a = vec4::dot(edge1, h);
+        h = Vec4::cross(ray.getDirection(), edge2);
+        a = Vec4::dot(edge1, h);
 
         if (a > -EPSILON && a < EPSILON)
-            return {false, vec4(), vec4(), 0}; //parallel to triangle
+            return {false, Vec4(), Vec4(), 0}; //parallel to triangle
 
         f = 1.0 / a;
         s = ray.getStartingPoint() - (theTriangle.vertex1 + position);
-        u = f * vec4::dot(s, h);
+        u = f * Vec4::dot(s, h);
 
         if (u < 0.0 || u > 1.0)
-            return {false, vec4(), vec4(), 0};
+            return {false, Vec4(), Vec4(), 0};
 
-        q = vec4::cross(s, edge1);
-        v = f * vec4::dot(ray.getDirection(), q);
+        q = Vec4::cross(s, edge1);
+        v = f * Vec4::dot(ray.getDirection(), q);
         if (v < 0.0 || u + v > 1.0)
-            return {false, vec4(), vec4(), 0};
+            return {false, Vec4(), Vec4(), 0};
 
         // At this stage we can compute t to find out where the intersection point is on the line.
-        PRECISION_TYPE t = f * vec4::dot(edge2, q);
+        PRECISION_TYPE t = f * Vec4::dot(edge2, q);
         if (t > EPSILON) {
             // ray intersects
-            vec4 rayIntersectionPoint = ray.along(t);
-            vec4 normal;
+            Vec4 rayIntersectionPoint = ray.along(t);
+            Vec4 normal;
             // normal = theTriangle.findClosestNormal(rayIntersectionPoint - position);
             if (theTriangle.hasNormals) // returning the closest normal is extra computation when n1 would likely be fine.
                 normal = theTriangle.normal1;
             else {
                 // standard points to normal algorithm but using already computed edges
-                normal = vec4{edge1.y() * edge2.z(), edge1.z() * edge2.x(), edge1.x() * edge2.y()} -
-                         vec4{edge1.z() * edge2.y(), edge1.x() * edge2.z(), edge1.y() * edge2.x()};
+                normal = Vec4{edge1.y() * edge2.z(), edge1.z() * edge2.x(), edge1.x() * edge2.y()} -
+                         Vec4{edge1.z() * edge2.y(), edge1.x() * edge2.z(), edge1.y() * edge2.x()};
             }
             return {true, rayIntersectionPoint, normal, t};
         }
-        return {false, vec4(), vec4(), 0};
+        return {false, Vec4(), Vec4(), 0};
     }
 
     HitData TriangleObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
@@ -146,12 +183,25 @@ namespace Raytracing {
     }
 
     HitData ModelObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
-        auto hResult = HitData{false, vec4(), vec4(), max};
+        /*auto hResult = HitData{false, Vec4(), Vec4(), max};
         for (const Triangle& t : triangles) {
             auto cResult = checkIfTriangleGotHit(t, position, ray, min, hResult.length);
             if (cResult.hit)
                 hResult = cResult;
+        }*/
+        auto hResult = HitData{false, Vec4(), Vec4(), max};
+        
+        auto intersected = tree->rayIntersect(ray, min, max);
+        
+        for (auto t : intersected){
+            // apparently this kind of casting is okay
+            // which makes sense since the actual data behind it is a empty object
+            // just this is really bad and im too annoyed to figure out a better way. TODO:.
+            auto cResult = checkIfTriangleGotHit(((EmptyObject*)(t))->tri, position, ray, min, hResult.length);
+            if (cResult.hit)
+                hResult = cResult;
         }
+        
         return hResult;
     }
 }

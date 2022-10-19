@@ -3,6 +3,7 @@
 #include "image/image.h"
 #include <raytracing.h>
 #include <world.h>
+#include <chrono>
 
 /**
  * Brett Terpstra 6920201
@@ -32,7 +33,7 @@ int main(int argc, char** args) {
     parser.addOption("--output", "Output Directory\n"
                                  "\tSet the output directory for the rendered image. Defaults to the local directory.\n", "./");
     parser.addOption("--format", "Output Format\n"
-                                 "\tSets the output format to PPM, PNG, or JPEG. Currently only PPM is supported.", "PPM");
+                                 "\tSets the output format to PPM, PNG, or JPEG. ", "PNG");
 
     // if the parser returns non-zero then it wants us to stop execution
     // likely due to a help function being called.
@@ -45,37 +46,56 @@ int main(int argc, char** args) {
 
     Raytracing::Image image(445, 256);
 
-    Raytracing::Camera camera(140, image);
-    camera.setPosition({0, 0, 1});
-    //camera.lookAt(Raytracing::vec4(0,1,0), Raytracing::vec4(0, 0, -1), Raytracing::vec4(0, 1, 0));
+    Raytracing::Camera camera(90, image);
+    //camera.setPosition({0, 0, 1});
+    camera.lookAt(Raytracing::Vec4(-3,3,3), Raytracing::Vec4(0, 0, 0), Raytracing::Vec4(0, 1, 0));
 
     Raytracing::World world;
 
     Raytracing::OBJLoader loader;
-    Raytracing::ModelData testData = loader.loadModel("spider.obj");
+    Raytracing::ModelData spider = loader.loadModel("spider.obj");
+    Raytracing::ModelData house = loader.loadModel("house.obj");
 
-    world.addMaterial("greenDiffuse", new Raytracing::DiffuseMaterial{Raytracing::vec4{0, 1.0, 0, 1}});
-    world.addMaterial("redDiffuse", new Raytracing::DiffuseMaterial{Raytracing::vec4{1.0, 0, 0, 1}});
-    world.addMaterial("blueDiffuse", new Raytracing::DiffuseMaterial{Raytracing::vec4{0, 0, 1.0, 1}});
+    world.addMaterial("greenDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 1.0, 0, 1}});
+    world.addMaterial("redDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{1.0, 0, 0, 1}});
+    world.addMaterial("blueDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 0, 1.0, 1}});
 
-    world.addMaterial("greenMetal", new Raytracing::MetalMaterial{Raytracing::vec4{0.4, 1.0, 0.4, 1}});
-    world.addMaterial("redMetal", new Raytracing::BrushedMetalMaterial{Raytracing::vec4{1.0, 0.4, 0.4, 1}, 0.6f});
-    world.addMaterial("blueMetal", new Raytracing::MetalMaterial{Raytracing::vec4{0.4, 0.4, 1.0, 1}});
+    world.addMaterial("greenMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 1.0, 0.4, 1}});
+    world.addMaterial("redMetal", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{1.0, 0.4, 0.4, 1}, 0.6f});
+    world.addMaterial("blueMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 0.4, 1.0, 1}});
 
     //world.add(new Raytracing::SphereObject(Raytracing::vec4(0,0,-1,0), 0.5, world.getMaterial("redDiffuse")));
     //world.add(new Raytracing::SphereObject(Raytracing::vec4(-1,0,-1,0), 0.5, world.getMaterial("blueMetal")));
     //world.add(new Raytracing::SphereObject(Raytracing::vec4(1,0,-1,0), 0.5, world.getMaterial("redMetal")));
-    //world.add(new Raytracing::SphereObject(Raytracing::vec4(0,-100.5,-1,0), 100, world.getMaterial("greenDiffuse")));
+    world.add(new Raytracing::SphereObject(Raytracing::Vec4(0,-100.5,-1,0), 100, world.getMaterial("greenDiffuse")));
     //world.add(new Raytracing::TriangleObject(Raytracing::vec4(0,0.1,-0.5f,0), {{-0.5, -0.5, 0.0}, {0.5, -0.5, 0.0}, {0.0,  0.5, 0}}, world.getMaterial("greenDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 0, -1}, testData, world.getMaterial("redDiffuse")));
+    world.add(new Raytracing::ModelObject({0, 0, -1}, spider, world.getMaterial("redDiffuse")));
+    world.add(new Raytracing::ModelObject({2, 0, 0}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({5, 0, 0}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({5, 0, -5}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({-5, 5, 5}, house, world.getMaterial("blueDiffuse")));
 
     Raytracing::Raycaster raycaster {camera, image, world, parser};
 
     raycaster.run();
 
     Raytracing::ImageOutput imageOutput(image);
-
-    imageOutput.write("test", "png");
+    
+    auto t = std::time(nullptr);
+    auto now = std::localtime(&t);
+    std::stringstream timeString;
+    timeString << (1900 + now->tm_year);
+    timeString << "-";
+    timeString << (1 + now->tm_mon);
+    timeString << "-";
+    timeString << now->tm_mday;
+    timeString << " ";
+    timeString << now->tm_hour;
+    timeString << ":";
+    timeString << now->tm_min;
+    timeString << ":";
+    timeString << now->tm_sec;
+    imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
 
     return 0;
 }

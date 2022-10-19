@@ -38,6 +38,7 @@
  * Constants
  */
 const double infinity = std::numeric_limits<double>::infinity();
+const double ninfinity = -std::numeric_limits<double>::infinity();
 // PI, to a large # of digits
 const double PI = 3.1415926535897932385;
 // very small number

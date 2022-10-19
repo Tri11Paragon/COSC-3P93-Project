@@ -17,7 +17,7 @@ namespace Raytracing {
     // since GPUs generally are far more optimized for floats
     typedef double PRECISION_TYPE;
 
-    class vec4 {
+    class Vec4 {
         private:
             union xType {
                 PRECISION_TYPE x;
@@ -50,10 +50,10 @@ namespace Raytracing {
             // and floating point units (especially on GPUs) tend to be aligned to 4*sizeof(float)
             valueType value;
         public:
-            vec4(): value{0, 0, 0, 0} {}
-            vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z): value{x, y, z, 0} {}
-            vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z, PRECISION_TYPE w): value{x, y, z, w} {}
-            vec4(const vec4& vec): value{vec.x(), vec.y(), vec.z(), vec.w()} {}
+            Vec4(): value{0, 0, 0, 0} {}
+            Vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z): value{x, y, z, 0} {}
+            Vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z, PRECISION_TYPE w): value{x, y, z, w} {}
+            Vec4(const Vec4& vec): value{vec.x(), vec.y(), vec.z(), vec.w()} {}
 
 
             // most of the modern c++ here is because clang tidy was annoying me
@@ -74,7 +74,7 @@ namespace Raytracing {
             [[nodiscard]] inline PRECISION_TYPE a() const { return value.v4.a; }
 
             // negation operator
-            vec4 operator-() const { return {-x(), -y(), -z(), -w()}; }
+            Vec4 operator-() const { return {-x(), -y(), -z(), -w()}; }
 
             [[nodiscard]] inline PRECISION_TYPE magnitude() const {
                 return sqrt(lengthSquared());
@@ -85,7 +85,7 @@ namespace Raytracing {
             }
 
             // returns the unit-vector.
-            [[nodiscard]] inline vec4 normalize() const {
+            [[nodiscard]] inline Vec4 normalize() const {
                 PRECISION_TYPE mag = magnitude();
                 return {x() / mag, y() / mag, z() / mag, w() / mag};
             }
@@ -96,7 +96,7 @@ namespace Raytracing {
             }
 
             // preforms the dot product of left * right
-            static inline PRECISION_TYPE dot(const vec4& left, const vec4& right) {
+            static inline PRECISION_TYPE dot(const Vec4& left, const Vec4& right) {
                 return left.x() * right.x()
                        + left.y() * right.y()
                        + left.z() * right.z();
@@ -105,7 +105,7 @@ namespace Raytracing {
             // preforms the cross product of left X right
             // since a general solution to the cross product doesn't exist in 4d
             // we are going to ignore the w.
-            static inline vec4 cross(const vec4& left, const vec4& right) {
+            static inline Vec4 cross(const Vec4& left, const Vec4& right) {
                 return {left.y() * right.z() - left.z() * right.y(),
                         left.z() * right.x() - left.x() * right.z(),
                         left.x() * right.y() - left.y() * right.x()};
@@ -116,62 +116,76 @@ namespace Raytracing {
 // Utility Functions
 
     // useful for printing out the vector to stdout
-    inline std::ostream& operator<<(std::ostream& out, const vec4& v) {
-        return out << "vec4{" << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << "} ";
+    inline std::ostream& operator<<(std::ostream& out, const Vec4& v) {
+        return out << "Vec4{" << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << "} ";
     }
 
     // adds the two vectors left and right
-    inline const vec4 operator+(const vec4& left, const vec4& right) {
-        return vec4(left.x() + right.x(), left.y() + right.y(), left.z() + right.z(), left.w() + right.w());
+    inline Vec4 operator+(const Vec4& left, const Vec4& right) {
+        return {left.x() + right.x(), left.y() + right.y(), left.z() + right.z(), left.w() + right.w()};
     }
 
     // subtracts the right vector from the left.
-    inline const vec4 operator-(const vec4& left, const vec4& right) {
-        return vec4(left.x() - right.x(), left.y() - right.y(), left.z() - right.z(), left.w() - right.w());
+    inline Vec4 operator-(const Vec4& left, const Vec4& right) {
+        return {left.x() - right.x(), left.y() - right.y(), left.z() - right.z(), left.w() - right.w()};
     }
 
     // multiples the left with the right
-    inline const vec4 operator*(const vec4& left, const vec4& right) {
-        return vec4(left.x() * right.x(), left.y() * right.y(), left.z() * right.z(), left.w() * right.w());
+    inline Vec4 operator*(const Vec4& left, const Vec4& right) {
+        return {left.x() * right.x(), left.y() * right.y(), left.z() * right.z(), left.w() * right.w()};
+    }
+
+    // divides each element individually
+    inline Vec4 operator/(const Vec4& left, const Vec4& right) {
+        return {left.x() / right.x(), left.y() / right.y(), left.z() / right.z(), left.w() / right.w()};
     }
 
     // multiplies the const c with each element in the vector v
-    inline const vec4 operator*(const PRECISION_TYPE c, const vec4& v) {
-        return vec4(c * v.x(), c * v.y(), c * v.z(), c * v.w());
+    inline Vec4 operator*(const PRECISION_TYPE c, const Vec4& v) {
+        return {c * v.x(), c * v.y(), c * v.z(), c * v.w()};
     }
 
     // same as above but for right sided constants
-    inline const vec4 operator*(const vec4& v, PRECISION_TYPE c) {
+    inline Vec4 operator*(const Vec4& v, PRECISION_TYPE c) {
         return c * v;
     }
 
     // divides the vector by the constant c
-    inline const vec4 operator/(const vec4& v, PRECISION_TYPE c) {
-        return vec4(v.x() / c, v.y() / c, v.z() / c, v.w() / c);
+    inline Vec4 operator/(const Vec4& v, PRECISION_TYPE c) {
+        return {v.x() / c, v.y() / c, v.z() / c, v.w() / c};
     }
 
-    // divides the constant by the magnitude of the vector
-    inline const PRECISION_TYPE operator/(PRECISION_TYPE c, const vec4& v) {
-        return c / +v;
+    // divides each element in the vector by over the constant
+    inline Vec4 operator/(PRECISION_TYPE c, const Vec4& v) {
+        return {c / v.x(), c / v.y(), c / v.z(), c / v.w()};
     }
 
     class Ray {
         private:
             // the starting point for our ray
-            vec4 start;
+            Vec4 start;
             // and the direction it is currently traveling
-            vec4 direction;
+            Vec4 direction;
+            Vec4 inverseDirection;
         public:
-            Ray(const vec4& start, const vec4& direction): start(start), direction(direction) {}
+            Ray(const Vec4& start, const Vec4& direction): start(start), direction(direction), inverseDirection(1 / direction) {}
 
-            [[nodiscard]] vec4 getStartingPoint() const { return start; }
+            [[nodiscard]] Vec4 getStartingPoint() const { return start; }
 
-            [[nodiscard]] vec4 getDirection() const { return direction; }
+            [[nodiscard]] Vec4 getDirection() const { return direction; }
+
+            // not always needed, but it's good to not have to calculate the inverse inside the intersection
+            // as that would be very every AABB, and that is expensive
+            [[nodiscard]] Vec4 getInverseDirection() const {return inverseDirection; }
 
             // returns a point along the ray, extended away from start by the length.
-            [[nodiscard]] inline vec4 along(PRECISION_TYPE length) const { return start + length * direction; }
+            [[nodiscard]] inline Vec4 along(PRECISION_TYPE length) const { return start + length * direction; }
 
     };
+
+    inline std::ostream& operator<<(std::ostream& out, const Ray& v) {
+        return out << "Ray{" << v.getStartingPoint() << " " << v.getDirection() << "} ";
+    }
 
 }
 

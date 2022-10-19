@@ -15,17 +15,17 @@ namespace Raytracing {
         private:
             int width;
             int height;
-            vec4 *pixelData;
+            Vec4 *pixelData;
         public:
             Image(int width, int height);
             Image(const Image &image);
             Image(const Image&& image) = delete;
 
-            inline void setPixelColor(int x, int y, const vec4 &color) {
+            inline void setPixelColor(int x, int y, const Vec4 &color) {
                 pixelData[(x * height) + y] = color;
             }
 
-            [[nodiscard]] inline vec4 getPixelColor(int x, int y) const {
+            [[nodiscard]] inline Vec4 getPixelColor(int x, int y) const {
                 return pixelData[(x * height) + y];
             }
 

@@ -7,7 +7,7 @@
 namespace Raytracing {
 
     PRECISION_TYPE AABB::longestDistanceFromCenter() const {
-        vec4 center = getCenter();
+        Vec4 center = getCenter();
         PRECISION_TYPE maxX = std::abs(max.x() - center.x());
         PRECISION_TYPE minX = std::abs(min.x() - center.x());
         PRECISION_TYPE maxY = std::abs(max.y() - center.y());
@@ -18,7 +18,7 @@ namespace Raytracing {
     }
 
     PRECISION_TYPE AABB::avgDistanceFromCenter() const {
-        vec4 center = getCenter();
+        Vec4 center = getCenter();
         PRECISION_TYPE maxX = std::abs(max.x() - center.x());
         PRECISION_TYPE minX = std::abs(min.x() - center.x());
         PRECISION_TYPE maxY = std::abs(max.y() - center.y());
@@ -48,17 +48,59 @@ namespace Raytracing {
         return X > Y && X > Z ? X : Y > Z ? Y : Z;
     }
 
-    std::vector<AABB> AABB::splitByLongestAxis() const {
+    std::pair<AABB, AABB> AABB::splitByLongestAxis() {
         PRECISION_TYPE X = std::abs(max.x() - min.x());
+        PRECISION_TYPE X2 = X/2;
         PRECISION_TYPE Y = std::abs(max.y() - min.y());
+        PRECISION_TYPE Y2 = Y/2;
         PRECISION_TYPE Z = std::abs(max.z() - min.z());
+        PRECISION_TYPE Z2 = Z/2;
+        // return the new split AABBs based on the calculated max lengths, but only in their respective axis.
         if (X > Y && X > Z) {
-            PRECISION_TYPE x2 = X/2.0;
-            
+            return {{min.x(), min.y(), min.z(), max.x()-X2, max.y(), max.z()},
+                    // start the second AABB at the end of the first AABB.
+                    {min.x()+X2, min.y(), min.z(), max.x(), max.y(), max.z()}};
         } else if (Y > Z) {
-
+            return {{min.x(), min.y(), min.z(), max.x(), max.y()-Y2, max.z()}, {min.x(), min.y()+Y2, min.z(), max.x(), max.y(), max.z()}};
         } else {
-
+            return {{min.x(), min.y(), min.z(), max.x(), max.y(), max.z()-Z2}, {min.x(), min.y(), min.z()+Z2, max.x(), max.y(), max.z()}};
         }
+    }
+
+    /*
+     * Sources for designing these various algorithms
+     * https://www.realtimerendering.com/intersections.html
+     * https://web.archive.org/web/20090803054252/http://tog.acm.org/resources/GraphicsGems/gems/RayBox.c
+     * https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+     * https://tavianator.com/2011/ray_box.html
+     * https://medium.com/@bromanz/another-view-on-the-classic-ray-aabb-intersection-algorithm-for-bvh-traversal-41125138b525
+     */
+
+    bool AABB::simpleSlabRayAABBMethod(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax){
+        // branch less design
+        // adapted from 2d to fit our 3d scene.
+        PRECISION_TYPE tx1 = (min.x() - ray.getStartingPoint().x())*ray.getInverseDirection().x();
+        PRECISION_TYPE tx2 = (max.x() - ray.getStartingPoint().x())*ray.getInverseDirection().x();
+
+        tmin = std::min(tmin, std::min(tx1, tx2));
+        tmax = std::max(tmax, std::max(tx1, tx2));
+
+        PRECISION_TYPE ty1 = (min.y() - ray.getStartingPoint().y())*ray.getInverseDirection().y();
+        PRECISION_TYPE ty2 = (max.y() - ray.getStartingPoint().y())*ray.getInverseDirection().y();
+
+        tmin = std::max(tmin, std::min(ty1, ty2));
+        tmax = std::min(tmax, std::max(ty1, ty2));
+
+        PRECISION_TYPE tz1 = (min.z() - ray.getStartingPoint().z())*ray.getInverseDirection().z();
+        PRECISION_TYPE tz2 = (max.z() - ray.getStartingPoint().z())*ray.getInverseDirection().z();
+
+        tmin = std::max(tmin, std::min(tz1, tz2));
+        tmax = std::min(tmax, std::max(tz1, tz2));
+
+        return tmax > std::max(tmin, 0.0);
+    }
+
+    bool AABB::intersects(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax) {
+        return simpleSlabRayAABBMethod(ray, tmin, tmax);
     }
 }

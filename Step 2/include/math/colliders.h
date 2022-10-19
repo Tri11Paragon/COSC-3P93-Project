@@ -12,8 +12,8 @@ namespace Raytracing {
     // 3D Axis Aligned Bounding Box
     class AABB {
         protected:
-            vec4 min;
-            vec4 max;
+            Vec4 min;
+            Vec4 max;
             bool empty = false;
         public:
             AABB() {
@@ -24,7 +24,7 @@ namespace Raytracing {
                     min{minX, minY, minZ}, max{maxX, maxY, maxZ} {
             }
 
-            AABB(const vec4& min, const vec4& max): min(min), max(max) {}
+            AABB(const Vec4& min, const Vec4& max): min(min), max(max) {}
 
             // creates an AABB extending of size centered on x, y, z
             AABB(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z, PRECISION_TYPE size):
@@ -33,7 +33,12 @@ namespace Raytracing {
 
             // translates the AABB to position x,y,z for world collision detection
             [[nodiscard]] AABB translate(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z) const {
-                vec4 pos = {x, y, z};
+                Vec4 pos = {x, y, z};
+                return {min + pos, max + pos};
+            }
+
+            [[nodiscard]] AABB translate(const Vec4& vec) const {
+                Vec4 pos = {vec.x(), vec.y(), vec.z()};
                 return {min + pos, max + pos};
             }
 
@@ -48,12 +53,13 @@ namespace Raytracing {
                 return {minX, minY, minZ, maxX, maxY, maxZ};
             }
 
-            [[nodiscard]] inline bool intersects(PRECISION_TYPE minX, PRECISION_TYPE minY, PRECISION_TYPE minZ, PRECISION_TYPE maxX, PRECISION_TYPE maxY,
+            [[nodiscard]] inline bool
+            intersects(PRECISION_TYPE minX, PRECISION_TYPE minY, PRECISION_TYPE minZ, PRECISION_TYPE maxX, PRECISION_TYPE maxY,
                        PRECISION_TYPE maxZ) const {
-                return min.x() < maxX && max.x() > minX && min.y() < maxY && max.y() > minY && min.z() < maxZ && max.z() > minZ;
+                return min.x() <= maxX && max.x() >= minX && min.y() <= maxY && max.y() >= minY && min.z() <= maxZ && max.z() >= minZ;
             }
 
-            [[nodiscard]] inline bool intersects(const vec4& minV, const vec4& maxV) const {
+            [[nodiscard]] inline bool intersects(const Vec4& minV, const Vec4& maxV) const {
                 return intersects(minV.x(), minV.y(), minV.z(), maxV.x(), maxV.y(), maxV.z());
             }
 
@@ -61,8 +67,11 @@ namespace Raytracing {
                 return intersects(other.min, other.max);
             }
 
+            bool intersects(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax);
+            bool simpleSlabRayAABBMethod(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax);
+
             [[nodiscard]] inline bool isInside(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z) const {
-                return x > min.x() && x < max.x() && y > min.y() && y < max.y() && z > min.z() && z < max.z();
+                return x >= min.x() && x <= max.x() && y >= min.y() && y <= max.y() && z >= min.z() && z <= max.z();
             }
 
             [[nodiscard]] inline bool intersectsWithYZ(PRECISION_TYPE y, PRECISION_TYPE z) const {
@@ -77,7 +86,7 @@ namespace Raytracing {
                 return x >= min.x() && x <= max.x() && y >= min.y() && y <= max.y();
             }
 
-            [[nodiscard]] inline vec4 getCenter() const {
+            [[nodiscard]] inline Vec4 getCenter() const {
                 return {min.x() + (max.x() - min.x()) * 0.5, min.y() + (max.y() - min.y()) * 0.5, min.z() + (max.z() - min.z()) * 0.5};
             }
 
@@ -87,13 +96,22 @@ namespace Raytracing {
             // 2 - z
             [[nodiscard]] int longestAxis() const;
             [[nodiscard]] PRECISION_TYPE longestAxisLength() const;
-            [[nodiscard]] std::vector<AABB> splitByLongestAxis() const;
+            [[nodiscard]] std::pair<AABB, AABB> splitByLongestAxis();
 
             [[nodiscard]] PRECISION_TYPE avgDistanceFromCenter() const;
 
-            [[nodiscard]] inline bool isEmpty() const {return empty;}
+            [[nodiscard]] inline bool isEmpty() const { return empty; }
+
+            [[nodiscard]] Vec4 getMin() const { return min; }
+
+            [[nodiscard]] Vec4 getMax() const { return max; }
 
     };
+
+    inline std::ostream& operator<<(std::ostream& out, const AABB& v) {
+        return out << "AABB{min{" << v.getMin().x() << ", " << v.getMin().y() << ", " << v.getMin().z() << "}, max{" << v.getMax().x() << ", " << v.getMax().y()
+                   << ", " << v.getMax().z() << "}} ";
+    }
 }
 
 #endif //STEP_2_COLLIDERS_H

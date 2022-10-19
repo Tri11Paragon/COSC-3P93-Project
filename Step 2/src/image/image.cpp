@@ -11,11 +11,11 @@
 namespace Raytracing {
 
     Image::Image(int width, int height) : width(width), height(height) {
-        pixelData = new vec4[width * height];
+        pixelData = new Vec4[width * height];
     }
 
     Image::Image(const Image& image) : width(image.width), height(image.height) {
-        pixelData = new vec4[image.width * image.height];
+        pixelData = new Vec4[image.width * image.height];
         for (int i = 0; i < image.width; i++) {
             for (int j = 0; j < image.height; j++) {
                 this->setPixelColor(i, j, image.pixelData[i * image.height + j]);
