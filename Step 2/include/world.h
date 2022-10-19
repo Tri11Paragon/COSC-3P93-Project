@@ -45,24 +45,25 @@ namespace Raytracing {
             std::vector<Triangle> triangles;
             ModelData& data;
             // basically we have to store this crap here because c++ loves to copy stuff
-            std::vector<Object*> createdTreeObjects;
-            BVHTree* tree;
+            //std::vector<Object*> createdTreeObjects{};
+            //BVHTree* tree = nullptr;
         public:
             ModelObject(const Vec4& position, ModelData& data, Material* material): Object(material, position), data(data) {
                 // since all of this occurs before the main ray tracing algorithm it's fine to do sequentially
                 triangles = data.toTriangles();
                 this->aabb = data.aabb;
-                createdTreeObjects = Raytracing::ModelData::createBVHTree(triangles, position);
-                tree = new BVHTree(createdTreeObjects);
+                //createdTreeObjects = Raytracing::ModelData::createBVHTree(triangles, position);
+                //tree = new BVHTree(createdTreeObjects);
             }
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
             virtual Object* clone() {
                 return new ModelObject(position, data, material);
             }
             virtual ~ModelObject() {
-                for (auto* p : createdTreeObjects)
-                    delete(p);
-                delete(tree);
+                // Disabled for now, causing bugs when on release mode.
+                //for (auto* p : createdTreeObjects)
+                //    delete(p);
+                //delete(tree);
             }
     };
 
@@ -104,7 +105,7 @@ namespace Raytracing {
              * saving on computation
              */
             // TODO: the above todo has been done, now we need to test the performance advantage of the BVH
-            BVHTree* bvhTree = nullptr;
+            //BVHTree* bvhTree = nullptr;
             std::unordered_map<std::string, Material*> materials;
         public:
             World() = default;

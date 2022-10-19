@@ -69,6 +69,7 @@ namespace Raytracing {
 
     /*
      * Sources for designing these various algorithms
+     * TODO: test these methods for performance
      * https://www.realtimerendering.com/intersections.html
      * https://web.archive.org/web/20090803054252/http://tog.acm.org/resources/GraphicsGems/gems/RayBox.c
      * https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
@@ -79,6 +80,7 @@ namespace Raytracing {
     bool AABB::simpleSlabRayAABBMethod(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax){
         // branch less design
         // adapted from 2d to fit our 3d scene.
+        // (turns out this is actually a pretty standard design, but could use some optimization)
         PRECISION_TYPE tx1 = (min.x() - ray.getStartingPoint().x())*ray.getInverseDirection().x();
         PRECISION_TYPE tx2 = (max.x() - ray.getStartingPoint().x())*ray.getInverseDirection().x();
 

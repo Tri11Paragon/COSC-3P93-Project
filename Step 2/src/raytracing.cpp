@@ -63,8 +63,7 @@ namespace Raytracing {
             return {0,0,0};
         }
 
-        Vec4 dir = ray.getDirection().normalize();
-        auto t = 0.5f * (dir.y() + 1.0);
-        return (1.0 - t) * Vec4(1.0, 1.0, 1.0) + t * Vec4(0.5, 0.7, 1.0);
+        // skybox color
+        return {0.5, 0.7, 1.0};
     }
 }

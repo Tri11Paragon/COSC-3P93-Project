@@ -44,11 +44,12 @@ int main(int argc, char** args) {
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
 
-    Raytracing::Image image(445, 256);
+    //Raytracing::Image image(445, 256);
+    Raytracing::Image image(910, 512);
 
     Raytracing::Camera camera(90, image);
     //camera.setPosition({0, 0, 1});
-    camera.lookAt(Raytracing::Vec4(-3,3,3), Raytracing::Vec4(0, 0, 0), Raytracing::Vec4(0, 1, 0));
+    camera.lookAt(Raytracing::Vec4(-2,2,2), Raytracing::Vec4(0, 0, 0), Raytracing::Vec4(0, 1, 0));
 
     Raytracing::World world;
 
@@ -66,17 +67,18 @@ int main(int argc, char** args) {
 
     //world.add(new Raytracing::SphereObject(Raytracing::vec4(0,0,-1,0), 0.5, world.getMaterial("redDiffuse")));
     //world.add(new Raytracing::SphereObject(Raytracing::vec4(-1,0,-1,0), 0.5, world.getMaterial("blueMetal")));
-    //world.add(new Raytracing::SphereObject(Raytracing::vec4(1,0,-1,0), 0.5, world.getMaterial("redMetal")));
+    //world.add(new Raytracing::SphereObject(Raytracing::Vec4(1,0,-1,0), 0.5, world.getMaterial("redMetal")));
     world.add(new Raytracing::SphereObject(Raytracing::Vec4(0,-100.5,-1,0), 100, world.getMaterial("greenDiffuse")));
-    //world.add(new Raytracing::TriangleObject(Raytracing::vec4(0,0.1,-0.5f,0), {{-0.5, -0.5, 0.0}, {0.5, -0.5, 0.0}, {0.0,  0.5, 0}}, world.getMaterial("greenDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 0, -1}, spider, world.getMaterial("redDiffuse")));
+    //world.add(new Raytracing::TriangleObject(Raytracing::Vec4(0,0.1,-0.5f,0), {{-0.5, -0.5, 0.0}, {0.5, -0.5, 0.0}, {0.0,  0.5, 0}}, world.getMaterial("greenDiffuse")));
+    world.add(new Raytracing::ModelObject({0, 1, -1}, spider, world.getMaterial("redDiffuse")));
     world.add(new Raytracing::ModelObject({2, 0, 0}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({5, 0, 0}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({5, 0, -5}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({-5, 5, 5}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({5, 5, -10}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({5, 0, -10}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({5, 5, 0}, house, world.getMaterial("blueDiffuse")));
 
     Raytracing::Raycaster raycaster {camera, image, world, parser};
 
+    ilog << "Running raycaster!\n";
     raycaster.run();
 
     Raytracing::ImageOutput imageOutput(image);
@@ -95,6 +97,7 @@ int main(int argc, char** args) {
     timeString << now->tm_min;
     timeString << ":";
     timeString << now->tm_sec;
+    ilog << "Writing Image!\n";
     imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
 
     return 0;

@@ -12,7 +12,7 @@ namespace Raytracing {
             delete (p);
         for (const auto& p: materials)
             delete (p.second);
-        delete(bvhTree);
+        //delete(bvhTree);
     }
 
     HitData SphereObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
@@ -57,7 +57,7 @@ namespace Raytracing {
     }
 
     std::pair<HitData, Object*> World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
-        if (bvhTree != nullptr){
+        /*if (bvhTree != nullptr){
             auto hResult = HitData{false, Vec4(), Vec4(), max};
             Object* objPtr = nullptr;
             
@@ -86,7 +86,7 @@ namespace Raytracing {
             }
             
             return {hResult, objPtr};
-        } else {
+        } else {*/
             // rejection algo without using a binary space partitioning data structure
             auto hResult = HitData{false, Vec4(), Vec4(), max};
             Object* objPtr = nullptr;
@@ -100,11 +100,11 @@ namespace Raytracing {
                 }
             }
             return {hResult, objPtr};
-        }
+        //}
     }
 
     void World::generateBVH() {
-        bvhTree = new BVHTree(objects);
+        //bvhTree = new BVHTree(objects);
     }
 
     ScatterResults DiffuseMaterial::scatter(const Ray& ray, const HitData& hitData) const {
@@ -161,7 +161,8 @@ namespace Raytracing {
 
         // At this stage we can compute t to find out where the intersection point is on the line.
         PRECISION_TYPE t = f * Vec4::dot(edge2, q);
-        if (t > EPSILON) {
+        // keep t in reasonable bounds, ensuring we respect depth
+        if (t > EPSILON && t >= min && t <= max) {
             // ray intersects
             Vec4 rayIntersectionPoint = ray.along(t);
             Vec4 normal;
@@ -183,13 +184,24 @@ namespace Raytracing {
     }
 
     HitData ModelObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
-        /*auto hResult = HitData{false, Vec4(), Vec4(), max};
+        auto hResult = HitData{false, Vec4(), Vec4(), max};
         for (const Triangle& t : triangles) {
             auto cResult = checkIfTriangleGotHit(t, position, ray, min, hResult.length);
             if (cResult.hit)
                 hResult = cResult;
-        }*/
-        auto hResult = HitData{false, Vec4(), Vec4(), max};
+        }
+        // if you've made it to this point this will be in the parallel step version
+        // I've run out of time to mess with this
+        // and I hate that he made this due in the middle of exam / assignment season
+        // it's really hard for me to get in there and obsess over this
+        // when i got 4 other classes cram-ing as much useless bullshit into the next week and a half for no reason other than
+        // "hahahahha I rambled about nonsense in class for the last few weeks let's test your knowledge with a tedious assignment!!! woooooo!!!!!"
+        // this is honestly the only good 3rd year class I've taken so far
+        // Only if I had more time. THINK OF THE GRAPHS I COULD'VE MADE!!!
+        // I had plans (and still do) to make graphs of every little performance bottleneck
+        // but it's impossible when you got all this stuff due, C++ decides it hates you and wants to segfault for dumb reasons, and the program takes 20 MINUTES TO RUN!
+        // would've been able to get the GUI stuff in and fix the BVH by visualizing the bounding boxes
+        /*auto hResult = HitData{false, Vec4(), Vec4(), max};
         
         auto intersected = tree->rayIntersect(ray, min, max);
         
@@ -200,7 +212,7 @@ namespace Raytracing {
             auto cResult = checkIfTriangleGotHit(((EmptyObject*)(t))->tri, position, ray, min, hResult.length);
             if (cResult.hit)
                 hResult = cResult;
-        }
+        }*/
         
         return hResult;
     }

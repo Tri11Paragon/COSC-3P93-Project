@@ -8,11 +8,12 @@
 
 Raytracing::ModelData Raytracing::OBJLoader::loadModel(std::string file) {
     std::ifstream modelFile;
-
+    
     modelFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     modelFile.open(file);
     std::stringstream modelSource;
-
+    
+    std::cout.flush();
     // read the entire file into a string
     modelSource << modelFile.rdbuf();
 
