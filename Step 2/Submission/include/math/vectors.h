@@ -8,7 +8,7 @@
 
 // AVX512 isn't supported on my CPU. We will use AVX2 since it is supported by most modern CPUs
 // THIS IS CURRENTLY BROKEN. DO NOT USE. it's a great idea, but I've run out of time to debug this. Will be in step 3
-#define USE_SIMD_CPU
+//#define USE_SIMD_CPU
 
 #ifdef USE_SIMD_CPU
     
@@ -44,8 +44,7 @@ namespace Raytracing {
             // makes it easy to convert between AVX and double data types.
             union {
                 struct {
-                    PRECISION_TYPE _x{}, _y{}, _z{}, _w{};
-                    //PRECISION_TYPE _w, _z, _y, _x;
+                    double _x, _y, _z, _w;
                 };
                 __m256d avxData;
             };
@@ -57,16 +56,10 @@ namespace Raytracing {
             friend Vec4 operator/(const Vec4& left, const Vec4& right);
         public:
             
-            Vec4(): avxData(_mm256_setzero_pd()) {}
-            Vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z): avxData(_mm256_setr_pd(x, y, z, 0.0)) {
-                //tlog << x << ":" << _x << " " << y << ":" << _y << " " << z << ":" << _z << "\n";
-            }
-            Vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z, PRECISION_TYPE w): avxData(_mm256_setr_pd(x, y, z, w)) {
-                //dlog << x << ":" << _x << " " << y << ":" << _y << " " << z << ":" << _z << "\n";
-            }
-            Vec4(const Vec4& vec): avxData(_mm256_setr_pd(vec.x(), vec.y(), vec.z(), vec.w())) {
-                //ilog << vec.x() << ":" << _x << " " << vec.y() << ":" << _y << " " << vec.z() << ":" << _z << "\n";
-            }
+            Vec4(): avxData{_mm256_set_pd(0.0, 0.0, 0.0, 0.0)} {}
+            Vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z): avxData{_mm256_set_pd(x, y, z, 0)} {}
+            Vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z, PRECISION_TYPE w): avxData{_mm256_set_pd(x, y, z, w)} {}
+            Vec4(const Vec4& vec): avxData{_mm256_set_pd(vec.x(), vec.y(), vec.z(), vec.w())} {}
             
             // most of the modern c++ here is because clang tidy was annoying me
             [[nodiscard]] inline PRECISION_TYPE x() const { return _x; }
@@ -129,16 +122,16 @@ namespace Raytracing {
                 // takes the x element and places it in the 3rd element of the vector
                 // and then the w element in the last element of the vector
                 // creating the alignment {left.y(), left.z(), left.x(), left.w()} (as seen in the cross algorithm
-                __m256d leftLeftShuffle = _mm256_permute4x64_pd(left.avxData, _MM_SHUFFLE(3,0,2,1));
+                __m256d leftLeftShuffle = _mm256_shuffle_pd(left.avxData, left.avxData, _MM_SHUFFLE(3,0,2,1));
                 // same thing but produces {right.z(), right.x(), right.y(), right.w()}
-                __m256d rightLeftShuffle = _mm256_permute4x64_pd(right.avxData, _MM_SHUFFLE(3,1,0,2));
-                // now we have to do the right side multiplications
-                // {left.z(), left.x(), left.y(), left.w()}
-                __m256d leftRightShuffle = _mm256_permute4x64_pd(left.avxData, _MM_SHUFFLE(3,1,0,2));
-                // {right.y(), right.z(), right.x(), right.w()}
-                __m256d rightRightShuffle = _mm256_permute4x64_pd(right.avxData, _MM_SHUFFLE(3,0,2,1));
+                __m256d rightLeftShuffle = _mm256_shuffle_pd(right.avxData, right.avxData, _MM_SHUFFLE(3,1,0,2));
                 // multiply to do the first step of the cross process
                 __m256d multiLeft = _mm256_mul_pd(leftLeftShuffle, rightLeftShuffle);
+                // now we have to do the right side multiplications
+                // {left.z(), left.x(), left.y(), left.w()}
+                __m256d leftRightShuffle = _mm256_shuffle_pd(left.avxData, left.avxData, _MM_SHUFFLE(3,1,0,2));
+                // {right.y(), right.z(), right.x(), right.w()}
+                __m256d rightRightShuffle = _mm256_shuffle_pd(right.avxData, right.avxData, _MM_SHUFFLE(3,0,2,1));
                 // multiply the right sides of the subtraction sign
                 __m256d multiRight = _mm256_mul_pd(leftRightShuffle, rightRightShuffle);
                 // then subtract to produce the cross product
@@ -146,11 +139,6 @@ namespace Raytracing {
                 // yes this looks a lot more complicated, but it should be faster!
                 AVXConvert conv {};
                 conv.avxData = subs;
-                /*auto b = Vec4{left.y() * right.z() - left.z() * right.y(),
-                          left.z() * right.x() - left.x() * right.z(),
-                          left.x() * right.y() - left.y() * right.x()};
-                tlog << b._x << " " << b._y << " " << b._z << "\n";
-                tlog << conv._x << " " << conv._y << " " << conv._z << "\n\n";*/
                 return {conv._x, conv._y, conv._z, conv._w};
             }
     };
