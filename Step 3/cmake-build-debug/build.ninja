@@ -11,7 +11,7 @@
 # =============================================================================
 
 # =============================================================================
-# Project: Step_2
+# Project: Step_3
 # Configurations: Debug
 # =============================================================================
 
@@ -41,112 +41,93 @@ include CMakeFiles/rules.ninja
 
 cmake_ninja_workdir = /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/cmake-build-debug/
 # =============================================================================
-# Object build statements for EXECUTABLE target Step_2
+# Object build statements for EXECUTABLE target Step_3
 
 
 #############################################
-# Order-only phony target for Step_2
+# Order-only phony target for Step_3
 
-build cmake_object_order_depends_target_Step_2: phony || CMakeFiles/Step_2.dir
+build cmake_object_order_depends_target_Step_3: phony || CMakeFiles/Step_3.dir
 
-build CMakeFiles/Step_2.dir/src/globals.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/globals.cpp || cmake_object_order_depends_target_Step_2
-  DEP_FILE = CMakeFiles/Step_2.dir/src/globals.cpp.o.d
+build CMakeFiles/Step_3.dir/src/globals.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/globals.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/globals.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
-  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-  OBJECT_DIR = CMakeFiles/Step_2.dir
-  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src
-  TARGET_COMPILE_PDB = CMakeFiles/Step_2.dir/
-  TARGET_PDB = Step_2.pdb
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src
 
-build CMakeFiles/Step_2.dir/src/image/image.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/image/image.cpp || cmake_object_order_depends_target_Step_2
-  DEP_FILE = CMakeFiles/Step_2.dir/src/image/image.cpp.o.d
+build CMakeFiles/Step_3.dir/src/image/image.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/image/image.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/image/image.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
-  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-  OBJECT_DIR = CMakeFiles/Step_2.dir
-  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src/image
-  TARGET_COMPILE_PDB = CMakeFiles/Step_2.dir/
-  TARGET_PDB = Step_2.pdb
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/image
 
-build CMakeFiles/Step_2.dir/src/main.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/main.cpp || cmake_object_order_depends_target_Step_2
-  DEP_FILE = CMakeFiles/Step_2.dir/src/main.cpp.o.d
+build CMakeFiles/Step_3.dir/src/main.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/main.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/main.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
-  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-  OBJECT_DIR = CMakeFiles/Step_2.dir
-  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src
-  TARGET_COMPILE_PDB = CMakeFiles/Step_2.dir/
-  TARGET_PDB = Step_2.pdb
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src
 
-build CMakeFiles/Step_2.dir/src/math/colliders.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/math/colliders.cpp || cmake_object_order_depends_target_Step_2
-  DEP_FILE = CMakeFiles/Step_2.dir/src/math/colliders.cpp.o.d
+build CMakeFiles/Step_3.dir/src/math/colliders.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/math/colliders.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/math/colliders.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
-  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-  OBJECT_DIR = CMakeFiles/Step_2.dir
-  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src/math
-  TARGET_COMPILE_PDB = CMakeFiles/Step_2.dir/
-  TARGET_PDB = Step_2.pdb
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/math
 
-build CMakeFiles/Step_2.dir/src/raytracing.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/raytracing.cpp || cmake_object_order_depends_target_Step_2
-  DEP_FILE = CMakeFiles/Step_2.dir/src/raytracing.cpp.o.d
+build CMakeFiles/Step_3.dir/src/raytracing.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/raytracing.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/raytracing.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
-  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-  OBJECT_DIR = CMakeFiles/Step_2.dir
-  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src
-  TARGET_COMPILE_PDB = CMakeFiles/Step_2.dir/
-  TARGET_PDB = Step_2.pdb
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src
 
-build CMakeFiles/Step_2.dir/src/util/debug.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/util/debug.cpp || cmake_object_order_depends_target_Step_2
-  DEP_FILE = CMakeFiles/Step_2.dir/src/util/debug.cpp.o.d
+build CMakeFiles/Step_3.dir/src/util/debug.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/util/debug.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/util/debug.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
-  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-  OBJECT_DIR = CMakeFiles/Step_2.dir
-  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src/util
-  TARGET_COMPILE_PDB = CMakeFiles/Step_2.dir/
-  TARGET_PDB = Step_2.pdb
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/util
 
-build CMakeFiles/Step_2.dir/src/util/models.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/util/models.cpp || cmake_object_order_depends_target_Step_2
-  DEP_FILE = CMakeFiles/Step_2.dir/src/util/models.cpp.o.d
+build CMakeFiles/Step_3.dir/src/util/models.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/util/models.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/util/models.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
-  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-  OBJECT_DIR = CMakeFiles/Step_2.dir
-  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src/util
-  TARGET_COMPILE_PDB = CMakeFiles/Step_2.dir/
-  TARGET_PDB = Step_2.pdb
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/util
 
-build CMakeFiles/Step_2.dir/src/util/parser.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/util/parser.cpp || cmake_object_order_depends_target_Step_2
-  DEP_FILE = CMakeFiles/Step_2.dir/src/util/parser.cpp.o.d
+build CMakeFiles/Step_3.dir/src/util/parser.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/util/parser.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/util/parser.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
-  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-  OBJECT_DIR = CMakeFiles/Step_2.dir
-  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src/util
-  TARGET_COMPILE_PDB = CMakeFiles/Step_2.dir/
-  TARGET_PDB = Step_2.pdb
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/util
 
-build CMakeFiles/Step_2.dir/src/world.cpp.o: CXX_COMPILER__Step_2_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/world.cpp || cmake_object_order_depends_target_Step_2
-  DEP_FILE = CMakeFiles/Step_2.dir/src/world.cpp.o.d
+build CMakeFiles/Step_3.dir/src/world.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/world.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/world.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
-  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-  OBJECT_DIR = CMakeFiles/Step_2.dir
-  OBJECT_FILE_DIR = CMakeFiles/Step_2.dir/src
-  TARGET_COMPILE_PDB = CMakeFiles/Step_2.dir/
-  TARGET_PDB = Step_2.pdb
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src
 
 
 # =============================================================================
-# Link build statements for EXECUTABLE target Step_2
+# Link build statements for EXECUTABLE target Step_3
 
 
 #############################################
-# Link the executable Step_2
+# Link the executable Step_3
 
-build Step_2: CXX_EXECUTABLE_LINKER__Step_2_Debug CMakeFiles/Step_2.dir/src/globals.cpp.o CMakeFiles/Step_2.dir/src/image/image.cpp.o CMakeFiles/Step_2.dir/src/main.cpp.o CMakeFiles/Step_2.dir/src/math/colliders.cpp.o CMakeFiles/Step_2.dir/src/raytracing.cpp.o CMakeFiles/Step_2.dir/src/util/debug.cpp.o CMakeFiles/Step_2.dir/src/util/models.cpp.o CMakeFiles/Step_2.dir/src/util/parser.cpp.o CMakeFiles/Step_2.dir/src/world.cpp.o
+build Step_3: CXX_EXECUTABLE_LINKER__Step_3_Debug CMakeFiles/Step_3.dir/src/globals.cpp.o CMakeFiles/Step_3.dir/src/image/image.cpp.o CMakeFiles/Step_3.dir/src/main.cpp.o CMakeFiles/Step_3.dir/src/math/colliders.cpp.o CMakeFiles/Step_3.dir/src/raytracing.cpp.o CMakeFiles/Step_3.dir/src/util/debug.cpp.o CMakeFiles/Step_3.dir/src/util/models.cpp.o CMakeFiles/Step_3.dir/src/util/parser.cpp.o CMakeFiles/Step_3.dir/src/world.cpp.o
   FLAGS = -fsanitize=address -g -march=native -g
   LINK_FLAGS = -fsanitize=address
-  OBJECT_DIR = CMakeFiles/Step_2.dir
+  OBJECT_DIR = CMakeFiles/Step_3.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = CMakeFiles/Step_2.dir/
-  TARGET_FILE = Step_2
-  TARGET_PDB = Step_2.pdb
+  TARGET_FILE = Step_3
+  TARGET_PDB = Step_3.dbg
 
 
 #############################################
@@ -183,7 +164,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 #############################################
 # Folder: /home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug
 
-build all: phony Step_2
+build all: phony Step_3
 
 # =============================================================================
 # Built-in targets
@@ -192,14 +173,14 @@ build all: phony Step_2
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | ../CMakeLists.txt /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCCompiler.cmake.in /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCCompilerABI.c /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCXXCompiler.cmake.in /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCXXCompilerABI.cpp /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCXXInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCommonLanguageInclude.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCompilerIdDetection.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCXXCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCompileFeatures.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCompilerABI.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCompilerId.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineSystem.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeFindBinUtils.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeGenericSystem.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeInitializeConfigs.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeLanguageInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeParseImplicitIncludeInfo.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeParseImplicitLinkInfo.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeParseLibraryArchitecture.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeSystem.cmake.in /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeSystemSpecificInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeSystemSpecificInitialize.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeTestCCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeTestCXXCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeTestCompilerCommon.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/ADSP-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/ARMCC-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/ARMClang-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/AppleClang-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Borland-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Bruce-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/CMakeCommonCompilerMacros.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Clang-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Clang-DetermineCompilerInternal.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Comeau-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Compaq-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Cray-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Embarcadero-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Fujitsu-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/FujitsuClang-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GHS-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-C.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-CXX.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-FindBinUtils.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/HP-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/HP-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IAR-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IBMCPP-C-DetermineVersionInternal.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IBMClang-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IBMClang-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Intel-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IntelLLVM-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/LCC-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/LCC-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/MSVC-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/NVHPC-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/NVIDIA-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/PGI-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/PathScale-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/SCO-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/SDCC-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/SunPro-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/TI-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/TinyCC-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/VisualAge-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Watcom-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/XL-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/XL-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/XLClang-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/XLClang-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/zOS-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Internal/FeatureTesting.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-Determine-CXX.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU-C.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU-CXX.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.23.2/CMakeCCompiler.cmake CMakeFiles/3.23.2/CMakeCXXCompiler.cmake CMakeFiles/3.23.2/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | ../CMakeLists.txt ../include/config.h.in /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCXXInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCommonLanguageInclude.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeGenericSystem.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeInitializeConfigs.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeLanguageInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeSystemSpecificInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeSystemSpecificInitialize.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/CMakeCommonCompilerMacros.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-C.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-CXX.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU-C.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU-CXX.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.23.2/CMakeCCompiler.cmake CMakeFiles/3.23.2/CMakeCXXCompiler.cmake CMakeFiles/3.23.2/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build ../CMakeLists.txt /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCCompiler.cmake.in /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCCompilerABI.c /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCXXCompiler.cmake.in /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCXXCompilerABI.cpp /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCXXInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCommonLanguageInclude.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCompilerIdDetection.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCXXCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCompileFeatures.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCompilerABI.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineCompilerId.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeDetermineSystem.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeFindBinUtils.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeGenericSystem.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeInitializeConfigs.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeLanguageInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeParseImplicitIncludeInfo.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeParseImplicitLinkInfo.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeParseLibraryArchitecture.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeSystem.cmake.in /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeSystemSpecificInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeSystemSpecificInitialize.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeTestCCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeTestCXXCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeTestCompilerCommon.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/ADSP-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/ARMCC-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/ARMClang-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/AppleClang-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Borland-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Bruce-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/CMakeCommonCompilerMacros.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Clang-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Clang-DetermineCompilerInternal.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Comeau-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Compaq-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Cray-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Embarcadero-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Fujitsu-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/FujitsuClang-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GHS-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-C.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-CXX.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-FindBinUtils.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/HP-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/HP-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IAR-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IBMCPP-C-DetermineVersionInternal.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IBMClang-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IBMClang-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Intel-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/IntelLLVM-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/LCC-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/LCC-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/MSVC-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/NVHPC-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/NVIDIA-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/PGI-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/PathScale-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/SCO-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/SDCC-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/SunPro-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/TI-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/TinyCC-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/VisualAge-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/Watcom-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/XL-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/XL-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/XLClang-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/XLClang-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/zOS-C-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Internal/FeatureTesting.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-Determine-CXX.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU-C.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU-CXX.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.23.2/CMakeCCompiler.cmake CMakeFiles/3.23.2/CMakeCXXCompiler.cmake CMakeFiles/3.23.2/CMakeSystem.cmake: phony
+build ../CMakeLists.txt ../include/config.h.in /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCXXInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeCommonLanguageInclude.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeGenericSystem.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeInitializeConfigs.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeLanguageInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeSystemSpecificInformation.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/CMakeSystemSpecificInitialize.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/CMakeCommonCompilerMacros.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-C.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU-CXX.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Compiler/GNU.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU-C.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU-CXX.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux-GNU.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/Linux.cmake /opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.23.2/CMakeCCompiler.cmake CMakeFiles/3.23.2/CMakeCXXCompiler.cmake CMakeFiles/3.23.2/CMakeSystem.cmake: phony
 
 
 #############################################

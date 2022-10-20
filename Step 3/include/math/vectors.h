@@ -7,7 +7,42 @@
 #define STEP_2_VECTORS_H
 
 // AVX512 isn't supported on my CPU. We will use AVX2 since it is supported by most modern CPUs
-#define USE_SIMD_CPU
+#include <config.h>
+
+// I have tested this and when in release mode the O3 optimizations are capable of creating
+// far better auto-vectorized results. See the table below for more info.
+// but in debug mode using the AVX instructions is far better. As they say, never try to out optimize the compiler - you'll lose.
+
+// in debug mode:
+// multiplication
+// 2174.43ms normal
+// 1483.04ms avx
+// division
+// 2282.44ms normal
+// 1627ms avx
+// addition
+// 2119.4ms normal
+// 1495.77ms avx
+// dot
+// 1447.9ms normal
+// 1088.5ms avx
+// cross
+// 2840.69ms normal
+// 2543.66ms avx
+
+// with release mode
+// cross
+// 244.144ms normal
+// 283.516ms avx
+// dot
+// 239.759ms normal
+// 385.583ms avx
+// mul
+// 70.9977ms normal
+// 286.656ms avx
+#ifdef COMPILER_DEBUG_ENABLED
+    #define USE_SIMD_CPU
+#endif
 
 #ifdef USE_SIMD_CPU
     
@@ -54,10 +89,14 @@ namespace Raytracing {
             friend Vec4 operator-(const Vec4& left, const Vec4& right);
             friend Vec4 operator*(const Vec4& left, const Vec4& right);
             friend Vec4 operator/(const Vec4& left, const Vec4& right);
+            friend Vec4 operator*(PRECISION_TYPE c, const Vec4& v);
+            friend Vec4 operator*(const Vec4& v, PRECISION_TYPE c);
+            friend Vec4 operator/(const Vec4& v, PRECISION_TYPE c);
+            friend Vec4 operator/(PRECISION_TYPE c, const Vec4& v);
         public:
             
             Vec4(): avxData(_mm256_setzero_pd()) {}
-            Vec4(const __m256d& data): avxData(data) {}
+            explicit Vec4(const __m256d& data): avxData(data) {}
             Vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z): avxData(_mm256_setr_pd(x, y, z, 0.0)) {
                 //tlog << x << ":" << _x << " " << y << ":" << _y << " " << z << ":" << _z << "\n";
             }
@@ -85,26 +124,26 @@ namespace Raytracing {
             
             [[nodiscard]] inline PRECISION_TYPE a() const { return _w; }
             
+            static inline __m256d getVecFromValue(PRECISION_TYPE c) {
+                return _mm256_set1_pd(c);
+            }
+            
             // negation operator
-            Vec4 operator-() const { return {-x(), -y(), -z(), -w()}; }
+            Vec4 operator-() const {
+                return Vec4{_mm256_mul_pd(getVecFromValue(-1), this->avxData)};
+            }
         
             [[nodiscard]] inline PRECISION_TYPE magnitude() const {
                 return sqrt(lengthSquared());
             }
         
             [[nodiscard]] inline PRECISION_TYPE lengthSquared() const {
-                __m256d multiplied = _mm256_mul_pd(avxData, avxData);
-                // horizontal add. element 0 and 2 (or 1 and 3) contain the results which we must scalar add.
-                __m256d sum = _mm256_hadd_pd(multiplied, multiplied);
-                AVXConvert conv;
-                conv.avxData = sum;
-                return conv._x + conv._z;
+                return dot(*this, *this);
             }
         
             // returns the unit-vector.
             [[nodiscard]] inline Vec4 normalize() const {
-                PRECISION_TYPE mag = magnitude();
-                return {x() / mag, y() / mag, z() / mag, w() / mag};
+                return Vec4{_mm256_div_pd(avxData, getVecFromValue(magnitude()))};
             }
         
             // add operator before the vec returns the magnitude
@@ -148,41 +187,58 @@ namespace Raytracing {
                 __m256d multiRight = _mm256_mul_pd(leftRightShuffle, rightRightShuffle);
                 // then subtract to produce the cross product
                 __m256d subs = _mm256_sub_pd(multiLeft, multiRight);
+                
                 // yes this looks a lot more complicated, but it should be faster!
                 /*auto b = Vec4{left.y() * right.z() - left.z() * right.y(),
                           left.z() * right.x() - left.x() * right.z(),
                           left.x() * right.y() - left.y() * right.x()};
                 tlog << b._x << " " << b._y << " " << b._z << "\n";
                 tlog << conv._x << " " << conv._y << " " << conv._z << "\n\n";*/
-                return {subs};
+                return Vec4{subs};
             }
     };
     
     // adds the two vectors left and right
     inline Vec4 operator+(const Vec4& left, const Vec4& right) {
-        __m256d added = _mm256_add_pd(left.avxData, right.avxData);
-        return {added};
+        return Vec4{_mm256_add_pd(left.avxData, right.avxData)};
     }
     
     // subtracts the right vector from the left.
     inline Vec4 operator-(const Vec4& left, const Vec4& right) {
-        __m256d subbed = _mm256_sub_pd(left.avxData, right.avxData);
-        return {subbed};
+        return Vec4{_mm256_sub_pd(left.avxData, right.avxData)};
     }
     
     // multiples the left with the right
     inline Vec4 operator*(const Vec4& left, const Vec4& right) {
         //dlog << left._x << " " << left._y << " " << left._z << " " << left._w << "\n";
         //dlog << right._x << " " << right._y << " " << right._z << " " << right._w << "\n";
-        __m256d multiplied = _mm256_mul_pd(left.avxData, right.avxData);
         //dlog << conv._x << " " << conv._y << " " << conv._z << " " << conv._w << "\n\n";
-        return {multiplied};
+        return Vec4{_mm256_mul_pd(left.avxData, right.avxData)};
     }
     
     // divides each element individually
     inline Vec4 operator/(const Vec4& left, const Vec4& right) {
-        __m256d dived = _mm256_div_pd(left.avxData, right.avxData);
-        return {dived};
+        return Vec4{_mm256_div_pd(left.avxData, right.avxData)};
+    }
+    
+    // multiplies the const c with each element in the vector v
+    inline Vec4 operator*(PRECISION_TYPE c, const Vec4& v) {
+        return Vec4{_mm256_mul_pd(Vec4::getVecFromValue(c), v.avxData)};
+    }
+    
+    // same as above but for right sided constants
+    inline Vec4 operator*(const Vec4& v, PRECISION_TYPE c) {
+        return Vec4{_mm256_mul_pd(v.avxData, Vec4::getVecFromValue(c))};
+    }
+    
+    // divides the vector by the constant c
+    inline Vec4 operator/(const Vec4& v, PRECISION_TYPE c) {
+        return Vec4{_mm256_div_pd(v.avxData, Vec4::getVecFromValue(c))};
+    }
+    
+    // divides each element in the vector by over the constant
+    inline Vec4 operator/(PRECISION_TYPE c, const Vec4& v) {
+        return Vec4{_mm256_div_pd(Vec4::getVecFromValue(c), v.avxData)};
     }
     
     #else
@@ -304,15 +360,6 @@ namespace Raytracing {
         return {left.x() / right.x(), left.y() / right.y(), left.z() / right.z(), left.w() / right.w()};
     }
     
-    #endif
-    
-    // none of these can be vectorized with AVX instructions
-    
-    // useful for printing out the vector to stdout
-    inline std::ostream& operator<<(std::ostream& out, const Vec4& v) {
-        return out << "Vec4{" << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << "} ";
-    }
-    
     // multiplies the const c with each element in the vector v
     inline Vec4 operator*(const PRECISION_TYPE c, const Vec4& v) {
         return {c * v.x(), c * v.y(), c * v.z(), c * v.w()};
@@ -331,6 +378,15 @@ namespace Raytracing {
     // divides each element in the vector by over the constant
     inline Vec4 operator/(PRECISION_TYPE c, const Vec4& v) {
         return {c / v.x(), c / v.y(), c / v.z(), c / v.w()};
+    }
+    
+    #endif
+    
+    // none of these can be vectorized with AVX instructions
+    
+    // useful for printing out the vector to stdout
+    inline std::ostream& operator<<(std::ostream& out, const Vec4& v) {
+        return out << "Vec4{" << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << "} ";
     }
     
     class Ray {

@@ -4,6 +4,7 @@
 #include <raytracing.h>
 #include <world.h>
 #include <chrono>
+#include <util/debug.h>
 
 /**
  * Brett Terpstra 6920201
@@ -13,13 +14,6 @@
 using namespace Raytracing;
 
 int main(int argc, char** args) {
-
-    Vec4 v(5, 3, 1, 6);
-    Vec4 v2(4, 2, 8, 7);
-
-    tlog << (v / v2) << "\n";
-
-    //return 0;
     // not a feature full parser but it'll work for what I need.
     Raytracing::Parser parser;
 

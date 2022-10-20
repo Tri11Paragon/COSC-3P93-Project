@@ -142,7 +142,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=Step_2
+CMAKE_PROJECT_NAME:STATIC=Step_3
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -206,6 +206,9 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Enable the debug utils
+EnableDebugMenu:BOOL=OFF
+
 //Value Computed by CMake
 Step_2_BINARY_DIR:STATIC=/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug
 
@@ -214,6 +217,15 @@ Step_2_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 Step_2_SOURCE_DIR:STATIC=/home/brett/Documents/Brock/CS 3P93/Project/Step 3
+
+//Value Computed by CMake
+Step_3_BINARY_DIR:STATIC=/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug
+
+//Value Computed by CMake
+Step_3_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+Step_3_SOURCE_DIR:STATIC=/home/brett/Documents/Brock/CS 3P93/Project/Step 3
 
 
 ########################
