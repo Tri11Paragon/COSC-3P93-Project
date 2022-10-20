@@ -1,18 +1,11 @@
 # ninja log v5
-1	1911	1666240985448103414	CMakeFiles/Step_2.dir/src/main.cpp.o	8da3d580eb6e9a1
-1	1263	1666240984800084042	CMakeFiles/Step_2.dir/src/math/colliders.cpp.o	c0cac41f151ac323
-2	1440	1666208421853012610	CMakeFiles/Step_2.dir/src/util/parser.cpp.o	67ef710b86dd32d6
-1	1419	1666240984956088704	CMakeFiles/Step_2.dir/src/raytracing.cpp.o	d0ae86d239f7153
-2673	2712	1666240986252127454	Step_2	7437176fc9e68547
-2	1437	1666208421849012493	CMakeFiles/Step_2.dir/src/util/debug.cpp.o	2bec3f4c06e82095
-2	1611	1666240985148094447	CMakeFiles/Step_2.dir/src/util/models.cpp.o	7aa2ab72df0658e
-1	874	1666208421288995782	CMakeFiles/Step_2.dir/src/globals.cpp.o	8caaf06f90e0c038
-2	1517	1666240985056091694	CMakeFiles/Step_2.dir/src/world.cpp.o	9ae7336b91871660
-1	2673	1666240986212126256	CMakeFiles/Step_2.dir/src/image/image.cpp.o	f94f9df081e81271
-1	1202	1666241022097198348	CMakeFiles/Step_2.dir/src/math/colliders.cpp.o	c0cac41f151ac323
-1	1575	1666241022473209572	CMakeFiles/Step_2.dir/src/util/models.cpp.o	7aa2ab72df0658e
-1	1914	1666241022809219604	CMakeFiles/Step_2.dir/src/raytracing.cpp.o	d0ae86d239f7153
 1	1942	1666241022837220441	CMakeFiles/Step_2.dir/src/main.cpp.o	8da3d580eb6e9a1
+1	1202	1666241022097198348	CMakeFiles/Step_2.dir/src/math/colliders.cpp.o	c0cac41f151ac323
+2	1440	1666208421853012610	CMakeFiles/Step_2.dir/src/util/parser.cpp.o	67ef710b86dd32d6
+1	1914	1666241022809219604	CMakeFiles/Step_2.dir/src/raytracing.cpp.o	d0ae86d239f7153
+2624	2663	1666241023561242054	Step_2	7437176fc9e68547
+2	1437	1666208421849012493	CMakeFiles/Step_2.dir/src/util/debug.cpp.o	2bec3f4c06e82095
+1	1575	1666241022473209572	CMakeFiles/Step_2.dir/src/util/models.cpp.o	7aa2ab72df0658e
+1	874	1666208421288995782	CMakeFiles/Step_2.dir/src/globals.cpp.o	8caaf06f90e0c038
 2	1962	1666241022857221038	CMakeFiles/Step_2.dir/src/world.cpp.o	9ae7336b91871660
 1	2624	1666241023521240863	CMakeFiles/Step_2.dir/src/image/image.cpp.o	f94f9df081e81271
-2624	2663	1666241023561242054	Step_2	7437176fc9e68547

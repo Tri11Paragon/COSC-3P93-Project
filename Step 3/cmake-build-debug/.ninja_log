@@ -1,0 +1,11 @@
+# ninja log v5
+1	1260	1666150927356923195	CMakeFiles/Step_2.dir/src/main.cpp.o	6490b92c9a765459
+1	1176	1666150252074198441	CMakeFiles/Step_2.dir/src/math/colliders.cpp.o	961741316937a4a5
+2	1433	1666137932077000920	CMakeFiles/Step_2.dir/src/util/parser.cpp.o	e9d3901d3a711cd
+1	902	1666150926996912836	CMakeFiles/Step_2.dir/src/raytracing.cpp.o	f57e640d9f276756
+1260	1355	1666150927448925842	Step_2	ba935c9c2d26b32e
+1	1250	1666137931896993564	CMakeFiles/Step_2.dir/src/util/debug.cpp.o	da2051938d8a4958
+1	1367	1666150651957086402	CMakeFiles/Step_2.dir/src/util/models.cpp.o	507adcdc012771a9
+1	951	1666137931596981302	CMakeFiles/Step_2.dir/src/globals.cpp.o	5bebf7bde55fd4af
+1	1036	1666150927132916751	CMakeFiles/Step_2.dir/src/world.cpp.o	528709b06ba304b9
+1	1302	1666137931948995690	CMakeFiles/Step_2.dir/src/image/image.cpp.o	a6a5848b13043c30
