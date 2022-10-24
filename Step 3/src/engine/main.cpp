@@ -74,8 +74,8 @@ int main(int argc, char** args) {
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
     
-    Raytracing::Image image(1920, 1080);
-    //Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
+    //Raytracing::Image image(1920, 1080);
+    Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
     
     Raytracing::Camera camera(std::stoi(parser.getOptionValue("--fov")), image);
     //camera.setPosition({0, 0, 1});
