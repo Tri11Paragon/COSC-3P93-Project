@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.22)
 project(Step_3)
 
 set(CMAKE_CXX_STANDARD 20)
+
+option(EnableDebugMenu "Enable the debug utils" OFF)
+option(COMPILE_GUI "Enable compilation of the GUI utils" OFF)
+option(COMPILE_OPENCL "Enable compilation of the OpenCL GPU Compute." OFF)
 
 # used to debug memory related issues
 if ((CMAKE_BUILD_TYPE MATCHES Debug))
@@ -16,8 +20,6 @@ else()
 endif()
 set(COMPILER_DEBUG_ENABLED_BOOL true)
 
-option(EnableDebugMenu "Enable the debug utils" OFF)
-
 if(EnableDebugMenu MATCHES ON)
     message("debug mode")
     set(DEBUG_ENABLED true)
@@ -28,7 +30,7 @@ endif(EnableDebugMenu MATCHES ON)
 set(DEBUG_ENABLED_BOOL true)
 
 #config stuff
-configure_file(${PROJECT_SOURCE_DIR}/include/config.h.in config.h @ONLY)
+configure_file(include/engine/config.h.in config.h @ONLY)
 # include the config file
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -36,11 +38,50 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
 #Setup project source compilation
-set(source_dir "${PROJECT_SOURCE_DIR}/src/")
-file(GLOB_RECURSE source_files "${source_dir}/*.cpp")
-file(GLOB_RECURSE source_c_files "${source_dir}/*.c")
+set(engine_source_dir "${PROJECT_SOURCE_DIR}/src/engine")
+file(GLOB_RECURSE engine_source_files "${engine_source_dir}/*.cpp" "${engine_source_dir}/*.c")
+# only want to attempt to compile graphics if user requests it
+# plus we can only compile on X11 supported systems, so basically unix
+if (COMPILE_GUI MATCHES ON AND UNIX)
+    message("Compiling with GUI.")
+    find_package(OpenGL REQUIRED)
+    find_package(X11)
+    if(NOT X11_FOUND)
+        message("X11 wasn't found on your system. Do you have the development libs? sudo apt install libx11-dev")
+    endif()
+
+    include_directories(${X11_INCLUDE_DIR})
+
+    set(graphics_source_dir "${PROJECT_SOURCE_DIR}/src/graphics")
+    file(GLOB_RECURSE graphics_source_files "${graphics_source_dir}/*.cpp" "${graphics_source_dir}/*.c")
+endif()
+# Windows should be able to handle opencl no problem.
+# i decided that i wanted to use opencl due to it having a much nicer c99 language.
+if (COMPILE_OPENCL MATCHES ON)
+    find_package(OpenCL)
+
+    if(NOT OpenCL_FOUND)
+        message("Unable to find OpenCL on your system. Do you have the required libs?")
+    endif()
+
+    include_directories(${OpenCL_INCLUDE_DIRS})
+
+    set(opencl_source_dir "${PROJECT_SOURCE_DIR}/src/opencl")
+    file(GLOB_RECURSE opencl_source_files "${opencl_source_dir}/*.cpp" "${opencl_source_dir}/*.c")
+endif()
 
 #Setup project header files
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_executable(${PROJECT_NAME} ${source_files} ${source_c_files})
+add_executable(${PROJECT_NAME} ${engine_source_files} ${graphics_source_files} ${opencl_source_files})
+
+target_link_libraries(${PROJECT_NAME} pthread)
+
+if (COMPILE_GUI MATCHES ON AND UNIX)
+    target_link_libraries(${PROJECT_NAME} OpenGL::GL OpenGL::GLU OpenGL::GLX)
+    target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES})
+endif()
+
+if (COMPILE_OPENCL MATCHES ON)
+    target_link_libraries(${PROJECT_NAME} ${OpenCL_LIBRARIES})
+endif()

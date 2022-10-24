@@ -12,5 +12,8 @@
 #define COMPILER_DEBUG_ENABLED
 #define COMPILER_DEBUG_ENABLED_BOOL false
 
+#define COMPILE_GUI
+#define COMPILE_OPENCL
+
 #define CMAKE_CONFIG
 #endif
