@@ -19,7 +19,7 @@
 		"files" : 
 		[
 			"CMakeLists.txt",
-			"/opt/netbrains/clion/clion-2022.1.3/bin/cmake/linux/share/cmake-3.23/Modules/FindOpenGL.cmake"
+			"/usr/share/cmake-3.24/Modules/FindOpenGL.cmake"
 		],
 		"nodes" : 
 		[
