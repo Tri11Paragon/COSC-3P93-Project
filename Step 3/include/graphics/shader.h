@@ -20,7 +20,7 @@ namespace Raytracing {
     class shader {
         private:
             struct IntDefaultedToMinusOne {
-                unsigned int i = -1;
+                GLint i = -1;
             };
             // we can have shaders of many types in OpenGL
             unsigned int programID = 0;
@@ -34,7 +34,7 @@ namespace Raytracing {
             static unsigned int loadShader(const std::string &file, int type);
             // loads from a string rather than a file!
             static unsigned int loadShaderString(const std::string &str, int type);
-            unsigned int getUniformLocation(const std::string &name);
+            GLint getUniformLocation(const std::string &name);
             static void checkCompileErrors(unsigned int shader, const std::string& type, const std::string& shaderPath);
         public:
             shader(const std::string& vertex, const std::string& fragment, bool loadString = false);
@@ -47,8 +47,9 @@ namespace Raytracing {
             void setBool(const std::string &name, bool value);
             void setInt(const std::string &name, int value);
             void setFloat(const std::string &name, float value);
-            void setMatrix(const std::string &name, glm::mat4x4 matrix);
-            void setVec4(const std::string &name, Vec4 vec);
+            void setMatrix(const std::string &name, Mat4x4& matrix);
+            void setVec4(const std::string &name, const Vec4& vec);
+            void setVec3(const std::string &name, const Vec4& vec);
             void setVec2(const std::string &name, float x, float y);
             void setVec3(const std::string &name, float x, float y, float z);
             void setVec4(const std::string &name, float x, float y, float z, float w);

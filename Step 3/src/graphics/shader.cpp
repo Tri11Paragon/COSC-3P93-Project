@@ -98,7 +98,7 @@ namespace Raytracing {
             // convert stream into std::string
             shaderSource = shaderStream.str();
         } catch(std::ifstream::failure& e) {
-            flog << "Unable to read shader file! " << file << endl;
+            flog << "Unable to read shader file! " << file << "\n";
             return -1;
         }
         
@@ -140,7 +140,7 @@ namespace Raytracing {
         glUniformBlockBinding(programID, glGetUniformBlockIndex(programID, name.c_str()), location);
     }
     
-    unsigned int shader::getUniformLocation(const std::string &name) {
+    GLint shader::getUniformLocation(const std::string &name) {
         if (uniformVars[name].i != -1)
             return uniformVars[name].i;
         unsigned int loc = glGetUniformLocation(programID, name.c_str());
@@ -182,20 +182,16 @@ namespace Raytracing {
         glUniform1f(getUniformLocation(name), value);
     }
     
-    void shader::setMatrix(const std::string &name, glm::mat4x4 matrix) {
-        glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix) );
+    void shader::setMatrix(const std::string &name, Mat4x4& matrix) {
+        glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, -matrix );
+    }
+
+    void shader::setVec3(const std::string &name, const Vec4& vec) {
+        glUniform3f(getUniformLocation(name), vec.x(), vec.y(), vec.z());
     }
     
-    void shader::setVec2(const std::string &name, glm::vec2 vec) {
-        glUniform2f(getUniformLocation(name), vec.x, vec.y);
-    }
-    
-    void shader::setVec3(const std::string &name, glm::vec3 vec) {
-        glUniform3f(getUniformLocation(name), vec.x, vec.y, vec.z);
-    }
-    
-    void shader::setVec4(const std::string &name, glm::vec4 vec) {
-        glUniform4f(getUniformLocation(name), vec.x, vec.y, vec.z, vec.w);
+    void shader::setVec4(const std::string &name, const Vec4& vec) {
+        glUniform4f(getUniformLocation(name), vec.x(), vec.y(), vec.z(), vec.w());
     }
     
     void shader::setVec2(const std::string &name, float x, float y) {

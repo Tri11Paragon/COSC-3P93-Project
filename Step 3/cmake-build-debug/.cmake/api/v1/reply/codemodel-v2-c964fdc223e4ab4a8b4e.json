@@ -6,7 +6,7 @@
 			[
 				{
 					"build" : ".",
-					"jsonFile" : "directory-.-Release-f5ebdc15457944623624.json",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -19,7 +19,7 @@
 					]
 				}
 			],
-			"name" : "Release",
+			"name" : "Debug",
 			"projects" : 
 			[
 				{
@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "Step_3::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Step_3-Release-5e3e581373472e214a18.json",
+					"jsonFile" : "target-Step_3-Debug-6eadffb946ea4fb4c8ee.json",
 					"name" : "Step_3",
 					"projectIndex" : 0
 				}
@@ -49,7 +49,7 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-release",
+		"build" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug",
 		"source" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 3"
 	},
 	"version" : 

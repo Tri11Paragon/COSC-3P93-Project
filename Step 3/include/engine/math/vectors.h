@@ -422,37 +422,39 @@ namespace Raytracing {
 
 #endif
     
+    // only float supported because GPUs don't like doubles
+    // well they do but there isn't much of a reason to use them since this is for opengl
     class Mat4x4 {
         protected:
-            [[nodiscard]] inline PRECISION_TYPE m00(PRECISION_TYPE d) { return data[0] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m10(PRECISION_TYPE d) { return data[1] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m20(PRECISION_TYPE d) { return data[2] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m30(PRECISION_TYPE d) { return data[3] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m01(PRECISION_TYPE d) { return data[4] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m11(PRECISION_TYPE d) { return data[5] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m21(PRECISION_TYPE d) { return data[6] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m31(PRECISION_TYPE d) { return data[7] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m02(PRECISION_TYPE d) { return data[8] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m12(PRECISION_TYPE d) { return data[9] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m22(PRECISION_TYPE d) { return data[10] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m32(PRECISION_TYPE d) { return data[11] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m03(PRECISION_TYPE d) { return data[12] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m13(PRECISION_TYPE d) { return data[13] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m23(PRECISION_TYPE d) { return data[14] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m33(PRECISION_TYPE d) { return data[15] = d; }
-            [[nodiscard]] inline PRECISION_TYPE m(int i, int j, PRECISION_TYPE d) { return data[i * 16 + j] = d; };
+            inline float m00(float d) { return data[0] = d; }
+            inline float m10(float d) { return data[1] = d; }
+            inline float m20(float d) { return data[2] = d; }
+            inline float m30(float d) { return data[3] = d; }
+            inline float m01(float d) { return data[4] = d; }
+            inline float m11(float d) { return data[5] = d; }
+            inline float m21(float d) { return data[6] = d; }
+            inline float m31(float d) { return data[7] = d; }
+            inline float m02(float d) { return data[8] = d; }
+            inline float m12(float d) { return data[9] = d; }
+            inline float m22(float d) { return data[10] = d; }
+            inline float m32(float d) { return data[11] = d; }
+            inline float m03(float d) { return data[12] = d; }
+            inline float m13(float d) { return data[13] = d; }
+            inline float m23(float d) { return data[14] = d; }
+            inline float m33(float d) { return data[15] = d; }
+            inline float m(int i, int j, float d) { return data[i * 16 + j] = d; };
             // 4x4 = 16
-            PRECISION_TYPE data[16]{};
+            float data[16]{};
             friend Mat4x4 operator+(const Mat4x4& left, const Mat4x4& right);
             friend Mat4x4 operator-(const Mat4x4& left, const Mat4x4& right);
             friend Mat4x4 operator*(const Mat4x4& left, const Mat4x4& right);
-            friend Mat4x4 operator*(PRECISION_TYPE c, const Mat4x4& v);
-            friend Mat4x4 operator*(const Mat4x4& v, PRECISION_TYPE c);
-            friend Mat4x4 operator/(const Mat4x4& v, PRECISION_TYPE c);
-            friend Mat4x4 operator/(PRECISION_TYPE c, const Mat4x4& v);
+            friend Mat4x4 operator*(float c, const Mat4x4& v);
+            friend Mat4x4 operator*(const Mat4x4& v, float c);
+            friend Mat4x4 operator/(const Mat4x4& v, float c);
+            friend Mat4x4 operator/(float c, const Mat4x4& v);
         public:
             Mat4x4() {
-                for (double & i : data) {
+                for (float & i : data) {
                     i = 0;
                 }
                 // set identity matrix default
@@ -464,11 +466,11 @@ namespace Raytracing {
             Mat4x4(const Mat4x4& mat) {
                 for (int i = 0; i < 16; i++) {data[i] = mat.data[i];}
             }
-            explicit Mat4x4(const PRECISION_TYPE dat[16]) {
+            explicit Mat4x4(const float dat[16]) {
                 for (int i = 0; i < 16; i++) {data[i] = dat[i];}
             }
             
-            inline Mat4x4& translate(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z) {
+            inline Mat4x4& translate(float x, float y, float z) {
                 m03(x);
                 m13(y);
                 m23(z);
@@ -482,7 +484,7 @@ namespace Raytracing {
                 return *this;
             }
             
-            inline Mat4x4& scale(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z) {
+            inline Mat4x4& scale(float x, float y, float z) {
                 m00(x);
                 m11(y);
                 m22(z);
@@ -496,28 +498,32 @@ namespace Raytracing {
                 return *this;
             }
             
-            [[nodiscard]] inline PRECISION_TYPE m00() const { return data[0]; }
-            [[nodiscard]] inline PRECISION_TYPE m10() const { return data[1]; }
-            [[nodiscard]] inline PRECISION_TYPE m20() const { return data[2]; }
-            [[nodiscard]] inline PRECISION_TYPE m30() const { return data[3]; }
-            [[nodiscard]] inline PRECISION_TYPE m01() const { return data[4]; }
-            [[nodiscard]] inline PRECISION_TYPE m11() const { return data[5]; }
-            [[nodiscard]] inline PRECISION_TYPE m21() const { return data[6]; }
-            [[nodiscard]] inline PRECISION_TYPE m31() const { return data[7]; }
-            [[nodiscard]] inline PRECISION_TYPE m02() const { return data[8]; }
-            [[nodiscard]] inline PRECISION_TYPE m12() const { return data[9]; }
-            [[nodiscard]] inline PRECISION_TYPE m22() const { return data[10]; }
-            [[nodiscard]] inline PRECISION_TYPE m32() const { return data[11]; }
-            [[nodiscard]] inline PRECISION_TYPE m03() const { return data[12]; }
-            [[nodiscard]] inline PRECISION_TYPE m13() const { return data[13]; }
-            [[nodiscard]] inline PRECISION_TYPE m23() const { return data[14]; }
-            [[nodiscard]] inline PRECISION_TYPE m33() const { return data[15]; }
-            [[nodiscard]] inline PRECISION_TYPE m(int i, int j) const { return data[i * 16 + j]; };
+            float* operator-() {
+                return data;
+            }
+            
+            [[nodiscard]] inline float m00() const { return data[0]; }
+            [[nodiscard]] inline float m10() const { return data[1]; }
+            [[nodiscard]] inline float m20() const { return data[2]; }
+            [[nodiscard]] inline float m30() const { return data[3]; }
+            [[nodiscard]] inline float m01() const { return data[4]; }
+            [[nodiscard]] inline float m11() const { return data[5]; }
+            [[nodiscard]] inline float m21() const { return data[6]; }
+            [[nodiscard]] inline float m31() const { return data[7]; }
+            [[nodiscard]] inline float m02() const { return data[8]; }
+            [[nodiscard]] inline float m12() const { return data[9]; }
+            [[nodiscard]] inline float m22() const { return data[10]; }
+            [[nodiscard]] inline float m32() const { return data[11]; }
+            [[nodiscard]] inline float m03() const { return data[12]; }
+            [[nodiscard]] inline float m13() const { return data[13]; }
+            [[nodiscard]] inline float m23() const { return data[14]; }
+            [[nodiscard]] inline float m33() const { return data[15]; }
+            [[nodiscard]] inline float m(int i, int j) const { return data[i * 16 + j]; };
     };
     
     // adds the two Mat4x4 left and right
     inline Mat4x4 operator+(const Mat4x4& left, const Mat4x4& right) {
-        PRECISION_TYPE data[16];
+        float data[16];
         for (int i = 0; i < 16; i++)
             data[i] = left.data[i] + right.data[i];
         return Mat4x4{data};
@@ -525,7 +531,7 @@ namespace Raytracing {
     
     // subtracts the right Mat4x4 from the left.
     inline Mat4x4 operator-(const Mat4x4& left, const Mat4x4& right) {
-        PRECISION_TYPE data[16];
+        float data[16];
         for (int i = 0; i < 16; i++)
             data[i] = left.data[i] - right.data[i];
         return Mat4x4{data};
@@ -548,7 +554,7 @@ namespace Raytracing {
     }
     
     // multiplies the const c with each element in the Mat4x4 v
-    inline Mat4x4 operator*(PRECISION_TYPE c, const Mat4x4& v) {
+    inline Mat4x4 operator*(float c, const Mat4x4& v) {
         Mat4x4 mat{};
         
         for (int i = 0; i < 16; i++) {
@@ -559,7 +565,7 @@ namespace Raytracing {
     }
     
     // same as above but for right sided constants
-    inline Mat4x4 operator*(const Mat4x4& v, PRECISION_TYPE c) {
+    inline Mat4x4 operator*(const Mat4x4& v, float c) {
         Mat4x4 mat{};
     
         for (int i = 0; i < 16; i++) {
@@ -570,7 +576,7 @@ namespace Raytracing {
     }
     
     // divides the Mat4x4 by the constant c
-    inline Mat4x4 operator/(const Mat4x4& v, PRECISION_TYPE c) {
+    inline Mat4x4 operator/(const Mat4x4& v, float c) {
         Mat4x4 mat{};
     
         for (int i = 0; i < 16; i++) {
@@ -581,7 +587,7 @@ namespace Raytracing {
     }
     
     // divides each element in the Mat4x4 by over the constant
-    inline Mat4x4 operator/(PRECISION_TYPE c, const Mat4x4& v) {
+    inline Mat4x4 operator/(float c, const Mat4x4& v) {
         Mat4x4 mat{};
     
         for (int i = 0; i < 16; i++) {
