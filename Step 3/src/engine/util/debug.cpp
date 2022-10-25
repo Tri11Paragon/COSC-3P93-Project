@@ -32,9 +32,13 @@ namespace Raytracing {
     
     void profiler::print() {
         ilog << "Profiler " << name << " recorded: \n";
+        double totalTime = 0;
         for (std::pair<std::string, std::pair<long, long>> e : timings){
-            ilog << "\t" << e.first << " took " << ((double)(e.second.second - e.second.first) / 1000000.0) << "ms to run!\n";
+            double time = ((double)(e.second.second - e.second.first) / 1000000.0);
+            ilog << "\t" << e.first << " took " << time << "ms to run!\n";
+            totalTime += time;
         }
+        ilog << "\t\tIn total it took " << totalTime << "ms to run!\n";
         
     }
     

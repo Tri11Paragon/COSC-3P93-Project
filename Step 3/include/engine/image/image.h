@@ -14,19 +14,21 @@ namespace Raytracing {
     // glorified structure to store our image data.
     class Image {
         private:
-            int width;
-            int height;
+            unsigned long width;
+            unsigned long height;
+            unsigned long _width;
+            unsigned long _height;
             Vec4 *pixelData;
         public:
-            Image(int width, int height);
+            Image(unsigned long width, unsigned long height);
             Image(const Image &image);
             Image(const Image&& image) = delete;
 
-            inline void setPixelColor(int x, int y, const Vec4 &color) {
+            inline void setPixelColor(unsigned long x, unsigned long y, const Vec4 &color) {
                 pixelData[(x * height) + y] = color;
             }
 
-            [[nodiscard]] inline Vec4 getPixelColor(int x, int y) const {
+            [[nodiscard]] inline Vec4 getPixelColor(unsigned long x, unsigned long y) const {
                 return pixelData[(x * height) + y];
             }
 
@@ -35,9 +37,9 @@ namespace Raytracing {
             [[nodiscard]] int getPixelB(int x, int y) const;
             [[nodiscard]] int getPixelA(int x, int y) const;
 
-            [[nodiscard]] inline int getWidth() const { return width; }
+            [[nodiscard]] inline int getWidth() const { return int(width); }
 
-            [[nodiscard]] inline int getHeight() const { return height; }
+            [[nodiscard]] inline int getHeight() const { return int(height); }
 
             ~Image();
     };

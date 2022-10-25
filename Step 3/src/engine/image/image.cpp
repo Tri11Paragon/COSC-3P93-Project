@@ -10,12 +10,12 @@
 
 namespace Raytracing {
 
-    Image::Image(int width, int height) : width(width), height(height) {
-        pixelData = new Vec4[width * height];
+    Image::Image(unsigned long width, unsigned long height) : width(width), height(height), _width(width-1), _height(height-1) {
+        pixelData = new Vec4[(width + 1) * (height + 1)];
     }
 
-    Image::Image(const Image& image) : width(image.width), height(image.height) {
-        pixelData = new Vec4[image.width * image.height];
+    Image::Image(const Image& image) : width(image.width), height(image.height), _width(image._width), _height(image._height) {
+        pixelData = new Vec4[(image.width + 1) * (image.height + 1)];
         for (int i = 0; i < image.width; i++) {
             for (int j = 0; j < image.height; j++) {
                 this->setPixelColor(i, j, image.pixelData[i * image.height + j]);
@@ -51,7 +51,7 @@ namespace Raytracing {
 
         if (!lowerExtension.ends_with("hdr")) {
             // unfortunately we do have to put the data into a format that STB can read
-            unsigned char data[image.getWidth() * image.getHeight() * 3];
+            auto* data = new unsigned char[(unsigned long)(image.getWidth()) * (unsigned long)image.getHeight() * 3];
             int pixelIndex = 0;
             for (int j = image.getHeight()-1; j >= 0; j--) {
                 for (int i = 0; i < image.getWidth(); i++) {
@@ -75,9 +75,10 @@ namespace Raytracing {
                 stbi_write_jpg(fullFile.c_str(), image.getWidth(), image.getHeight(), 3, data, 90);
             } else
                 throw std::runtime_error("Invalid format! Please use bmp, png, or jpg");
+            delete[](data);
         } else {
             // the TODO: here is to check if HDR is in [0,1] or if we need to transform the value.
-            float data[image.getWidth() * image.getHeight() * 3];
+            auto* data = new float[image.getWidth() * image.getHeight() * 3];
             int pixelIndex = 0;
             for (int i = 0; i < image.getWidth(); i++) {
                 for (int j = 0; j < image.getHeight(); j++) {
@@ -87,6 +88,7 @@ namespace Raytracing {
                 }
             }
             stbi_write_hdr(fullFile.c_str(), image.getWidth(), image.getHeight(), 3, data);
+            delete[](data);
         }
     }
 }

@@ -16,6 +16,7 @@
 #include <utility>
 #include <mutex>
 #include <thread>
+#include <queue>
 
 namespace Raytracing {
 
@@ -90,6 +91,7 @@ namespace Raytracing {
             // yes this is actually the only sync we need between the threads
             // and compared to the actual runtime of the raytracing it's very small!
             std::mutex queueSync;
+            std::queue<std::vector<int>>* unprocessedQuads = new std::queue<std::vector<int>>();
 
             Vec4 raycast(const Ray& ray, int depth);
         public:
@@ -127,6 +129,7 @@ namespace Raytracing {
                     } catch (std::exception& e){}
                     delete(p);
                 }
+                delete(unprocessedQuads);
             }
     };
 

@@ -33,8 +33,10 @@ namespace Raytracing {
     void Camera::setRotation(const PRECISION_TYPE yaw, const PRECISION_TYPE pitch, const PRECISION_TYPE roll) {
         // TODO:
     }
-    
-    Vec4 Raycaster::raycast(const Ray& ray, int depth) {
+    /*
+     *
+     *Vec4 Raycaster::raycast(const Ray& ray, int depth) {
+        
         if (depth > maxBounceDepth)
             return {0, 0, 0};
         
@@ -53,8 +55,64 @@ namespace Raytracing {
         // skybox color
         return {0.5, 0.7, 1.0};
     }
+     */
+    
+    struct RayData {
+        Ray ray;
+        int depth;
+        Vec4 color;
+    };
+    
+    Vec4 Raycaster::raycast(const Ray& ray, int depth) {
+        auto* rayQueue = new std::queue<Ray>();
+        rayQueue->push(ray);
+        Vec4 color {1.0, 1.0, 1.0};
+        int currentDepth = 0;
+        do {
+            Ray r = rayQueue->front();
+            
+            auto hit = world.checkIfHit(r, 0.001, infinity);
+            if (hit.first.hit) {
+                auto object = hit.second;
+                auto scatterResults = object->getMaterial()->scatter(r, hit.first);
+                // if the material scatters the ray, ie casts a new one,
+                if (scatterResults.scattered) { // attenuate the recursive raycast by the material's color
+                    color = scatterResults.attenuationColor * color;
+                    rayQueue->push(scatterResults.newRay);
+                }
+            } else {
+                color = color * Vec4{0.5, 0.7, 1.0};
+                rayQueue->pop();
+                break;
+            }
+            rayQueue->pop();
+            currentDepth++;
+            //tlog << currentDepth << " " << rayQueue->size() << "\n";
+        } while (currentDepth < maxBounceDepth && !rayQueue->empty());
+        delete(rayQueue);
+        return color;
+        /*if (depth > maxBounceDepth)
+            return {0, 0, 0};
+        
+        auto hit = world.checkIfHit(ray, 0.001, infinity);
+        
+        if (hit.first.hit) {
+            auto object = hit.second;
+            auto scatterResults = object->getMaterial()->scatter(ray, hit.first);
+            // if the material scatters the ray, ie casts a new one,
+            if (scatterResults.scattered) // attenuate the recursive raycast by the material's color
+                return scatterResults.attenuationColor * raycast(scatterResults.newRay, depth + 1);
+            //tlog << "Not scattered? " << object->getMaterial() << "\n";
+            return {0, 0, 0};
+        }
+        
+        // skybox color
+        return {0.5, 0.7, 1.0};*/
+    }
+    
     void Raycaster::runSingle() {
         executors.push_back(new std::thread([this]() -> void {
+            profiler::start("Raytracer Results", "Single Thread");
             for (int i = 0; i < image.getWidth(); i++) {
                 for (int j = 0; j < image.getHeight(); j++) {
                     Raytracing::Vec4 color;
@@ -68,6 +126,7 @@ namespace Raytracing {
                     image.setPixelColor(i, j, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
                 }
             }
+            profiler::end("Raytracer Results", "Single Thread");
             finishedThreads++;
         }));
     }
@@ -79,36 +138,31 @@ namespace Raytracing {
         // matching the 16 threads.
         if (t == 0)
             t = system_threads;
-        auto divs = (double) int(std::log(t) / std::log(2));
+        int divs = int(std::log(t) / std::log(2));
         // now double the divs, splitting each quadrant into 4 sub-quadrants which we can queue
         // the reason to do this is that some of them will finish before others, and the now free threads can keep working
         // do it without a queue like this leads to a single thread critical path and isn't optimally efficient.
-        divs *= 2; // 2 because two axis getting split makes 4 sub-quadrants
-        auto* unprocessedQuads = new std::queue<std::vector<int>>();
-        //auto* queue = new basic_queue{};
+        divs *= 4; // 2 because two axis getting split makes 4 sub-quadrants, but I tested 4, and it was faster by two seconds, so I'm keeping 4.
         
         for (int dx = 0; dx < divs; dx++) {
             for (int dy = 0; dy < divs; dy++) {
-                // sending functions wasn't working. 
+                // sending functions wasn't working. (fixed, however it feels janky sending lambda functions w/ captures)
                 unprocessedQuads->push({
-                                               int(std::ceil(image.getWidth() / divs)),
-                                               int(std::ceil(image.getHeight() / divs)),
-                                               int(std::floor(image.getWidth() / divs) * dx),
-                                               int(std::floor(image.getHeight() / divs) * dy)
-                    
+                                               image.getWidth() / divs,
+                                               image.getHeight() / divs,
+                                               (image.getWidth() / divs) * dx,
+                                               (image.getHeight() / divs) * dy
                                        });
             }
         }
         
-        profiler profile("Multithreading Raytracer Results");
         for (int i = 0; i < t; i++) {
-            executors.push_back(new std::thread([this, &unprocessedQuads, &profile, i, divs, t]() -> void {
+            executors.push_back(new std::thread([this, i, divs, t]() -> void {
                 // run through all the quadrants
-//                std::stringstream str;
-//                str << "Threading of #";
-//                str << i;
-//                tlog << str.str() << "\n";
-//                profile.start(str.str());
+                std::stringstream str;
+                str << "Threading of #";
+                str << (i+1);
+                profiler::start("Raytracer Results", str.str());
                 int j = 0;
                 while (true) {
                     std::vector<int> func;
@@ -121,7 +175,7 @@ namespace Raytracing {
                     func = unprocessedQuads->front();
                     unprocessedQuads->pop();
                     queueSync.unlock();
-                    // then run it
+                    // the run it
                     for (int kx = 0; kx <= func[0]; kx++) {
                         for (int ky = 0; ky < func[1]; ky++) {
                             try {
@@ -145,10 +199,7 @@ namespace Raytracing {
                     j++;
                 }
                 finishedThreads++;
-//                profile.end(str.str());
-//
-//                if (finishedThreads == executors.size()-1)
-//                    profile.print();
+                profiler::end("Raytracer Results", str.str());
             }));
         }
     }

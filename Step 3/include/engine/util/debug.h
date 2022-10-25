@@ -39,9 +39,14 @@ namespace Raytracing {
             void start();
             void start(const std::string& name);
             static void start(const std::string& name, const std::string& tabName) {
-                auto p = new profiler(name);
-                profiles.insert(std::pair(name, p));
-                p->start(tabName);
+                if (profiles.contains(name)) {
+                    auto p = profiles.at(name);
+                    p->start(tabName);
+                } else {
+                    auto p = new profiler(name);
+                    profiles.insert(std::pair(name, p));
+                    p->start(tabName);
+                }
             }
             
             void end();

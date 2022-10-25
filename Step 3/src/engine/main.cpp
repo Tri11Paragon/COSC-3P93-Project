@@ -54,9 +54,9 @@ int main(int argc, char** args) {
     parser.addOption("--format", "Output Format\n"
                                  "\tSets the output format to BMP, PNG, or JPEG. \n", "PNG");
     parser.addOption("-w", "Image Width\n"
-                           "\tSets the width of the output image.\n", "910");
+                           "\tSets the width of the output image.\n", "1440");
     parser.addOption("-h", "Image Height\n"
-                           "\tSets the height of the output image.\n", "512");
+                           "\tSets the height of the output image.\n", "720");
     parser.addOption("--fov", "Camera FOV\n"
                               "\tSets the FOV used to render the camera.\n", "90");
     parser.addOption("--resources", "Resources Directory\n"
@@ -74,8 +74,8 @@ int main(int argc, char** args) {
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
     
-    //Raytracing::Image image(1920, 1080);
-    Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
+    Raytracing::Image image(1440, 720);
+    //Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
     
     Raytracing::Camera camera(std::stoi(parser.getOptionValue("--fov")), image);
     //camera.setPosition({0, 0, 1});
@@ -131,6 +131,8 @@ int main(int argc, char** args) {
         }
         raycaster.join();
     }
+    
+    profiler::print("Raytracer Results");
     
     Raytracing::ImageOutput imageOutput(image);
     
