@@ -8,7 +8,7 @@
 #include <graphics/gl/gl.h>
 
 namespace Raytracing {
-    
+
 //    const std::vector<float> vertices = {
 //            1.0f,  1.0f, 0.0f,  // top right
 //            1.0f,  0.0f, 0.0f,  // bottom right
@@ -28,10 +28,10 @@ namespace Raytracing {
 //            0.0f, 1.0f    // top left
 //    };
     const std::vector<float> vertices = {
-            1.0f,  1.0f, 0.0f,  // top right
-            1.0f,  -1.0f, 0.0f,  // bottom right
-            -1.0f,  -1.0f, 0.0f,  // bottom left
-            -1.0f,  1.0f, 0.0f   // top left
+            1.0f, 1.0f, 0.0f,  // top right
+            1.0f, -1.0f, 0.0f,  // bottom right
+            -1.0f, -1.0f, 0.0f,  // bottom left
+            -1.0f, 1.0f, 0.0f   // top left
     };
     
     const std::vector<unsigned int> indices = {
@@ -58,47 +58,50 @@ namespace Raytracing {
     }
     
     void deleteQuad() {
-        delete(quad);
+        delete (quad);
     }
+    
+    // unfortunately GLX doesn't provide a typedef for the context creation, so we must define our own. I've chosen to go with the same style as
+    // GL function pointers, "Pointer to the FunctioN GLX createContextAttribsARB PROCedure"
+    typedef GLXContext (* PFNGLXCREATECONTEXTATTRIBSARBPROC)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
     
     XWindow::XWindow(int width, int height): m_width(width), m_height(height) {
         // open the DEFAULT display. We don't want to open a specific screen as that is annoying.
-        dlog << "Creating X11 display!";
+        dlog << "Creating X11 display!\n";
         display = XOpenDisplay(NULL);
         if (display == NULL)
             throw std::runtime_error("Unable to open an X11 display! Is the X server running?");
         // FBConfigs were added in GLX version 1.3.
-        if (!glXQueryVersion( display, &glx_major, &glx_minor ))
+        if (!glXQueryVersion(display, &glx_major, &glx_minor))
             throw std::runtime_error("Unable to get GLX version!");
-        if ((glx_major < 1) || (glx_major == 1  && glx_minor < 3))
+        if ((glx_major < 1) || (glx_major == 1 && glx_minor < 3))
             throw std::runtime_error("Invalid GLX Version. At least 1.3 is required!");
         // get the frame buffer config from the X11 window
         frameBufferConfig = glXChooseFBConfig(display, DefaultScreen(display), visual_attribs, &frameBufferCount);
         if (!frameBufferConfig)
             throw std::runtime_error("Unable to get window framebuffer configs!");
-        dlog << "We have " << frameBufferCount << " framebuffers\nSelecting the best!";
+        dlog << "We have " << frameBufferCount << " framebuffers\n";
         // select the best config from available ones.
-        int bestConfigIndex = -1, worstConfig = -1, bestSamples = -1, worstSamples = 999;
-        for (int i = 0; i < frameBufferCount; i++){
-            XVisualInfo *xVisualInfo = glXGetVisualFromFBConfig(display, frameBufferConfig[i]);
-            if (xVisualInfo){
+        int bestConfigIndex = 0, bestSamples = -1;
+        for (int i = 0; i < frameBufferCount; i++) {
+            XVisualInfo* xVisualInfo = glXGetVisualFromFBConfig(display, frameBufferConfig[i]);
+            if (xVisualInfo) {
                 int sampleBuffer, samples;
                 glXGetFBConfigAttrib(display, frameBufferConfig[i], GLX_SAMPLE_BUFFERS, &sampleBuffer);
                 glXGetFBConfigAttrib(display, frameBufferConfig[i], GLX_SAMPLES, &samples);
-    
-                dlog << "Checking framebuffer config " << i << " with samples: " << samples;
-    
-                if ( bestConfigIndex < 0 || sampleBuffer && samples > bestSamples )
-                    bestConfigIndex = i, bestSamples = samples;
-                if ( worstConfig < 0 || !sampleBuffer || samples < worstSamples )
-                    worstConfig = i, worstSamples = samples;
+                
+                // if the sample buffer exists, and we have more samples in this config, make this config the one we use.
+                if (sampleBuffer && samples > bestSamples) {
+                    bestConfigIndex = i;
+                    bestSamples = samples;
+                }
             }
             XFree(xVisualInfo);
         }
+        dlog << "We selected config: " << bestConfigIndex << " with " << bestSamples << "# of samples!\n";
         GLXFBConfig bestConfig = frameBufferConfig[bestConfigIndex];
         // we need to make sure we remember to free memory since we are working with c pointers!
         XFree(frameBufferConfig);
-        
         // as I understand it every window in X11 is a sub-window of the root, or desktop window
         // which is why I guess wayland was created, because X11 can't handle a bunch of stuff like VRF (variable refresh rate)
         // because your say two monitors are treated as one big window, in effect limiting the refresh rate
@@ -106,7 +109,7 @@ namespace Raytracing {
         // plus needless security in a low level lib preventing stuff like discord screen sharing. Annoying as hell. /rant/.
         desktop = DefaultRootWindow(display);
         // try to open a gl visual context that meets our attributes' requirements
-        dlog << "Getting visual info!";
+        dlog << "Getting visual info!\n";
         visualInfo = glXChooseVisual(display, 0, OpenGLAttributes);
         // if our attributes are too much for the display, let's try reducing them. (modern hardware should support 24bit depth though)
         if (visualInfo == NULL) {
@@ -114,7 +117,7 @@ namespace Raytracing {
             OpenGLAttributes[2] = 16;
             visualInfo = glXChooseVisual(display, 0, OpenGLAttributes);
             if (visualInfo == NULL) {
-                throw std::runtime_error("Unable to create window's visual context. Is your driver up to date?");
+                throw std::runtime_error("Unable to create window's visual context. Is your driver up to date?\n");
             }
         }
         ilog << visualInfo->visualid << ": With depth: " << visualInfo->depth << " and RGB: " << visualInfo->bits_per_rgb << "\n";
@@ -141,6 +144,13 @@ namespace Raytracing {
                                visualInfo->visual,
                                CWColormap | CWEventMask,
                                &xSetWindowAttributes);
+        // install a error handler
+        // maybe we should set back the old one but i'd rather it goto std:err than crash the window
+        XSetErrorHandler([](Display* displayPtr, XErrorEvent* eventPtr) -> int {
+            elog << "An error occurred while trying to setup X11: " << eventPtr->error_code << ";\n " << eventPtr->minor_code << ";\n "
+                 << eventPtr->request_code << "\n";
+            return 0;
+        });
         
         // Now show the window
         XMapWindow(display, window);
@@ -148,9 +158,32 @@ namespace Raytracing {
         // there might actually be an argument to be made about X11 being outdated....
         wmDelete = XInternAtom(display, "WM_DELETE_WINDOW", True);
         XSetWMProtocols(display, window, &wmDelete, 1);
-        
+        // get the list of GLX extensions for this system
+        const char* glExtensions = glXQueryExtensionsString(display, DefaultScreen(display));
+        // much in the same way that we get GL function pointers and use them we will do the same with the context creation
+        auto glXCreateContextAttribsARBPtr = (PFNGLXCREATECONTEXTATTRIBSARBPROC) glXGetProcAddressARB((unsigned char*) "glXCreateContextAttribsARB");
         // now we can finally create a OpenGL context for our window
-        glContext = glXCreateContext(display, visualInfo, NULL, GL_TRUE);
+        int OpenGLContextAttributes[] = {
+                // OpenGL major version, we want GL4.5+
+                GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+                // OpenGL minor version,
+                GLX_CONTEXT_MINOR_VERSION_ARB, 5,
+                // I don't remember what this does, but I know GLFW recommends that forward compatability be set true,
+                GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                // Core profile for better Renderdoc compatibility + I don't need non core extensions
+                GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+                None
+        };
+        // now we can actually create and acquire the context
+        glContext = glXCreateContextAttribsARBPtr(display, bestConfig, 0, True, OpenGLContextAttributes);
+        // make sure if there was any error we are notified
+        XSync(display, False);
+        if (!glContext)
+            flog << "Unable to create GL context!";
+        if (glXIsDirect(display, glContext)){
+            ilog << "A direct GL context was acquired!\n";
+        } else // direct contexts are faster than indirect!
+            wlog << "Warning! Indirect context!\n";
         // make the currently executing thread the one current to the OpenGL context
         // since OpenGL is a single threaded finite state machine if we want to do mutli-threading with OpenGL (we don't)
         // this has to be called in each thread before we make use of any OpenGL function.
@@ -158,7 +191,7 @@ namespace Raytracing {
         // Now we can issue some OpenGL commands
         // we want to respect depth
         glEnable(GL_DEPTH_TEST);
-    
+        
         assignGLFunctionPointers();
         //glEnableVertexArrayAttribPtr = glXGetProcAddress((unsigned char*)("glEnableVertexArrayAttrib"));
         
@@ -178,7 +211,7 @@ namespace Raytracing {
         // only try to check events if they are queued
         while (XPending(display) > 0) {
             XNextEvent(display, &events);
-    
+            
             // one of the few times I'll use a switch statement
             switch (events.type) {
                 // called when the system thinks that the window should be updated
@@ -255,18 +288,18 @@ namespace Raytracing {
                                 m_width,
                                 m_height);
         ImGui::NewFrame();
-    
+        
         static bool t = true;
         if (t)
             ImGui::ShowDemoWindow(&t);
-    
+        
         // do our drawing
         drawFunction();
-    
+        
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         ImGui_ImplGlfw_UpdateMouseData(true, true);
-    
+        
         // we use double buffering to prevent screen tearing and other visual disturbances
         glXSwapBuffers(display, window);
     }

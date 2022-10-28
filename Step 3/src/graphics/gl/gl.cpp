@@ -257,7 +257,7 @@ Texture::Texture(Raytracing::Image* image): _image(image), width(image->getWidth
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    glTexStorage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, width, height);
     //glGenerateMipmap(GL_TEXTURE_2D);
     
     // no sense sending data now since this texture is likely all black.
@@ -298,8 +298,9 @@ void Texture::updateImage() {
     // unfortunately we do have to put the data into a format that OpenGL can read. This is a TODO:?
     data = new unsigned char[(unsigned long)(width) * (unsigned long)height * 3];
     int pixelIndex = 0;
-    for (int j = width-1; j >= 0; j--) {
-        for (int i = 0; i < height; i++) {
+    // slightly different order from STBi
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
             data[pixelIndex++] = _image->getPixelR(i, j);
             data[pixelIndex++] = _image->getPixelG(i, j);
             data[pixelIndex++] = _image->getPixelB(i, j);
