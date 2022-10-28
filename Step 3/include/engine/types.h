@@ -41,9 +41,9 @@ namespace Raytracing {
     struct Triangle {
         public:
             Vec4 vertex1, vertex2, vertex3;
-            bool hasNormals = false;
             Vec4 normal1, normal2, normal3;
             Vec4 uv1, uv2, uv3;
+            bool hasNormals = false;
             AABB aabb;
             
             Triangle(const Vec4& v1, const Vec4& v2, const Vec4& v3): vertex1(v1), vertex2(v2), vertex3(v3) {}

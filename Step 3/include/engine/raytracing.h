@@ -93,7 +93,7 @@ namespace Raytracing {
             std::mutex queueSync;
             std::queue<std::vector<int>>* unprocessedQuads = new std::queue<std::vector<int>>();
 
-            Vec4 raycast(const Ray& ray, int depth);
+            Vec4 raycast(const Ray& ray);
         public:
             inline static Vec4 randomUnitVector() {
                 // there are two methods to generating a random unit sphere

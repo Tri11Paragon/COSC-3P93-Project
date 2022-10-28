@@ -6,12 +6,15 @@
 #include <chrono>
 #include "engine/util/debug.h"
 #include <config.h>
+#include <csignal>
 //#include <sys/time.h>
 //#include <sys/resource.h>
 
 #ifdef COMPILE_GUI
         
-        #include <graphics/graphics.h>
+    #include <graphics/graphics.h>
+    #include <graphics/gl/gl.h>
+    #include <graphics/gl/shader.h>
 
 #endif
 
@@ -22,6 +25,8 @@
  */
 
 using namespace Raytracing;
+
+extern bool* haltExecution;
 
 int main(int argc, char** args) {
     // since this is linux only we can easily set our process priority to be high with a syscall
@@ -70,6 +75,18 @@ int main(int argc, char** args) {
     if (parser.parse(args, argc))
         return 0;
     
+    // yes this is a very stupid and bad way of doing this.
+    haltExecution = new bool;
+    *haltExecution = false;
+    if (signal(SIGTERM, [] (int sig) -> void {
+        ilog<<"Computations complete.\nHalting now...\n";
+        *haltExecution = true;
+    })==SIG_ERR) { elog<<"Unable to change signal handler.\n";   return 1; }
+    if (signal(SIGINT, [] (int sig) -> void {
+        ilog<<"Computations complete.\nHalting now...\n";
+        *haltExecution = true;
+    })==SIG_ERR) { elog<<"Unable to change signal handler.\n";   return 1; }
+    
     tlog << "Parsing complete! Starting raytracer with options:" << std::endl;
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
@@ -109,13 +126,34 @@ int main(int argc, char** args) {
     world.add(new Raytracing::ModelObject({0, 0, 5}, house, world.getMaterial("blueDiffuse")));
     
     Raytracing::Raycaster raycaster{camera, image, world, parser};
+    static bool started = false;
     
     if (parser.hasOption("--gui") || parser.hasOption("-g")) {
         #ifdef COMPILE_GUI
             XWindow window(1440, 720);
+            Texture mainImage(&image);
+            Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
             while (!window.shouldWindowClose()) {
-                window.runUpdates([]() -> void {
-                
+                window.runUpdates([&window, &mainImage, &shader, &raycaster, &parser]() -> void {
+                    if (*haltExecution){window.closeWindow();}
+    
+                    if (ImGui::Button("Start") && !started){
+                        ilog << "Running raycaster!\n";
+                        if(parser.hasOption("--multi")) {
+                            raycaster.runMulti(std::max(std::stoi(parser.getOptionValue("-t")), std::stoi(parser.getOptionValue("--threads"))));
+                        } else { // we don't actually have to check for --single since it's implied to be default true.
+                            raycaster.runSingle();
+                        }
+                        started = true;
+                    }
+                    
+                    shader.use();
+                    mainImage.updateImage();
+                    mainImage.bind();
+                    mainImage.enableGlTextures(1);
+                    drawQuad();
+                    
+                    mainImage.updateImage();
                 });
             }
         #else
@@ -152,6 +190,9 @@ int main(int argc, char** args) {
     timeString << now->tm_sec;
     ilog << "Writing Image!\n";
     imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
+    
+    delete(haltExecution);
+    deleteQuad();
     
     return 0;
 }

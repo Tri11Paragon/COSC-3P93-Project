@@ -6,6 +6,11 @@
 #ifndef STEP_3_KEYS_H
 #define STEP_3_KEYS_H
 
+#define RT_CONTROL 1
+#define RT_SHIFT 2
+#define RT_ALT 4
+#define RT_SUPER 8
+
 /* $Xorg: keysymdef.h,v 1.4 2001/02/09 02:03:23 $ */
 // https://www.cl.cam.ac.uk/~mgk25/ucs/keysymdef.h
 /***********************************************************

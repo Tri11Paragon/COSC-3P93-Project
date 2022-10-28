@@ -112,6 +112,20 @@ build CMakeFiles/Step_3.dir/src/engine/world.cpp.o: CXX_COMPILER__Step_3_Debug /
   OBJECT_DIR = CMakeFiles/Step_3.dir
   OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/engine
 
+build CMakeFiles/Step_3.dir/src/graphics/gl/gl.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/graphics/gl/gl.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/graphics/gl/gl.cpp.o.d
+  FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/graphics/gl
+
+build CMakeFiles/Step_3.dir/src/graphics/gl/shader.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/graphics/gl/shader.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/graphics/gl/shader.cpp.o.d
+  FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/graphics/gl
+
 build CMakeFiles/Step_3.dir/src/graphics/graphics.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/graphics/graphics.cpp || cmake_object_order_depends_target_Step_3
   DEP_FILE = CMakeFiles/Step_3.dir/src/graphics/graphics.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
@@ -140,6 +154,20 @@ build CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_draw.cpp.o: CXX_COMPILER__S
   OBJECT_DIR = CMakeFiles/Step_3.dir
   OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/graphics/imgui
 
+build CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_impl_glfw.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/graphics/imgui/imgui_impl_glfw.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_impl_glfw.cpp.o.d
+  FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/graphics/imgui
+
+build CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_impl_opengl3.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/graphics/imgui/imgui_impl_opengl3.cpp || cmake_object_order_depends_target_Step_3
+  DEP_FILE = CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_impl_opengl3.cpp.o.d
+  FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
+  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
+  OBJECT_DIR = CMakeFiles/Step_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/graphics/imgui
+
 build CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_tables.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/graphics/imgui/imgui_tables.cpp || cmake_object_order_depends_target_Step_3
   DEP_FILE = CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_tables.cpp.o.d
   FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
@@ -161,13 +189,6 @@ build CMakeFiles/Step_3.dir/src/graphics/input.cpp.o: CXX_COMPILER__Step_3_Debug
   OBJECT_DIR = CMakeFiles/Step_3.dir
   OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/graphics
 
-build CMakeFiles/Step_3.dir/src/graphics/shader.cpp.o: CXX_COMPILER__Step_3_Debug /home/brett/Documents/Brock/CS$ 3P93/Project/Step$ 3/src/graphics/shader.cpp || cmake_object_order_depends_target_Step_3
-  DEP_FILE = CMakeFiles/Step_3.dir/src/graphics/shader.cpp.o.d
-  FLAGS = -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20
-  INCLUDES = -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug" -I"/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-  OBJECT_DIR = CMakeFiles/Step_3.dir
-  OBJECT_FILE_DIR = CMakeFiles/Step_3.dir/src/graphics
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target Step_3
@@ -176,7 +197,7 @@ build CMakeFiles/Step_3.dir/src/graphics/shader.cpp.o: CXX_COMPILER__Step_3_Debu
 #############################################
 # Link the executable Step_3
 
-build Step_3: CXX_EXECUTABLE_LINKER__Step_3_Debug CMakeFiles/Step_3.dir/src/engine/globals.cpp.o CMakeFiles/Step_3.dir/src/engine/image/image.cpp.o CMakeFiles/Step_3.dir/src/engine/main.cpp.o CMakeFiles/Step_3.dir/src/engine/math/colliders.cpp.o CMakeFiles/Step_3.dir/src/engine/raytracing.cpp.o CMakeFiles/Step_3.dir/src/engine/util/debug.cpp.o CMakeFiles/Step_3.dir/src/engine/util/models.cpp.o CMakeFiles/Step_3.dir/src/engine/util/parser.cpp.o CMakeFiles/Step_3.dir/src/engine/world.cpp.o CMakeFiles/Step_3.dir/src/graphics/graphics.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_demo.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_draw.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_tables.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_widgets.cpp.o CMakeFiles/Step_3.dir/src/graphics/input.cpp.o CMakeFiles/Step_3.dir/src/graphics/shader.cpp.o | /usr/lib/x86_64-linux-gnu/libGLU.so /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libSM.so /usr/lib/x86_64-linux-gnu/libICE.so /usr/lib/x86_64-linux-gnu/libX11.so /usr/lib/x86_64-linux-gnu/libXext.so /usr/lib/x86_64-linux-gnu/libOpenCL.so /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so
+build Step_3: CXX_EXECUTABLE_LINKER__Step_3_Debug CMakeFiles/Step_3.dir/src/engine/globals.cpp.o CMakeFiles/Step_3.dir/src/engine/image/image.cpp.o CMakeFiles/Step_3.dir/src/engine/main.cpp.o CMakeFiles/Step_3.dir/src/engine/math/colliders.cpp.o CMakeFiles/Step_3.dir/src/engine/raytracing.cpp.o CMakeFiles/Step_3.dir/src/engine/util/debug.cpp.o CMakeFiles/Step_3.dir/src/engine/util/models.cpp.o CMakeFiles/Step_3.dir/src/engine/util/parser.cpp.o CMakeFiles/Step_3.dir/src/engine/world.cpp.o CMakeFiles/Step_3.dir/src/graphics/gl/gl.cpp.o CMakeFiles/Step_3.dir/src/graphics/gl/shader.cpp.o CMakeFiles/Step_3.dir/src/graphics/graphics.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_demo.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_draw.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_impl_glfw.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_impl_opengl3.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_tables.cpp.o CMakeFiles/Step_3.dir/src/graphics/imgui/imgui_widgets.cpp.o CMakeFiles/Step_3.dir/src/graphics/input.cpp.o | /usr/lib/x86_64-linux-gnu/libGLU.so /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libSM.so /usr/lib/x86_64-linux-gnu/libICE.so /usr/lib/x86_64-linux-gnu/libX11.so /usr/lib/x86_64-linux-gnu/libXext.so /usr/lib/x86_64-linux-gnu/libOpenCL.so /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so
   FLAGS = -fsanitize=address -g -march=native -g
   LINK_FLAGS = -fsanitize=address
   LINK_LIBRARIES = -lpthread  /usr/lib/x86_64-linux-gnu/libGLU.so  /usr/lib/x86_64-linux-gnu/libGLX.so  /usr/lib/x86_64-linux-gnu/libSM.so  /usr/lib/x86_64-linux-gnu/libICE.so  /usr/lib/x86_64-linux-gnu/libX11.so  /usr/lib/x86_64-linux-gnu/libXext.so  /usr/lib/x86_64-linux-gnu/libOpenCL.so  /usr/lib/x86_64-linux-gnu/libGLX.so  /usr/lib/x86_64-linux-gnu/libOpenGL.so

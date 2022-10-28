@@ -5,6 +5,8 @@
 // Yes, globals are bad.
 #include "engine/util/debug.h"
 
+bool* haltExecution;
+
 namespace Raytracing {
     std::unordered_map<std::string, profiler*> profiles;
 }

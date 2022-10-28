@@ -8,6 +8,8 @@
 #include <utility>
 #include <engine/util/debug.h>
 
+extern bool* haltExecution;
+
 namespace Raytracing {
     
     Ray Camera::projectRay(PRECISION_TYPE x, PRECISION_TYPE y) {
@@ -33,29 +35,6 @@ namespace Raytracing {
     void Camera::setRotation(const PRECISION_TYPE yaw, const PRECISION_TYPE pitch, const PRECISION_TYPE roll) {
         // TODO:
     }
-    /*
-     *
-     *Vec4 Raycaster::raycast(const Ray& ray, int depth) {
-        
-        if (depth > maxBounceDepth)
-            return {0, 0, 0};
-        
-        auto hit = world.checkIfHit(ray, 0.001, infinity);
-        
-        if (hit.first.hit) {
-            auto object = hit.second;
-            auto scatterResults = object->getMaterial()->scatter(ray, hit.first);
-            // if the material scatters the ray, ie casts a new one,
-            if (scatterResults.scattered) // attenuate the recursive raycast by the material's color
-                return scatterResults.attenuationColor * raycast(scatterResults.newRay, depth + 1);
-            //tlog << "Not scattered? " << object->getMaterial() << "\n";
-            return {0, 0, 0};
-        }
-        
-        // skybox color
-        return {0.5, 0.7, 1.0};
-    }
-     */
     
     struct RayData {
         Ray ray;
@@ -63,34 +42,35 @@ namespace Raytracing {
         Vec4 color;
     };
     
-    Vec4 Raycaster::raycast(const Ray& ray, int depth) {
-        auto* rayQueue = new std::queue<Ray>();
-        rayQueue->push(ray);
+    Vec4 Raycaster::raycast(const Ray& ray) {
+        Ray localRay = ray;
         Vec4 color {1.0, 1.0, 1.0};
-        int currentDepth = 0;
-        do {
-            Ray r = rayQueue->front();
-            
-            auto hit = world.checkIfHit(r, 0.001, infinity);
+        for (int CURRENT_BOUNCE = 0; CURRENT_BOUNCE < maxBounceDepth; CURRENT_BOUNCE++){
+            if (*haltExecution)
+                return color;
+            auto hit = world.checkIfHit(localRay, 0.001, infinity);
             if (hit.first.hit) {
                 auto object = hit.second;
-                auto scatterResults = object->getMaterial()->scatter(r, hit.first);
+                auto scatterResults = object->getMaterial()->scatter(localRay, hit.first);
                 // if the material scatters the ray, ie casts a new one,
                 if (scatterResults.scattered) { // attenuate the recursive raycast by the material's color
-                    color = scatterResults.attenuationColor * color;
-                    rayQueue->push(scatterResults.newRay);
+                    color = color * scatterResults.attenuationColor;
+                    localRay = scatterResults.newRay;
+                } else {
+                    // if we don't scatter, we don't need to keep looping
+                    color = {0.0, 0.0, 0.0};
+                    break;
                 }
             } else {
+                // since we didn't hit, we hit the sky.
                 color = color * Vec4{0.5, 0.7, 1.0};
-                rayQueue->pop();
+                // if we don't hit we cannot keep looping.
                 break;
             }
-            rayQueue->pop();
-            currentDepth++;
-            //tlog << currentDepth << " " << rayQueue->size() << "\n";
-        } while (currentDepth < maxBounceDepth && !rayQueue->empty());
-        delete(rayQueue);
+        }
+        
         return color;
+        // old recursive version:
         /*if (depth > maxBounceDepth)
             return {0, 0, 0};
         
@@ -119,11 +99,13 @@ namespace Raytracing {
                     // TODO: profile for speed;
                     for (int s = 0; s < raysPerPixel; s++) {
                         // simulate anti aliasing by generating rays with very slight random directions
-                        color = color + raycast(camera.projectRay(i + rnd.getDouble(), j + rnd.getDouble()), 0);
+                        color = color + raycast(camera.projectRay(i + rnd.getDouble(), j + rnd.getDouble()));
                     }
                     PRECISION_TYPE sf = 1.0 / raysPerPixel;
                     // apply pixel color with gamma correction
                     image.setPixelColor(i, j, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
+                    if (*haltExecution)
+                        return;
                 }
             }
             profiler::end("Raytracer Results", "Single Thread");
@@ -185,11 +167,13 @@ namespace Raytracing {
                                 // TODO: profile for speed;
                                 for (int s = 0; s < raysPerPixel; s++) {
                                     // simulate anti aliasing by generating rays with very slight random directions
-                                    color = color + raycast(camera.projectRay(x + rnd.getDouble(), y + rnd.getDouble()), 0);
+                                    color = color + raycast(camera.projectRay(x + rnd.getDouble(), y + rnd.getDouble()));
                                 }
                                 PRECISION_TYPE sf = 1.0 / raysPerPixel;
                                 // apply pixel color with gamma correction
                                 image.setPixelColor(x, y, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
+                                if (*haltExecution)
+                                    return;
                             } catch (std::exception& error) {
                                 flog << "Possibly fatal error in the multithreaded raytracer!\n";
                                 flog << error.what() << "\n";

@@ -6,8 +6,8 @@
 #ifndef STEP_3_SHADER_H
 #define STEP_3_SHADER_H
 
-#include <engine/util/std.h>
-#include <engine/math/vectors.h>
+#include "engine/util/std.h"
+#include "engine/math/vectors.h"
 #include <GL/gl.h>
 #include <GLES3/gl32.h>
 #include <GL/glx.h>
@@ -17,7 +17,7 @@
 
 namespace Raytracing {
     
-    class shader {
+    class Shader {
         private:
             struct IntDefaultedToMinusOne {
                 GLint i = -1;
@@ -37,12 +37,12 @@ namespace Raytracing {
             GLint getUniformLocation(const std::string &name);
             static void checkCompileErrors(unsigned int shader, const std::string& type, const std::string& shaderPath);
         public:
-            shader(const std::string& vertex, const std::string& fragment, bool loadString = false);
-            shader(const std::string& vertex, const std::string& geometry, const std::string& fragment, bool loadString = false);
+            Shader(const std::string& vertex, const std::string& fragment, bool loadString = false);
+            Shader(const std::string& vertex, const std::string& geometry, const std::string& fragment, bool loadString = false);
             // used to set the location of VAOs to the in variables in opengl shaders.
-            void bindAttribute(int attribute, std::string name);
+            void bindAttribute(int attribute, const std::string& name);
             // used to set location of shared UBOs
-            void setUniformBlockLocation(std::string name, int location);
+            void setUniformBlockLocation(const std::string& name, int location);
             // set various data-types.
             void setBool(const std::string &name, bool value);
             void setInt(const std::string &name, int value);
@@ -54,7 +54,7 @@ namespace Raytracing {
             void setVec3(const std::string &name, float x, float y, float z);
             void setVec4(const std::string &name, float x, float y, float z, float w);
             void use();
-            ~shader();
+            ~Shader();
     };
     
 }
