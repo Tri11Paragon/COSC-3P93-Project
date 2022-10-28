@@ -223,8 +223,6 @@ void ImGui_ImplGlfw_UpdateKeyModifiers(int mods)
 }
 
 void ImGui_ImplGlfw_MouseButtonCallback(unsigned int button, bool press, int mods) {
-    ImGui_ImplGlfw_UpdateKeyModifiers(mods);
-    
     ImGuiIO& io = ImGui::GetIO();
     if (button < ImGuiMouseButton_COUNT)
         io.AddMouseButtonEvent((int)button, press);

@@ -274,7 +274,7 @@ unsigned char *Texture::loadTexture(const std::string& path) {
     return dta;
 }
 Texture::~Texture() {
-    tlog << "Deleting Texture {" << textureID << "}";
+    tlog << "Deleting Texture {" << textureID << "}\n";
     glDeleteTextures(1, &textureID);
     data = nullptr;
 }

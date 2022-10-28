@@ -168,7 +168,8 @@ namespace Raytracing {
                 GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
                 // OpenGL minor version,
                 GLX_CONTEXT_MINOR_VERSION_ARB, 5,
-                // I don't remember what this does, but I know GLFW recommends that forward compatability be set true,
+                // I don't remember what this does, but I know GLFW recommends that forward compatability be set true, (Pretty sure it's only an issue
+                // on MacOS but I've always included this in all my projects so :shrug:
                 GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
                 // Core profile for better Renderdoc compatibility + I don't need non core extensions
                 GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
@@ -316,6 +317,7 @@ namespace Raytracing {
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
         
+        XFree(visualInfo);
         glXMakeCurrent(display, None, NULL);
         glXDestroyContext(display, glContext);
         XDestroyWindow(display, window);

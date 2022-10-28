@@ -6,6 +6,8 @@
 #include "engine/util/debug.h"
 
 bool* haltExecution;
+bool* pauseRaytracing;
+bool* haltRaytracing;
 
 namespace Raytracing {
     std::unordered_map<std::string, profiler*> profiles;

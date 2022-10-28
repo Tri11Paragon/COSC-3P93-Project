@@ -9,6 +9,8 @@
 #include <engine/util/debug.h>
 
 extern bool* haltExecution;
+extern bool* pauseRaytracing;
+extern bool* haltRaytracing;
 
 namespace Raytracing {
     
@@ -46,8 +48,10 @@ namespace Raytracing {
         Ray localRay = ray;
         Vec4 color {1.0, 1.0, 1.0};
         for (int CURRENT_BOUNCE = 0; CURRENT_BOUNCE < maxBounceDepth; CURRENT_BOUNCE++){
-            if (*haltExecution)
+            if (*haltExecution || *haltRaytracing)
                 return color;
+            while (*pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
+                std::this_thread::sleep_for(std::chrono::milliseconds(16));
             auto hit = world.checkIfHit(localRay, 0.001, infinity);
             if (hit.first.hit) {
                 auto object = hit.second;
@@ -91,7 +95,7 @@ namespace Raytracing {
     }
     
     void Raycaster::runSingle() {
-        executors.push_back(new std::thread([this]() -> void {
+        executors.push_back(std::make_unique<std::thread>([this]() -> void {
             profiler::start("Raytracer Results", "Single Thread");
             for (int i = 0; i < image.getWidth(); i++) {
                 for (int j = 0; j < image.getHeight(); j++) {
@@ -104,8 +108,10 @@ namespace Raytracing {
                     PRECISION_TYPE sf = 1.0 / raysPerPixel;
                     // apply pixel color with gamma correction
                     image.setPixelColor(i, j, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
-                    if (*haltExecution)
+                    if (*haltExecution || *haltRaytracing)
                         return;
+                    while (*pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
+                        std::this_thread::sleep_for(std::chrono::milliseconds(16));
                 }
             }
             profiler::end("Raytracer Results", "Single Thread");
@@ -120,11 +126,15 @@ namespace Raytracing {
         // matching the 16 threads.
         if (t == 0)
             t = system_threads;
+        ilog << "Starting multithreaded raytracer with " << t << " threads!\n";
         int divs = int(std::log(t) / std::log(2));
         // now double the divs, splitting each quadrant into 4 sub-quadrants which we can queue
         // the reason to do this is that some of them will finish before others, and the now free threads can keep working
         // do it without a queue like this leads to a single thread critical path and isn't optimally efficient.
         divs *= 4; // 2 because two axis getting split makes 4 sub-quadrants, but I tested 4, and it was faster by two seconds, so I'm keeping 4.
+        
+        delete(unprocessedQuads);
+        unprocessedQuads = new std::queue<std::vector<int>>();
         
         for (int dx = 0; dx < divs; dx++) {
             for (int dy = 0; dy < divs; dy++) {
@@ -139,7 +149,7 @@ namespace Raytracing {
         }
         
         for (int i = 0; i < t; i++) {
-            executors.push_back(new std::thread([this, i, divs, t]() -> void {
+            executors.push_back(std::make_unique<std::thread>([this, i, divs, t]() -> void {
                 // run through all the quadrants
                 std::stringstream str;
                 str << "Threading of #";
@@ -172,8 +182,12 @@ namespace Raytracing {
                                 PRECISION_TYPE sf = 1.0 / raysPerPixel;
                                 // apply pixel color with gamma correction
                                 image.setPixelColor(x, y, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
-                                if (*haltExecution)
+                                if (*haltExecution || *haltRaytracing) {
+                                    tlog << "Halting raytracing! " << *haltExecution << " " << *haltRaytracing << " " << i << "\n";
                                     return;
+                                }
+                                while (*pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
+                                    std::this_thread::sleep_for(std::chrono::milliseconds(16));
                             } catch (std::exception& error) {
                                 flog << "Possibly fatal error in the multithreaded raytracer!\n";
                                 flog << error.what() << "\n";
@@ -182,6 +196,7 @@ namespace Raytracing {
                     }
                     j++;
                 }
+                tlog << "ex threead " << i << "\n";
                 finishedThreads++;
                 profiler::end("Raytracer Results", str.str());
             }));

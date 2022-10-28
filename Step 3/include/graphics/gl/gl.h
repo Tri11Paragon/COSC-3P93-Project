@@ -75,7 +75,7 @@ class VAO {
         VAO(VAO &&) noexcept = delete; // Disable move constructor.
         VAO& operator=(VAO &&) noexcept = delete; // Disable Move Assignment
         
-        VAO(const std::vector<Raytracing::Triangle> &triangles);
+        explicit VAO(const std::vector<Raytracing::Triangle> &triangles);
         VAO(const std::vector<float>& verts, const std::vector<float>& uvs, const std::vector<unsigned int>& indices);
         
         void bind() const;

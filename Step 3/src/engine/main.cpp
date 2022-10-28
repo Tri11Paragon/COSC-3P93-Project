@@ -27,6 +27,8 @@
 using namespace Raytracing;
 
 extern bool* haltExecution;
+extern bool* pauseRaytracing;
+extern bool* haltRaytracing;
 
 int main(int argc, char** args) {
     // since this is linux only we can easily set our process priority to be high with a syscall
@@ -77,7 +79,11 @@ int main(int argc, char** args) {
     
     // yes this is a very stupid and bad way of doing this.
     haltExecution = new bool;
+    pauseRaytracing = new bool;
+    haltRaytracing = new bool;
     *haltExecution = false;
+    *pauseRaytracing = false;
+    *haltRaytracing = false;
     if (signal(SIGTERM, [] (int sig) -> void {
         ilog<<"Computations complete.\nHalting now...\n";
         *haltExecution = true;
@@ -137,15 +143,25 @@ int main(int argc, char** args) {
                 window.runUpdates([&window, &mainImage, &shader, &raycaster, &parser]() -> void {
                     if (*haltExecution){window.closeWindow();}
     
+                    ImGui::Begin("Debug");
                     if (ImGui::Button("Start") && !started){
+                        started = true;
+                        *haltRaytracing = false;
                         ilog << "Running raycaster!\n";
                         if(parser.hasOption("--multi")) {
                             raycaster.runMulti(std::max(std::stoi(parser.getOptionValue("-t")), std::stoi(parser.getOptionValue("--threads"))));
                         } else { // we don't actually have to check for --single since it's implied to be default true.
                             raycaster.runSingle();
                         }
-                        started = true;
                     }
+                    if (ImGui::Checkbox("Pause", pauseRaytracing)){}
+                    if (ImGui::Button("Stop") && started){
+                        *haltRaytracing = true;
+                        started = false;
+                        raycaster.deleteThreads();
+                    }
+                    ImGui::End();
+                    
                     
                     shader.use();
                     mainImage.updateImage();
@@ -192,7 +208,12 @@ int main(int argc, char** args) {
     imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
     
     delete(haltExecution);
+    delete(haltRaytracing);
+    delete(pauseRaytracing);
     deleteQuad();
+    
+    for (auto& p : Raytracing::profiles)
+        delete(p.second);
     
     return 0;
 }
