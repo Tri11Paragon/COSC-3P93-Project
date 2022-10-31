@@ -13,6 +13,10 @@
 #define STEP_2_DEBUG_H
 
 #include "std.h"
+#include <config.h>
+#ifdef COMPILE_GUI
+    #include <graphics/debug_gui.h>
+#endif
 
 namespace Raytracing {
     class profiler;

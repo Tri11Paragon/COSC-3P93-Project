@@ -4,8 +4,8 @@
  */
 #include <graphics/graphics.h>
 #include <chrono>
-#include <GLES/glext.h>
 #include <graphics/gl/gl.h>
+#include "engine/image/stb_image.h"
 
 namespace Raytracing {
 
@@ -61,10 +61,115 @@ namespace Raytracing {
         delete (quad);
     }
     
-    // unfortunately GLX doesn't provide a typedef for the context creation, so we must define our own. I've chosen to go with the same style as
-    // GL function pointers, "Pointer to the FunctioN GLX createContextAttribsARB PROCedure"
-    typedef GLXContext (* PFNGLXCREATECONTEXTATTRIBSARBPROC)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
+    struct ImageData {
+        unsigned char* data;
+        int width;
+        int height;
+        int channels;
+    };
     
+    GLFWimage getImageData(const std::string& file) {
+        GLFWimage imager;
+        int channels = 0;
+        imager.pixels = stbi_load(file.c_str(), &imager.width, &imager.height, &channels, 4);
+        return imager;
+    }
+    
+    #ifdef USE_GLFW
+        XWindow::XWindow(int width, int height): m_displayWidth(width), m_displayHeight(height) {
+            // OpenGL 4.6 is like 5 years old at this point and most systems support it
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+            // We only generated GLAD headers for GL core profile. Plus renderdoc only support core profile.
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            // Apple stuff. Not like apple supports GL4.6 anyways :/
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+            glfwWindowHint(GLFW_VISIBLE, GL_TRUE);
+            glfwWindowHint(GLFW_DECORATED, GL_TRUE);
+            glfwWindowHint(GLFW_FOCUSED, GL_TRUE);
+    
+            glfwSetErrorCallback([](int error_code, const char* description) -> void {
+                elog << "GLFW Error: " << error_code << "\n\t" << description << "\n";
+            });
+    
+            if (!glfwInit())
+                throw std::runtime_error("Unable to init GLFW!\n");
+            
+            // create a window using the above settings,
+            window = glfwCreateWindow(width, height, "GLFW 3P93 Raytracing Project", NULL, NULL);
+            if (!window)
+                throw std::runtime_error("Unable to create GLFW window!\n");
+            glfwMakeContextCurrent(window);
+            // enable V-Sync.
+            glfwSwapInterval(1);
+            // setup the callbacks we might use.
+            auto imageData16 = getImageData("../resources/icon/icon16.png");
+            auto imageData32 = getImageData("../resources/icon/icon32.png");
+            GLFWimage images[2];
+            // TODO: delete STBI_resize
+            images[0] = imageData16;
+            images[1] = imageData32;
+    
+            glfwSetWindowIcon(window, 2, images);
+            stbi_image_free(imageData16.pixels);
+            stbi_image_free(imageData32.pixels);
+            
+            IMGUI_CHECKVERSION();
+            ImGui::CreateContext();
+            ImGuiIO& io = ImGui::GetIO(); (void)io;
+            ImGui::StyleColorsDark();
+            // create ImGUI GLFW instance and install the callbacks
+            ImGui_ImplGlfw_InitForOpenGL(window, true);
+            ImGui_ImplOpenGL3_Init("#version 130");
+            
+            int version = gladLoadGL(glfwGetProcAddress);
+            if(!version)
+                throw std::runtime_error("Unable to load Glad GL!\n");
+    
+            glfwShowWindow(window);
+            ilog << "Loaded GL" << GLAD_VERSION_MAJOR(version) << "." << GLAD_VERSION_MINOR(version) << "!\n";
+        }
+        void XWindow::runUpdates(const std::function<void()>& drawFunction) {
+            // check for window events
+            isCloseRequested = glfwWindowShouldClose(window);
+            glfwPollEvents();
+            // update window settings
+            glfwGetFramebufferSize(window, &m_displayWidth, &m_displayHeight);
+            glViewport(0, 0, m_displayWidth, m_displayHeight);
+            glClearColor(0.5, 0.7, 1.0, 1.0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_TEST);
+            
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+    
+            ImGui::ShowDemoWindow(nullptr);
+            
+            drawFunction();
+            
+            // Render ImGUI
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            
+            glfwSwapBuffers(window);
+        }
+        void XWindow::closeWindow() {
+            if (isCloseRequested)
+                return;
+            tlog << "Closing window!\n";
+            isCloseRequested = true;
+            ImGui_ImplOpenGL3_Shutdown();
+            ImGui_ImplGlfw_Shutdown();
+            ImGui::DestroyContext();
+    
+            glfwDestroyWindow(window);
+            glfwTerminate();
+        }
+        XWindow::~XWindow() {
+            closeWindow();
+        }
+    #else
     XWindow::XWindow(int width, int height): m_width(width), m_height(height) {
         // open the DEFAULT display. We don't want to open a specific screen as that is annoying.
         dlog << "Creating X11 display!\n";
@@ -145,19 +250,47 @@ namespace Raytracing {
                                CWColormap | CWEventMask,
                                &xSetWindowAttributes);
         // install a error handler
-        // maybe we should set back the old one but i'd rather it goto std:err than crash the window
+        // maybe we should set back the old one but I'd rather it goto std:err than crash the window
         XSetErrorHandler([](Display* displayPtr, XErrorEvent* eventPtr) -> int {
             elog << "An error occurred while trying to setup X11: " << eventPtr->error_code << ";\n " << eventPtr->minor_code << ";\n "
                  << eventPtr->request_code << "\n";
             return 0;
         });
         
-        // Now show the window
-        XMapWindow(display, window);
         XStoreName(display, window, "3P93 Raytracing Project");
+        ImageInput image("../resources/icon/icon.png");
+        auto* imageData = image.getImageAsIconBuffer();
+        
+        auto hints = XAllocWMHints();
+        hints->flags = IconPixmapHint | StateHint | IconPositionHint;
+        auto pixMapRob = XCreateBitmapFromData(display, window, (const char*) (icon_bits), 32, 32);
+        if (!pixMapRob)
+            flog << "Unable to create icon pixel map\n";
+        hints->icon_pixmap = pixMapRob;
+        hints->initial_state = IconicState;
+        hints->icon_x = 0;
+        hints->icon_y = 0;
+        XSetWMHints(display, window, hints);
+        XFree(hints);
+        
+        int length = 32 * 32 + 2;
+        //int length = 16 * 16 * 4 + 32*32 * 4 + 4 * 4;
+        XChangeProperty(display,
+                        window,
+                        XInternAtom(display, "_NET_WM_ICON", False),
+                        XInternAtom(display, "CARDINAL", False),
+                        32,
+                        PropModeReplace,
+                        (const unsigned char*) imageData,
+                        length);
+        delete[](imageData);
         // there might actually be an argument to be made about X11 being outdated....
         wmDelete = XInternAtom(display, "WM_DELETE_WINDOW", True);
         XSetWMProtocols(display, window, &wmDelete, 1);
+        
+        // Now show the window
+        XMapWindow(display, window);
+        
         // get the list of GLX extensions for this system
         const char* glExtensions = glXQueryExtensionsString(display, DefaultScreen(display));
         // much in the same way that we get GL function pointers and use them we will do the same with the context creation
@@ -181,7 +314,7 @@ namespace Raytracing {
         XSync(display, False);
         if (!glContext)
             flog << "Unable to create GL context!";
-        if (glXIsDirect(display, glContext)){
+        if (glXIsDirect(display, glContext)) {
             ilog << "A direct GL context was acquired!\n";
         } else // direct contexts are faster than indirect!
             wlog << "Warning! Indirect context!\n";
@@ -193,7 +326,7 @@ namespace Raytracing {
         // we want to respect depth
         glEnable(GL_DEPTH_TEST);
         
-        assignGLFunctionPointers();
+        //assignGLFunctionPointers();
         //glEnableVertexArrayAttribPtr = glXGetProcAddress((unsigned char*)("glEnableVertexArrayAttrib"));
         
         // Setup Dear IMGUI
@@ -323,4 +456,5 @@ namespace Raytracing {
         XDestroyWindow(display, window);
         XCloseDisplay(display);
     }
+    #endif
 }

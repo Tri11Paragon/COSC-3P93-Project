@@ -30,6 +30,11 @@ namespace Raytracing {
             PRECISION_TYPE viewportHeight;
             PRECISION_TYPE viewportWidth;
             PRECISION_TYPE focalLength = 1.0;
+            
+            const PRECISION_TYPE NEAR_PLANE = 0.1;
+            const PRECISION_TYPE FAR_PLANE = 500;
+            PRECISION_TYPE tanFovHalf;
+            PRECISION_TYPE frustumLength;
 
             Vec4 position{0, 0, 0};
             Vec4 horizontalAxis;
@@ -39,9 +44,11 @@ namespace Raytracing {
             Camera(PRECISION_TYPE fov, const Image& image): image(image),
                                                             aspectRatio(double(image.getWidth()) / double(image.getHeight())) {
                 // scale the viewport height based on the camera's FOV
-                viewportHeight = (2.0 * tan(degreeeToRadian(fov) / 2));
+                tanFovHalf = tan(degreeeToRadian(fov) / 2);
+                viewportHeight = (2.0 * tanFovHalf);
                 // with must respect the aspect ratio of the image, otherwise we'd get funky results
                 viewportWidth = (aspectRatio * viewportHeight);
+                frustumLength = FAR_PLANE - NEAR_PLANE;
                 // horizontal direction from the camera. used to translate the camera
                 horizontalAxis = (Vec4{viewportWidth, 0, 0, 0});
                 // virtual direction, also used to translate the camera
@@ -65,6 +72,87 @@ namespace Raytracing {
             void setPosition(const Vec4& pos) { this->position = pos; }
 
             void setRotation(PRECISION_TYPE yaw, PRECISION_TYPE pitch, PRECISION_TYPE roll);
+            [[nodiscard]] Mat4x4 project() const {
+                Mat4x4 project;
+                
+                // this should be all it takes to create a mostly correct projection matrix
+                project.m00(float(1.0 / (aspectRatio * tanFovHalf)));
+                project.m11(float(1.0 / tanFovHalf));
+                project.m22(float(-((FAR_PLANE + NEAR_PLANE) / frustumLength)));
+                project.m23(-1);
+                project.m32(float(-((2 * NEAR_PLANE * FAR_PLANE) / frustumLength)));
+                //project.m33(0);
+                
+                return project;
+            }
+            Mat4x4 view(const Vec4& lookAtPos, const Vec4& up){
+                Mat4x4 view;
+                auto w = (position - lookAtPos).normalize(); // forward
+                auto u = (Vec4::cross(up, w)).normalize(); // right
+                auto v = Vec4::cross(w, u); // up
+                
+                view.m00(float(w.x()));
+                view.m01(float(w.y()));
+                view.m02(float(w.z()));
+                view.m03(float(w.w()));
+    
+                view.m10(float(u.x()));
+                view.m11(float(u.y()));
+                view.m12(float(u.z()));
+                view.m13(float(u.w()));
+    
+                view.m20(float(v.x()));
+                view.m21(float(v.y()));
+                view.m22(float(v.z()));
+                view.m23(float(v.w()));
+                
+                // view matrix are inverted, dot product to simulate translate matrix multiplication
+                view.m30(-float(Vec4::dot(u, position)));
+                view.m31(-float(Vec4::dot(v, position)));
+                view.m32(-float(Vec4::dot(w, position)));
+                view.m33(1);
+                
+                return view;
+            }
+            Mat4x4 view(PRECISION_TYPE yaw, PRECISION_TYPE pitch) {
+                Mat4x4 view;
+                
+                pitch = degreeeToRadian(pitch);
+                yaw = degreeeToRadian(yaw);
+                
+                PRECISION_TYPE cosPitch = std::cos(pitch);
+                PRECISION_TYPE cosYaw = std::cos(yaw);
+                PRECISION_TYPE sinPitch = std::sin(pitch);
+                PRECISION_TYPE sinYaw = std::sin(yaw);
+    
+                auto x = Vec4{cosYaw, 0, -sinYaw}; // forward
+                auto y = Vec4{sinYaw * sinPitch, cosPitch, cosYaw * sinPitch}; // right
+                auto z = Vec4{sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw}; // up
+    
+                view.m00(float(x.x()));
+                view.m01(float(x.y()));
+                view.m02(float(x.z()));
+                view.m03(float(x.w()));
+    
+                view.m10(float(y.x()));
+                view.m11(float(y.y()));
+                view.m12(float(y.z()));
+                view.m13(float(y.w()));
+    
+                view.m20(float(z.x()));
+                view.m21(float(z.y()));
+                view.m22(float(z.z()));
+                view.m23(float(z.w()));
+    
+                // view matrix are inverted, dot product to simulate translate matrix multiplication
+                view.m30(-float(Vec4::dot(x, position)));
+                view.m31(-float(Vec4::dot(y, position)));
+                view.m32(-float(Vec4::dot(z, position)));
+                view.m33(1);
+    
+                return view;
+            }
+            [[nodiscard]] inline Vec4 getPosition() const {return position;};
 
     };
 

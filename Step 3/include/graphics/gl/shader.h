@@ -8,10 +8,16 @@
 
 #include "engine/util/std.h"
 #include "engine/math/vectors.h"
-#include <GL/gl.h>
-#include <GLES3/gl32.h>
-#include <GL/glx.h>
-#include <GL/glu.h>
+#include <config.h>
+#ifndef USE_GLFW
+    #include <GL/gl.h>
+    #include <GLES3/gl32.h>
+    #include <GL/glx.h>
+    #include <GL/glu.h>
+#else
+    #include <graphics/gl/glad/gl.h>
+#endif
+
 
 // opengl shader
 

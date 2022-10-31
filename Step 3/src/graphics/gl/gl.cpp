@@ -6,8 +6,9 @@
 #include <graphics/gl/gl.h>
 #include <GL/glx.h>
 #define STB_IMAGE_IMPLEMENTATION
-#include <graphics/gl/stb_image.h>
+#include "engine/image/stb_image.h"
 
+#ifndef USE_GLFW
 PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
 PFNGLCREATEBUFFERSPROC glCreateBuffers;
 PFNGLNAMEDBUFFERDATAPROC glNamedBufferData;
@@ -29,6 +30,7 @@ void assignGLFunctionPointers() {
     glVertexArrayAttribFormat = (PFNGLVERTEXARRAYATTRIBFORMATPROC) glXGetProcAddress((unsigned char*) "glVertexArrayAttribFormat");
 
 }
+#endif
 
 unsigned int createVAO() {
     unsigned int vaoID;
@@ -107,9 +109,6 @@ VAO::VAO(const std::vector<float>& verts, const std::vector<float>& uvs, const s
     // enable the attributes, prevents us from having to do this later.
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    // redundant DSA nonsense. TODO: remove? my plan was to switch to GL4.6 idk if wise.
-    (*glEnableVertexArrayAttrib)(VaoID, 0);
-    (*glEnableVertexArrayAttrib)(VaoID, 1);
     // store index data
     storeData((int)indices.size(), indices.data());
     // store vertex data
@@ -119,14 +118,11 @@ VAO::VAO(const std::vector<float>& verts, const std::vector<float>& uvs, const s
     unbind();
 }
 VAO::VAO(const std::vector<Raytracing::Triangle>& triangles): VaoID(createVAO()) {
-    this->drawCount = (int)triangles.size();
+    this->drawCount = (int)triangles.size() * 3;
     glBindVertexArray(VaoID);
     // enable the attributes, prevents us from having to do this later.
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    // redundant DSA nonsense. TODO: remove? my plan was to switch to GL4.6 idk if wise.
-    (*glEnableVertexArrayAttrib)(VaoID, 0);
-    (*glEnableVertexArrayAttrib)(VaoID, 1);
     // convert vertex data
     std::vector<float> verts;
     std::vector<float> uvs;
@@ -173,12 +169,12 @@ VAO::VAO(const std::vector<Raytracing::Triangle>& triangles): VaoID(createVAO())
     storeData(2, 3, 3 * sizeof(float), 0, (int)normals.size(), normals.data());
     // create an instance buffer with a large number of positions (stored in matrices)
     // this way we don't have to expand it later, since I don't think I'll use 1k
-    createInstanceVBO(1000, sizeof(Raytracing::Mat4x4));
-    // send the positions as attributes
-    addInstancedAttribute(3, 4, sizeof(Raytracing::Mat4x4), 0);
-    addInstancedAttribute(4, 4, sizeof(Raytracing::Mat4x4), 16);
-    addInstancedAttribute(5, 4, sizeof(Raytracing::Mat4x4), 32);
-    addInstancedAttribute(6, 4, sizeof(Raytracing::Mat4x4), 48);
+//    createInstanceVBO(1000, sizeof(Raytracing::Mat4x4));
+//    // send the positions as attributes
+//    addInstancedAttribute(3, 4, sizeof(Raytracing::Mat4x4), 0);
+//    addInstancedAttribute(4, 4, sizeof(Raytracing::Mat4x4), 16);
+//    addInstancedAttribute(5, 4, sizeof(Raytracing::Mat4x4), 32);
+//    addInstancedAttribute(6, 4, sizeof(Raytracing::Mat4x4), 48);
     unbind();
 }
 void VAO::bind() const {
@@ -188,24 +184,30 @@ void VAO::unbind() {
     glBindVertexArray(0);
     VaoID;
 }
-void VAO::draw(const std::vector<Raytracing::Vec4>& positions) {
+void VAO::draw(Raytracing::Shader& shader, const std::vector<Raytracing::Vec4>& positions) {
     // this should only update if we are drawing with more positions than we already have allocated.
-    createInstanceVBO((int)positions.size(), sizeof(Raytracing::Mat4x4));
-    std::vector<Raytracing::Mat4x4> data;
-    for (const Raytracing::Vec4& v : positions){
-        // identity matrix
-        Raytracing::Mat4x4 mat4X4 {};
-        // translate to position
-        mat4X4 = mat4X4.translate(v);
-        data.push_back(mat4X4);
-    }
+//    createInstanceVBO((int)positions.size(), sizeof(Raytracing::Mat4x4));
+//    std::vector<Raytracing::Mat4x4> data;
+//    for (const Raytracing::Vec4& v : positions){
+//        // identity matrix
+//        Raytracing::Mat4x4 mat4X4 {};
+//        // translate to position
+//        mat4X4 = mat4X4.translate(v);
+//        data.push_back(mat4X4);
+//    }
     // send translated matrices as data to the GPU, TODO: since this will likely be used on static geometry, try making this more static!
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    //glBufferData(GL_ARRAY_BUFFER, datas.size() * sizeof(LightData), NULL, GL_STREAM_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(data.size() * sizeof(Raytracing::Mat4x4)), &data[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // then finally draw
-    glDrawArraysInstanced(GL_TRIANGLES, 0, drawCount * 3, (int)positions.size());
+//    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+//    //glBufferData(GL_ARRAY_BUFFER, datas.size() * sizeof(LightData), NULL, GL_STREAM_DRAW);
+//    glBufferSubData(GL_ARRAY_BUFFER, 0, (long)(data.size() * sizeof(Raytracing::Mat4x4)), &data[0]);
+//    glBindBuffer(GL_ARRAY_BUFFER, 0);
+//    // then finally draw
+    //glDrawArraysInstanced(GL_TRIANGLES, 0, drawCount * 3, (int)positions.size());
+    for (const auto& v : positions) {
+        Raytracing::Mat4x4 transform {};
+        transform.translate(v);
+        shader.setMatrix("transform", transform);
+        glDrawArrays(GL_TRIANGLES, 0, drawCount);
+    }
 }
 void VAO::draw() const {
     if (drawCount < 0)

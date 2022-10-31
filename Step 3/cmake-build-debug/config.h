@@ -14,6 +14,7 @@
 
 #define COMPILE_GUI
 #define COMPILE_OPENCL
+#define USE_GLFW
 
 #define CMAKE_CONFIG
 #endif

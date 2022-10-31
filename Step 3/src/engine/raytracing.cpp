@@ -182,10 +182,8 @@ namespace Raytracing {
                                 PRECISION_TYPE sf = 1.0 / raysPerPixel;
                                 // apply pixel color with gamma correction
                                 image.setPixelColor(x, y, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
-                                if (*haltExecution || *haltRaytracing) {
-                                    tlog << "Halting raytracing! " << *haltExecution << " " << *haltRaytracing << " " << i << "\n";
+                                if (*haltExecution || *haltRaytracing)
                                     return;
-                                }
                                 while (*pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
                                     std::this_thread::sleep_for(std::chrono::milliseconds(16));
                             } catch (std::exception& error) {
@@ -196,7 +194,6 @@ namespace Raytracing {
                     }
                     j++;
                 }
-                tlog << "ex threead " << i << "\n";
                 finishedThreads++;
                 profiler::end("Raytracer Results", str.str());
             }));

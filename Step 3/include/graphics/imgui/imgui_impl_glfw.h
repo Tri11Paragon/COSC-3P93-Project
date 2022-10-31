@@ -1,15 +1,3 @@
-/*
- * Created by Brett Terpstra 6920201 on 25/10/22.
- * Copyright (c) 2022 Brett Terpstra. All Rights Reserved.
- *
- * I HAVE MODIFIED THIS FILE SIGNIFICANTLY!
- * I AM NOT USING GLFW
- * BUT HAVE TAKEN THE BACKEND FOR IT AND ADAPTED IT FOR RAW X11
- */
-
-#ifndef STEP_3_IMGUI_IMPL_GLFW_H
-#define STEP_3_IMGUI_IMPL_GLFW_H
-
 // dear imgui: Platform Backend for GLFW
 // This needs to be used along with a Renderer (e.g. OpenGL3, Vulkan, WebGPU..)
 // (Info: GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan graphics context creation, etc.)
@@ -25,27 +13,30 @@
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
-#include "graphics/imgui/imgui.h"      // IMGUI_IMPL_API
+#pragma once
+#include "imgui.h"      // IMGUI_IMPL_API
 
+struct GLFWwindow;
+struct GLFWmonitor;
+
+IMGUI_IMPL_API bool     ImGui_ImplGlfw_InitForOpenGL(GLFWwindow* window, bool install_callbacks);
+IMGUI_IMPL_API bool     ImGui_ImplGlfw_InitForVulkan(GLFWwindow* window, bool install_callbacks);
+IMGUI_IMPL_API bool     ImGui_ImplGlfw_InitForOther(GLFWwindow* window, bool install_callbacks);
 IMGUI_IMPL_API void     ImGui_ImplGlfw_Shutdown();
-IMGUI_IMPL_API void     ImGui_ImplGlfw_NewFrame(double time, int display_w, int display_h, int w, int h);
-IMGUI_IMPL_API bool     ImGui_ImplGlfw_Init();
+IMGUI_IMPL_API void     ImGui_ImplGlfw_NewFrame();
 
 // GLFW callbacks (installer)
 // - When calling Init with 'install_callbacks=true': ImGui_ImplGlfw_InstallCallbacks() is called. GLFW callbacks will be installed for you. They will chain-call user's previously installed callbacks, if any.
 // - When calling Init with 'install_callbacks=false': GLFW callbacks won't be installed. You will need to call individual function yourself from your own GLFW callbacks.
-IMGUI_IMPL_API void     ImGui_ImplGlfw_InstallCallbacks();
-IMGUI_IMPL_API void     ImGui_ImplGlfw_RestoreCallbacks();
+IMGUI_IMPL_API void     ImGui_ImplGlfw_InstallCallbacks(GLFWwindow* window);
+IMGUI_IMPL_API void     ImGui_ImplGlfw_RestoreCallbacks(GLFWwindow* window);
 
 // GLFW callbacks (individual callbacks to call if you didn't install callbacks)
-IMGUI_IMPL_API void     ImGui_ImplGlfw_WindowFocusCallback(int focused);        // Since 1.84
-IMGUI_IMPL_API void     ImGui_ImplGlfw_CursorEnterCallback(int entered, bool cursorVisible);        // Since 1.84
-IMGUI_IMPL_API void     ImGui_ImplGlfw_CursorPosCallback(double x, double y, bool cursorVisible);   // Since 1.87
-IMGUI_IMPL_API void     ImGui_ImplGlfw_MouseButtonCallback(unsigned int button, bool pressed, int mods);
-IMGUI_IMPL_API void     ImGui_ImplGlfw_ScrollCallback(double xoffset, double yoffset);
-IMGUI_IMPL_API void     ImGui_ImplGlfw_KeyCallback(unsigned int key, int scancode, bool pressed, int mods);
-IMGUI_IMPL_API void     ImGui_ImplGlfw_CharCallback(unsigned int c);
-IMGUI_IMPL_API void     ImGui_ImplGlfw_MonitorCallback(int event);
-IMGUI_IMPL_API void     ImGui_ImplGlfw_UpdateMouseData(bool cursorVisible, bool focused);
-
-#endif //STEP_3_IMGUI_IMPL_GLFW_H
+IMGUI_IMPL_API void     ImGui_ImplGlfw_WindowFocusCallback(GLFWwindow* window, int focused);        // Since 1.84
+IMGUI_IMPL_API void     ImGui_ImplGlfw_CursorEnterCallback(GLFWwindow* window, int entered);        // Since 1.84
+IMGUI_IMPL_API void     ImGui_ImplGlfw_CursorPosCallback(GLFWwindow* window, double x, double y);   // Since 1.87
+IMGUI_IMPL_API void     ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+IMGUI_IMPL_API void     ImGui_ImplGlfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+IMGUI_IMPL_API void     ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+IMGUI_IMPL_API void     ImGui_ImplGlfw_CharCallback(GLFWwindow* window, unsigned int c);
+IMGUI_IMPL_API void     ImGui_ImplGlfw_MonitorCallback(GLFWmonitor* monitor, int event);

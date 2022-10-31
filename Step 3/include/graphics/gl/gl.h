@@ -10,19 +10,25 @@
 #include <engine/util/std.h>
 #include <engine/types.h>
 #include <engine/image/image.h>
-#include <GLES3/gl32.h>
-#include <GLES3/gl3.h>
-#include <GL/gl.h>
-#include "graphics/gl/glext.h"
-
-extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
-extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
-extern PFNGLNAMEDBUFFERDATAPROC glNamedBufferData;
-extern PFNGLNAMEDBUFFERSUBDATAPROC glNamedBufferSubData;
-
-extern PFNGLENABLEVERTEXARRAYATTRIBPROC glEnableVertexArrayAttrib;
-extern PFNGLVERTEXARRAYATTRIBBINDINGPROC glVertexArrayAttribBinding;
-extern PFNGLVERTEXARRAYATTRIBFORMATPROC glVertexArrayAttribFormat;
+#include <config.h>
+#include <graphics/gl/shader.h>
+#ifndef USE_GLFW
+    #include <GLES3/gl32.h>
+    #include <GLES3/gl3.h>
+    #include <GL/gl.h>
+    #include "graphics/gl/glext.h"
+    
+    extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
+    extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
+    extern PFNGLNAMEDBUFFERDATAPROC glNamedBufferData;
+    extern PFNGLNAMEDBUFFERSUBDATAPROC glNamedBufferSubData;
+    
+    extern PFNGLENABLEVERTEXARRAYATTRIBPROC glEnableVertexArrayAttrib;
+    extern PFNGLVERTEXARRAYATTRIBBINDINGPROC glVertexArrayAttribBinding;
+    extern PFNGLVERTEXARRAYATTRIBFORMATPROC glVertexArrayAttribFormat;
+#else
+    #include <graphics/gl/glad/gl.h>
+#endif
 
 // since we are doing everything with raytracing
 // the purpose of these utility classes are purely for debug
@@ -83,7 +89,7 @@ class VAO {
         // draws as if it where a fullscreen quad (literally used for that)
         void draw() const;
         // draw as if it's a box that we need to bulk draw.
-        void draw(const std::vector<Raytracing::Vec4>& positions);
+        void draw(Raytracing::Shader& shader, const std::vector<Raytracing::Vec4>& positions);
         ~VAO();
 };
 

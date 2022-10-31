@@ -132,46 +132,78 @@ int main(int argc, char** args) {
     world.add(new Raytracing::ModelObject({0, 0, 5}, house, world.getMaterial("blueDiffuse")));
     
     Raytracing::Raycaster raycaster{camera, image, world, parser};
-    static bool started = false;
+    static bool started = false, debug = false;
+    static int maxRayBounce = 50;
+    static int raysPerPixel = 50;
+    raycaster.updateRayInfo(maxRayBounce, raysPerPixel);
     
     if (parser.hasOption("--gui") || parser.hasOption("-g")) {
         #ifdef COMPILE_GUI
             XWindow window(1440, 720);
             Texture mainImage(&image);
+            auto spiderVAO = new VAO(spider.toTriangles());
+            auto houseVAO = new VAO(house.toTriangles());
+            auto planeVAO = new VAO(plane.toTriangles());
             Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
+            Shader worldShader("../resources/shaders/world.vs", "../resources/shaders/world.fs");
             while (!window.shouldWindowClose()) {
-                window.runUpdates([&window, &mainImage, &shader, &raycaster, &parser]() -> void {
+                window.runUpdates([&window, &mainImage, &shader, &raycaster, &parser, &worldShader, &spiderVAO, &houseVAO, &planeVAO, &camera]() -> void {
                     if (*haltExecution){window.closeWindow();}
     
-                    ImGui::Begin("Debug");
-                    if (ImGui::Button("Start") && !started){
-                        started = true;
-                        *haltRaytracing = false;
-                        ilog << "Running raycaster!\n";
-                        if(parser.hasOption("--multi")) {
-                            raycaster.runMulti(std::max(std::stoi(parser.getOptionValue("-t")), std::stoi(parser.getOptionValue("--threads"))));
-                        } else { // we don't actually have to check for --single since it's implied to be default true.
-                            raycaster.runSingle();
+                    DebugUI::render([&raycaster, &parser]() -> void {
+                        if (ImGui::Button("Start") && !started){
+                            started = true;
+                            *haltRaytracing = false;
+                            ilog << "Running raycaster!\n";
+                            if(parser.hasOption("--multi")) {
+                                raycaster.runMulti(std::max(std::stoi(parser.getOptionValue("-t")), std::stoi(parser.getOptionValue("--threads"))));
+                            } else { // we don't actually have to check for --single since it's implied to be default true.
+                                raycaster.runSingle();
+                            }
                         }
-                    }
-                    if (ImGui::Checkbox("Pause", pauseRaytracing)){}
-                    if (ImGui::Button("Stop") && started){
-                        *haltRaytracing = true;
-                        started = false;
-                        raycaster.deleteThreads();
-                    }
-                    ImGui::End();
+                        if (ImGui::Checkbox("Pause", pauseRaytracing)){}
+                        if (ImGui::Button("Stop") && started){
+                            *haltRaytracing = true;
+                            started = false;
+                            raycaster.deleteThreads();
+                        }
+                        ImGui::NewLine();
+                        ImGui::InputInt("Max Ray Bounce", &maxRayBounce);
+                        ImGui::InputInt("Rays Per Pixel", &raysPerPixel);
+                        raycaster.updateRayInfo(maxRayBounce, raysPerPixel);
+                        ImGui::Checkbox("Debug", &debug);
+                    });
                     
-                    
-                    shader.use();
-                    mainImage.updateImage();
-                    mainImage.bind();
-                    mainImage.enableGlTextures(1);
-                    drawQuad();
+                    if (debug){
+                        auto projection = camera.project();
+                        static float yaw = 0;
+                        yaw += 1.0/60.0;
+                        auto view = camera.view(yaw, 0);
+                        worldShader.setMatrix("projectMatrix", projection);
+                        worldShader.setMatrix("ViewMatrix", view);
+                        worldShader.use();
+                        spiderVAO->bind();
+                        spiderVAO->draw(worldShader, {{0, 1, 0}});
+                        houseVAO->bind();
+                        houseVAO->draw(worldShader, {{5, 1, 0}, {0, 0, -5}, {0, 0, 5}});
+                        planeVAO->bind();
+                        planeVAO->draw(worldShader, {{-5, 0.5, 0}});
+                    } else {
+                        shader.use();
+                        mainImage.updateImage();
+                        mainImage.bind();
+                        mainImage.enableGlTextures(1);
+                        drawQuad();
+                    }
                     
                     mainImage.updateImage();
                 });
             }
+            *haltExecution = true;
+            raycaster.join();
+            delete(spiderVAO);
+            delete(houseVAO);
+            delete(planeVAO);
         #else
             flog << "Program not compiled with GUI support! Unable to continue!\n";
         #endif

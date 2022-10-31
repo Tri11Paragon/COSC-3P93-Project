@@ -44,6 +44,18 @@ namespace Raytracing {
             ~Image();
     };
 
+    class ImageInput {
+        private:
+            int width, height, channels;
+            unsigned char* data;
+        public:
+            explicit ImageInput(const std::string& image);
+            unsigned long* getImageAsIconBuffer();
+            unsigned char* getImageData(){return data;}
+            [[nodiscard]] int getImageSize() const{return width;}
+            ~ImageInput();
+    };
+    
     // image writer class used to output the image to a file.
     class ImageOutput {
         private:

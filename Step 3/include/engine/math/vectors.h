@@ -426,23 +426,6 @@ namespace Raytracing {
     // well they do but there isn't much of a reason to use them since this is for opengl
     class Mat4x4 {
         protected:
-            inline float m00(float d) { return data[0] = d; }
-            inline float m10(float d) { return data[1] = d; }
-            inline float m20(float d) { return data[2] = d; }
-            inline float m30(float d) { return data[3] = d; }
-            inline float m01(float d) { return data[4] = d; }
-            inline float m11(float d) { return data[5] = d; }
-            inline float m21(float d) { return data[6] = d; }
-            inline float m31(float d) { return data[7] = d; }
-            inline float m02(float d) { return data[8] = d; }
-            inline float m12(float d) { return data[9] = d; }
-            inline float m22(float d) { return data[10] = d; }
-            inline float m32(float d) { return data[11] = d; }
-            inline float m03(float d) { return data[12] = d; }
-            inline float m13(float d) { return data[13] = d; }
-            inline float m23(float d) { return data[14] = d; }
-            inline float m33(float d) { return data[15] = d; }
-            inline float m(int i, int j, float d) { return data[i * 16 + j] = d; };
             // 4x4 = 16
             float data[16]{};
             friend Mat4x4 operator+(const Mat4x4& left, const Mat4x4& right);
@@ -478,9 +461,9 @@ namespace Raytracing {
             }
         
             inline Mat4x4& translate(const Vec4& vec) {
-                m03(vec.x());
-                m13(vec.y());
-                m23(vec.z());
+                m03(float(vec.x()));
+                m13(float(vec.y()));
+                m23(float(vec.z()));
                 return *this;
             }
             
@@ -492,9 +475,9 @@ namespace Raytracing {
             }
         
             inline Mat4x4& scale(const Vec4& vec) {
-                m00(vec.x());
-                m11(vec.y());
-                m22(vec.z());
+                m00(float(vec.x()));
+                m11(float(vec.y()));
+                m22(float(vec.z()));
                 return *this;
             }
             
@@ -518,7 +501,24 @@ namespace Raytracing {
             [[nodiscard]] inline float m13() const { return data[13]; }
             [[nodiscard]] inline float m23() const { return data[14]; }
             [[nodiscard]] inline float m33() const { return data[15]; }
-            [[nodiscard]] inline float m(int i, int j) const { return data[i * 16 + j]; };
+            [[nodiscard]] inline float m(int i, int j) const { return data[i + j * 4]; };
+            inline float m00(float d) { return data[0] = d; }
+            inline float m10(float d) { return data[1] = d; }
+            inline float m20(float d) { return data[2] = d; }
+            inline float m30(float d) { return data[3] = d; }
+            inline float m01(float d) { return data[4] = d; }
+            inline float m11(float d) { return data[5] = d; }
+            inline float m21(float d) { return data[6] = d; }
+            inline float m31(float d) { return data[7] = d; }
+            inline float m02(float d) { return data[8] = d; }
+            inline float m12(float d) { return data[9] = d; }
+            inline float m22(float d) { return data[10] = d; }
+            inline float m32(float d) { return data[11] = d; }
+            inline float m03(float d) { return data[12] = d; }
+            inline float m13(float d) { return data[13] = d; }
+            inline float m23(float d) { return data[14] = d; }
+            inline float m33(float d) { return data[15] = d; }
+            inline float m(int i, int j, float d) { return data[i + j * 4] = d; };
     };
     
     // adds the two Mat4x4 left and right

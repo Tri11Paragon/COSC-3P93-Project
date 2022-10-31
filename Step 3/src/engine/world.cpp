@@ -57,7 +57,8 @@ namespace Raytracing {
     }
 
     std::pair<HitData, Object*> World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
-        /*if (bvhTree != nullptr){
+        // actually speeds up rendering by about 110,000ms (total across 16 threads)
+        if (bvhTree != nullptr){
             auto hResult = HitData{false, Vec4(), Vec4(), max};
             Object* objPtr = nullptr;
             
@@ -86,7 +87,7 @@ namespace Raytracing {
             }
             
             return {hResult, objPtr};
-        } else {*/
+        } else {
             // rejection algo without using a binary space partitioning data structure
             auto hResult = HitData{false, Vec4(), Vec4(), max};
             Object* objPtr = nullptr;
@@ -100,11 +101,11 @@ namespace Raytracing {
                 }
             }
             return {hResult, objPtr};
-        //}
+        }
     }
 
     void World::generateBVH() {
-        //bvhTree = new BVHTree(objects);
+        bvhTree = new BVHTree(objects);
     }
 
     ScatterResults DiffuseMaterial::scatter(const Ray& ray, const HitData& hitData) const {

@@ -112,7 +112,7 @@ namespace Raytracing {
              * saving on computation
              */
             // TODO: the above todo has been done, now we need to test the performance advantage of the BVH
-            //BVHTree* bvhTree = nullptr;
+            BVHTree* bvhTree = nullptr;
             std::unordered_map<std::string, Material*> materials;
         public:
             World() = default;

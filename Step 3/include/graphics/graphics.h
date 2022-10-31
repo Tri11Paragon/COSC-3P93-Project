@@ -11,16 +11,23 @@
 // we are using the GLX extension to the X11 windowing system
 // instead of using external libs like GLFW and GLAD.
 // Wayland is not and will not be supported.
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <GLES3/gl32.h>
-#include <GL/gl.h>
-#include <GL/glx.h>
+#include <config.h>
+#ifndef USE_GLFW
+    #include <X11/X.h>
+    #include <X11/Xlib.h>
+    #include <GLES3/gl32.h>
+    #include <GL/gl.h>
+    #include <GL/glx.h>
+    #include "graphics/imgui/imgui_impl_x11.h"
+#else
+    #include <graphics/gl/glad/gl.h>
+    #include <GLFW/glfw3.h>
+    #include "graphics/imgui/imgui_impl_glfw.h"
+#endif
 #include <config.h>
 #include <engine/util/std.h>
 #include <functional>
 #include <graphics/input.h>
-#include "graphics/imgui/imgui_impl_glfw.h"
 #include "graphics/imgui/imgui_impl_opengl3.h"
 #include <engine/image/image.h>
 #include <engine/types.h>
@@ -30,6 +37,21 @@ namespace Raytracing {
     void drawQuad();
     void deleteQuad();
     
+    #ifdef USE_GLFW
+    class XWindow {
+        private:
+            GLFWwindow* window;
+            int m_displayWidth, m_displayHeight;
+            bool isCloseRequested = false;
+        public:
+            XWindow(int width, int height);
+            // runs X11 event processing and some GL commands used for window drawing
+            void runUpdates(const std::function<void()>& drawFunction);
+            [[nodiscard]] inline bool shouldWindowClose() const{ return isCloseRequested; }
+            void closeWindow();
+            ~XWindow();
+    };
+    #else
     class XWindow {
         private:
             // X11 display itself
@@ -78,6 +100,7 @@ namespace Raytracing {
             void closeWindow();
             ~XWindow();
     };
+    #endif
 }
 
 #endif //STEP_3_GRAPHICS_H

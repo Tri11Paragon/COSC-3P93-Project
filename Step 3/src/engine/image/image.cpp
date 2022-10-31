@@ -7,6 +7,9 @@
 #include <fstream>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "engine/image/stb_image_write.h"
+#include "engine/image/stb_image.h"
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "engine/image/stb_image_resize.h"
 
 namespace Raytracing {
 
@@ -90,5 +93,27 @@ namespace Raytracing {
             stbi_write_hdr(fullFile.c_str(), image.getWidth(), image.getHeight(), 3, data);
             delete[](data);
         }
+    }
+    ImageInput::ImageInput(const std::string& image) {
+        data = stbi_load(image.c_str(), &width, &height, &channels, 4);
+    }
+    unsigned long* ImageInput::getImageAsIconBuffer() {
+        const int size = 32;
+        unsigned char newData[size * size * channels];
+        auto* returnData = new unsigned long[size * size + 2];
+        stbir_resize_uint8(data, width, height, 0, newData, size, size, 0, channels);
+        int charPoint = 0;
+        returnData[charPoint++] = size;
+        returnData[charPoint++] = size;
+        for (int i = 0; i < size; i++){
+            for (int j = 0; j < size; j++){
+                unsigned long dtr = (((const unsigned long*) data)[i + j * size]);
+                returnData[i + j * size + 2] = (dtr >> 48) | (dtr << ((sizeof(unsigned long)*8) - 48));
+            }
+        }
+        return returnData;
+    }
+    ImageInput::~ImageInput() {
+        stbi_image_free(data);
     }
 }
