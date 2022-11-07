@@ -40,6 +40,9 @@ namespace Raytracing {
             Vec4 horizontalAxis;
             Vec4 verticalAxis;
             Vec4 imageOrigin;
+            
+            Vec4 up {0, 1, 0};
+            
         public:
             Camera(PRECISION_TYPE fov, const Image& image): image(image),
                                                             aspectRatio(double(image.getWidth()) / double(image.getHeight())) {
@@ -66,27 +69,35 @@ namespace Raytracing {
             }
 
             Ray projectRay(PRECISION_TYPE x, PRECISION_TYPE y);
-            // makes the camera look at the lookatpos from the position p, with respects to the up direction up. (set to 0,1,0)
-            void lookAt(const Vec4& pos, const Vec4& lookAtPos, const Vec4& up);
 
             void setPosition(const Vec4& pos) { this->position = pos; }
 
             void setRotation(PRECISION_TYPE yaw, PRECISION_TYPE pitch, PRECISION_TYPE roll);
+            
+            // the follow utility functions are actually taking forever to get right
+            // I can't tell if my projection calculation is off or the view calc?
+            // got to install GLM to test which function works and which does. Maybe they are both bad. or Maybe it's my matrix impl
+            // or maybe the whole rendering stack sucks
             [[nodiscard]] Mat4x4 project() const {
-                Mat4x4 project;
+                Mat4x4 project {emptyMatrix};
                 
                 // this should be all it takes to create a mostly correct projection matrix
                 project.m00(float(1.0 / (aspectRatio * tanFovHalf)));
                 project.m11(float(1.0 / tanFovHalf));
                 project.m22(float(-((FAR_PLANE + NEAR_PLANE) / frustumLength)));
-                project.m23(-1);
-                project.m32(float(-((2 * NEAR_PLANE * FAR_PLANE) / frustumLength)));
+                // this has been transposed
+                project.m32(-1);
+                project.m23(float(-((2 * NEAR_PLANE * FAR_PLANE) / frustumLength)));
                 //project.m33(0);
                 
                 return project;
+                // use GLM to debug issues with ^
+                //glm::mat4 projectG = glm::perspective(glm::radians(90.0f), (float)aspectRatio, 0.1f, (float)1000);
+                //return Mat4x4{projectG};
             }
-            Mat4x4 view(const Vec4& lookAtPos, const Vec4& up){
+            Mat4x4 view(const Vec4& lookAtPos){
                 Mat4x4 view;
+                
                 auto w = (position - lookAtPos).normalize(); // forward
                 auto u = (Vec4::cross(up, w)).normalize(); // right
                 auto v = Vec4::cross(w, u); // up
@@ -150,10 +161,14 @@ namespace Raytracing {
                 view.m32(-float(Vec4::dot(z, position)));
                 view.m33(1);
     
-                return view;
+                return view.transpose();
             }
             [[nodiscard]] inline Vec4 getPosition() const {return position;};
-
+        
+            // the camera's position must be set with setPosition(Vec4);
+            // uses an internal up vector, assumed to be {0, 1, 0}
+            // will make the camera look at provided position with respects to the current camera position.
+            void lookAt(const Vec4& lookAtPos);
     };
 
     static Random rnd{-1, 1};

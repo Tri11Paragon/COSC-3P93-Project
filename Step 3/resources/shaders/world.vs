@@ -9,10 +9,10 @@ out vec3 outNormal;
 
 uniform mat4 transform;
 uniform mat4 projectMatrix;
-uniform mat4 ViewMatrix;
+uniform mat4 viewMatrix;
 
 void main() {
-    gl_Position = projectMatrix * ViewMatrix * transform * vec4(inPos, 1.0);
+    gl_Position = projectMatrix * viewMatrix * transform * vec4(inPos, 1.0);
     outUv = inUv;
     outNormal = inNormal;
 }

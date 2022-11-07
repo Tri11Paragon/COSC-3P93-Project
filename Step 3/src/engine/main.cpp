@@ -102,7 +102,8 @@ int main(int argc, char** args) {
     
     Raytracing::Camera camera(std::stoi(parser.getOptionValue("--fov")), image);
     //camera.setPosition({0, 0, 1});
-    camera.lookAt({6, 5, 6}, {0, 0, 0}, {0, 1, 0});
+    camera.setPosition({6, 5, 6});
+    //camera.lookAt({0, 0, 0});
     
     Raytracing::World world;
     
@@ -175,12 +176,13 @@ int main(int argc, char** args) {
                     });
                     
                     if (debug){
+                        // TODO: temp install GLM to test which function is broken.
                         auto projection = camera.project();
                         static float yaw = 0;
                         yaw += 1.0/60.0;
                         auto view = camera.view(yaw, 0);
                         worldShader.setMatrix("projectMatrix", projection);
-                        worldShader.setMatrix("ViewMatrix", view);
+                        worldShader.setMatrix("viewMatrix", view);
                         worldShader.use();
                         spiderVAO->bind();
                         spiderVAO->draw(worldShader, {{0, 1, 0}});

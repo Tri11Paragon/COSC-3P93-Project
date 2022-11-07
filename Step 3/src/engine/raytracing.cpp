@@ -22,13 +22,12 @@ namespace Raytracing {
         return {position, imageOrigin + transformedX * horizontalAxis + transformedY * verticalAxis - position};
     }
     
-    void Camera::lookAt(const Vec4& pos, const Vec4& lookAtPos, const Vec4& up) {
+    void Camera::lookAt(const Vec4& lookAtPos) {
         // standard camera lookAt function
-        auto w = (pos - lookAtPos).normalize();
+        auto w = (position - lookAtPos).normalize();
         auto u = (Vec4::cross(up, w)).normalize();
         auto v = Vec4::cross(w, u);
         
-        position = pos;
         horizontalAxis = viewportWidth * u;
         verticalAxis = viewportHeight * v;
         imageOrigin = position - horizontalAxis / 2 - verticalAxis / 2 - w;

@@ -184,7 +184,7 @@ namespace Raytracing {
     }
     
     void Shader::setMatrix(const std::string &name, Mat4x4& matrix) {
-        glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, -matrix );
+        glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, matrix.ptr() );
     }
 
     void Shader::setVec3(const std::string &name, const Vec4& vec) {

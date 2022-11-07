@@ -2,6 +2,7 @@
 release mode
 Compiling with GUI.
 Found GLFW3!
+-- GLM: Version 0.9.9.9
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-release

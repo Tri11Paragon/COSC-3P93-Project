@@ -8,6 +8,9 @@
 
 // AVX512 isn't supported on my CPU. We will use AVX2 since it is supported by most modern CPUs
 #include "config.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // I have tested this and when in release mode the O3 optimizations are capable of creating
 // far better auto-vectorized results. See the table below for more info.
@@ -427,7 +430,11 @@ namespace Raytracing {
     class Mat4x4 {
         protected:
             // 4x4 = 16
-            float data[16]{};
+            union dataType {
+                float single[16];
+                float dim[4][4];
+            };
+            dataType data {};
             friend Mat4x4 operator+(const Mat4x4& left, const Mat4x4& right);
             friend Mat4x4 operator-(const Mat4x4& left, const Mat4x4& right);
             friend Mat4x4 operator*(const Mat4x4& left, const Mat4x4& right);
@@ -437,7 +444,7 @@ namespace Raytracing {
             friend Mat4x4 operator/(float c, const Mat4x4& v);
         public:
             Mat4x4() {
-                for (float & i : data) {
+                for (float & i : data.single) {
                     i = 0;
                 }
                 // set identity matrix default
@@ -446,11 +453,56 @@ namespace Raytracing {
                 m22(1);
                 m33(1);
             }
+            explicit Mat4x4(glm::mat4x4 mat) {
+                /*m00(mat[0][0]);
+                m01(mat[0][1]);
+                m02(mat[0][2]);
+                m03(mat[0][3]);
+    
+                m10(mat[1][0]);
+                m11(mat[1][1]);
+                m12(mat[1][2]);
+                m13(mat[1][3]);
+    
+                m20(mat[2][0]);
+                m21(mat[2][1]);
+                m22(mat[2][2]);
+                m23(mat[2][3]);
+    
+                m30(mat[3][0]);
+                m31(mat[3][1]);
+                m32(mat[3][2]);
+                m33(mat[3][3]);*/
+                
+                m00(mat[0][0]);
+                m01(mat[1][0]);
+                m02(mat[2][0]);
+                m03(mat[3][0]);
+    
+                m10(mat[0][1]);
+                m11(mat[1][1]);
+                m12(mat[2][1]);
+                m13(mat[3][1]);
+    
+                m20(mat[0][2]);
+                m21(mat[1][2]);
+                m22(mat[2][2]);
+                m23(mat[3][2]);
+    
+                m30(mat[0][3]);
+                m31(mat[1][3]);
+                m32(mat[2][3]);
+                m33(mat[3][3]);
+            }
             Mat4x4(const Mat4x4& mat) {
-                for (int i = 0; i < 16; i++) {data[i] = mat.data[i];}
+                for (int i = 0; i < 16; i++) {
+                    data.single[i] = mat.data.single[i];
+                }
             }
             explicit Mat4x4(const float dat[16]) {
-                for (int i = 0; i < 16; i++) {data[i] = dat[i];}
+                for (int i = 0; i < 16; i++) {
+                    data.single[i] = dat[i];
+                }
             }
             
             inline Mat4x4& translate(float x, float y, float z) {
@@ -481,51 +533,113 @@ namespace Raytracing {
                 return *this;
             }
             
-            float* operator-() {
-                return data;
+            float* ptr() {
+                return data.single;
             }
             
-            [[nodiscard]] inline float m00() const { return data[0]; }
-            [[nodiscard]] inline float m10() const { return data[1]; }
-            [[nodiscard]] inline float m20() const { return data[2]; }
-            [[nodiscard]] inline float m30() const { return data[3]; }
-            [[nodiscard]] inline float m01() const { return data[4]; }
-            [[nodiscard]] inline float m11() const { return data[5]; }
-            [[nodiscard]] inline float m21() const { return data[6]; }
-            [[nodiscard]] inline float m31() const { return data[7]; }
-            [[nodiscard]] inline float m02() const { return data[8]; }
-            [[nodiscard]] inline float m12() const { return data[9]; }
-            [[nodiscard]] inline float m22() const { return data[10]; }
-            [[nodiscard]] inline float m32() const { return data[11]; }
-            [[nodiscard]] inline float m03() const { return data[12]; }
-            [[nodiscard]] inline float m13() const { return data[13]; }
-            [[nodiscard]] inline float m23() const { return data[14]; }
-            [[nodiscard]] inline float m33() const { return data[15]; }
-            [[nodiscard]] inline float m(int i, int j) const { return data[i + j * 4]; };
-            inline float m00(float d) { return data[0] = d; }
-            inline float m10(float d) { return data[1] = d; }
-            inline float m20(float d) { return data[2] = d; }
-            inline float m30(float d) { return data[3] = d; }
-            inline float m01(float d) { return data[4] = d; }
-            inline float m11(float d) { return data[5] = d; }
-            inline float m21(float d) { return data[6] = d; }
-            inline float m31(float d) { return data[7] = d; }
-            inline float m02(float d) { return data[8] = d; }
-            inline float m12(float d) { return data[9] = d; }
-            inline float m22(float d) { return data[10] = d; }
-            inline float m32(float d) { return data[11] = d; }
-            inline float m03(float d) { return data[12] = d; }
-            inline float m13(float d) { return data[13] = d; }
-            inline float m23(float d) { return data[14] = d; }
-            inline float m33(float d) { return data[15] = d; }
-            inline float m(int i, int j, float d) { return data[i + j * 4] = d; };
+            Mat4x4& transpose() {
+                Mat4x4 copy {*this};
+    
+                m00(copy.m00());
+                m01(copy.m10());
+                m02(copy.m20());
+                m03(copy.m30());
+    
+                m10(copy.m01());
+                m11(copy.m11());
+                m12(copy.m21());
+                m13(copy.m31());
+    
+                m20(copy.m02());
+                m21(copy.m12());
+                m22(copy.m22());
+                m23(copy.m32());
+    
+                m30(copy.m03());
+                m31(copy.m13());
+                m32(copy.m23());
+                m33(copy.m33());
+                
+                return *this;
+            }
+            
+            // Due to the conversion between the 2d array -> 1d array we must transpose the values.
+            // the old system has been archived (commented) for future debugging
+//            [[nodiscard]] inline float m00() const { return data.dim[0][0]; }
+//            [[nodiscard]] inline float m10() const { return data.dim[1][0]; }
+//            [[nodiscard]] inline float m20() const { return data.dim[2][0]; }
+//            [[nodiscard]] inline float m30() const { return data.dim[3][0]; }
+//            [[nodiscard]] inline float m01() const { return data.dim[0][1]; }
+//            [[nodiscard]] inline float m11() const { return data.dim[1][1]; }
+//            [[nodiscard]] inline float m21() const { return data.dim[2][1]; }
+//            [[nodiscard]] inline float m31() const { return data.dim[3][1]; }
+//            [[nodiscard]] inline float m02() const { return data.dim[0][2]; }
+//            [[nodiscard]] inline float m12() const { return data.dim[1][2]; }
+//            [[nodiscard]] inline float m22() const { return data.dim[2][2]; }
+//            [[nodiscard]] inline float m32() const { return data.dim[3][2]; }
+//            [[nodiscard]] inline float m03() const { return data.dim[0][3]; }
+//            [[nodiscard]] inline float m13() const { return data.dim[1][3]; }
+//            [[nodiscard]] inline float m23() const { return data.dim[2][3]; }
+//            [[nodiscard]] inline float m33() const { return data.dim[3][3]; }
+//            [[nodiscard]] inline float m(int i, int j) const { return data.dim[i][j]; };
+//            inline float m00(float d) { return data.dim[0][0] = d; }
+//            inline float m10(float d) { return data.dim[1][0] = d; }
+//            inline float m20(float d) { return data.dim[2][0] = d; }
+//            inline float m30(float d) { return data.dim[3][0] = d; }
+//            inline float m01(float d) { return data.dim[0][1] = d; }
+//            inline float m11(float d) { return data.dim[1][1] = d; }
+//            inline float m21(float d) { return data.dim[2][1] = d; }
+//            inline float m31(float d) { return data.dim[3][1] = d; }
+//            inline float m02(float d) { return data.dim[0][2] = d; }
+//            inline float m12(float d) { return data.dim[1][2] = d; }
+//            inline float m22(float d) { return data.dim[2][2] = d; }
+//            inline float m32(float d) { return data.dim[3][2] = d; }
+//            inline float m03(float d) { return data.dim[0][3] = d; }
+//            inline float m13(float d) { return data.dim[1][3] = d; }
+//            inline float m23(float d) { return data.dim[2][3] = d; }
+//            inline float m33(float d) { return data.dim[3][3] = d; }
+            
+            [[nodiscard]] inline float m00() const { return data.dim[0][0]; }
+            [[nodiscard]] inline float m10() const { return data.dim[0][1]; }
+            [[nodiscard]] inline float m20() const { return data.dim[0][2]; }
+            [[nodiscard]] inline float m30() const { return data.dim[0][3]; }
+            [[nodiscard]] inline float m01() const { return data.dim[1][0]; }
+            [[nodiscard]] inline float m11() const { return data.dim[1][1]; }
+            [[nodiscard]] inline float m21() const { return data.dim[1][2]; }
+            [[nodiscard]] inline float m31() const { return data.dim[1][3]; }
+            [[nodiscard]] inline float m02() const { return data.dim[2][0]; }
+            [[nodiscard]] inline float m12() const { return data.dim[2][1]; }
+            [[nodiscard]] inline float m22() const { return data.dim[2][2]; }
+            [[nodiscard]] inline float m32() const { return data.dim[2][3]; }
+            [[nodiscard]] inline float m03() const { return data.dim[3][0]; }
+            [[nodiscard]] inline float m13() const { return data.dim[3][1]; }
+            [[nodiscard]] inline float m23() const { return data.dim[3][2]; }
+            [[nodiscard]] inline float m33() const { return data.dim[3][3]; }
+            [[nodiscard]] inline float m(int i, int j) const { return data.dim[i][j]; };
+            inline float m00(float d) { return data.dim[0][0] = d; }
+            inline float m10(float d) { return data.dim[0][1] = d; }
+            inline float m20(float d) { return data.dim[0][2] = d; }
+            inline float m30(float d) { return data.dim[0][3] = d; }
+            inline float m01(float d) { return data.dim[1][0] = d; }
+            inline float m11(float d) { return data.dim[1][1] = d; }
+            inline float m21(float d) { return data.dim[1][2] = d; }
+            inline float m31(float d) { return data.dim[1][3] = d; }
+            inline float m02(float d) { return data.dim[2][0] = d; }
+            inline float m12(float d) { return data.dim[2][1] = d; }
+            inline float m22(float d) { return data.dim[2][2] = d; }
+            inline float m32(float d) { return data.dim[2][3] = d; }
+            inline float m03(float d) { return data.dim[3][0] = d; }
+            inline float m13(float d) { return data.dim[3][1] = d; }
+            inline float m23(float d) { return data.dim[3][2] = d; }
+            inline float m33(float d) { return data.dim[3][3] = d; }
+            inline float m(int i, int j, float d) { return data.dim[i][j] = d; };
     };
     
     // adds the two Mat4x4 left and right
     inline Mat4x4 operator+(const Mat4x4& left, const Mat4x4& right) {
         float data[16];
         for (int i = 0; i < 16; i++)
-            data[i] = left.data[i] + right.data[i];
+            data[i] = left.data.single[i] + right.data.single[i];
         return Mat4x4{data};
     }
     
@@ -533,13 +647,20 @@ namespace Raytracing {
     inline Mat4x4 operator-(const Mat4x4& left, const Mat4x4& right) {
         float data[16];
         for (int i = 0; i < 16; i++)
-            data[i] = left.data[i] - right.data[i];
+            data[i] = left.data.single[i] - right.data.single[i];
         return Mat4x4{data};
     }
     
+    // since matrices are made identity by default, we need to create the result collector matrix without identity
+    // otherwise the diagonal will be 1 off and cause weird results (see black screen issue)
+    constexpr float emptyMatrix[16] = {0, 0, 0, 0,
+                             0, 0, 0, 0,
+                             0, 0, 0, 0,
+                             0, 0, 0, 0};
+    
     // multiples the left with the right
     inline Mat4x4 operator*(const Mat4x4& left, const Mat4x4& right) {
-        Mat4x4 mat{};
+        Mat4x4 mat{emptyMatrix};
         
         // TODO: check avx with this??
         for (int i = 0; i < 4; i++) {
@@ -558,7 +679,7 @@ namespace Raytracing {
         Mat4x4 mat{};
         
         for (int i = 0; i < 16; i++) {
-            mat.data[i] = c * v.data[i];
+            mat.data.single[i] = c * v.data.single[i];
         }
         
         return mat;
@@ -569,7 +690,7 @@ namespace Raytracing {
         Mat4x4 mat{};
     
         for (int i = 0; i < 16; i++) {
-            mat.data[i] = v.data[i] * c;
+            mat.data.single[i] = v.data.single[i] * c;
         }
     
         return mat;
@@ -580,7 +701,7 @@ namespace Raytracing {
         Mat4x4 mat{};
     
         for (int i = 0; i < 16; i++) {
-            mat.data[i] = v.data[i] / c;
+            mat.data.single[i] = v.data.single[i] / c;
         }
     
         return mat;
@@ -591,10 +712,17 @@ namespace Raytracing {
         Mat4x4 mat{};
     
         for (int i = 0; i < 16; i++) {
-            mat.data[i] = c / v.data[i];
+            mat.data.single[i] = c / v.data.single[i];
         }
     
         return mat;
+    }
+    
+    inline std::ostream& operator<<(std::ostream& out, const Mat4x4& v) {
+        return out << "\rMatrix4x4{" << v.m00() << ", " << v.m01() << ", " << v.m02() << ", " << v.m03() << "} \n"\
+                   << "         {" << v.m10() << ", " << v.m11() << ", " << v.m12() << ", " << v.m13() << "} \n"\
+                   << "         {" << v.m20() << ", " << v.m21() << ", " << v.m22() << ", " << v.m23() << "} \n"\
+                   << "         {" << v.m30() << ", " << v.m31() << ", " << v.m32() << ", " << v.m33() << "} \n";
     }
     
 };
