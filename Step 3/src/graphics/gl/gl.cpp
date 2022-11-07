@@ -5,7 +5,6 @@
 
 #include <graphics/gl/gl.h>
 #include <GL/glx.h>
-#define STB_IMAGE_IMPLEMENTATION
 #include "engine/image/stb_image.h"
 
 #ifndef USE_GLFW

@@ -244,7 +244,9 @@ int main(int argc, char** args) {
     delete(haltExecution);
     delete(haltRaytracing);
     delete(pauseRaytracing);
-    deleteQuad();
+    #ifdef COMPILE_GUI
+        deleteQuad();
+    #endif
     
     for (auto& p : Raytracing::profiles)
         delete(p.second);
