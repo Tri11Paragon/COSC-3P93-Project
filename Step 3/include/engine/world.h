@@ -20,7 +20,9 @@ namespace Raytracing {
         private:
             PRECISION_TYPE radius;
         public:
-            SphereObject(const Vec4& position, PRECISION_TYPE radius, Material* material): radius(radius), Object(material, position) {}
+            SphereObject(const Vec4& position, PRECISION_TYPE radius, Material* material): radius(radius), Object(material, position) {
+               // aabb = AABB(position.x(), position.y(), position.z(), radius);
+            }
 
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
             virtual Object* clone(){
@@ -32,8 +34,8 @@ namespace Raytracing {
         private:
             Triangle theTriangle;
         public:
-            TriangleObject(const Vec4& position, Triangle theTriangle, Material* material): Object(material, position),
-                                                                                            theTriangle(std::move(theTriangle)) {}
+            TriangleObject(const Vec4& position, Triangle tri, Material* material): Object(material, position), 
+                                                                                            theTriangle(std::move(tri)) {}
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
             virtual Object* clone() {
                 return new TriangleObject(position, theTriangle, material);

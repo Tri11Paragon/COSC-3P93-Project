@@ -103,7 +103,7 @@ int main(int argc, char** args) {
     Raytracing::Camera camera(std::stoi(parser.getOptionValue("--fov")), image);
     //camera.setPosition({0, 0, 1});
     camera.setPosition({6, 5, 6});
-    //camera.lookAt({0, 0, 0});
+    camera.lookAt({0, 0, 0});
     
     Raytracing::World world;
     
