@@ -392,6 +392,10 @@ namespace Raytracing {
         return out << "Vec4{" << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << "} ";
     }
     
+    inline bool operator==(const Vec4& left, const Vec4& right) {
+        return left.x() == right.x() && left.y() == right.y() && left.z() == right.z() && left.w() == right.w();
+    }
+    
     class Ray {
         private:
             // the starting point for our ray

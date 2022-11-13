@@ -14,11 +14,8 @@ namespace Raytracing {
         protected:
             Vec4 min;
             Vec4 max;
-            bool empty = false;
         public:
-            AABB() {
-                empty = true;
-            };
+            AABB(): min({0,0,0}), max({0,0,0}) {};
 
             AABB(PRECISION_TYPE minX, PRECISION_TYPE minY, PRECISION_TYPE minZ, PRECISION_TYPE maxX, PRECISION_TYPE maxY, PRECISION_TYPE maxZ):
                     min{minX, minY, minZ}, max{maxX, maxY, maxZ} {
@@ -100,7 +97,9 @@ namespace Raytracing {
 
             [[nodiscard]] PRECISION_TYPE avgDistanceFromCenter() const;
 
-            [[nodiscard]] inline bool isEmpty() const { return empty; }
+            // Returns true if the min and max are equal, which tells us this AABB wasn't assigned
+            // or was properly created. Either way it isn't responsible to use the AABB in said case.
+            [[nodiscard]] inline bool isEmpty() const { return min == max; }
 
             [[nodiscard]] Vec4 getMin() const { return min; }
 

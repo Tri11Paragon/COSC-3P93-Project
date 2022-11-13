@@ -10,19 +10,30 @@
 #include "engine/types.h"
 
 #include <utility>
+#include <cassert>
 
 // A currently pure header implementation of a BVH. TODO: make source file.
 // this is also for testing and might not make it into the step 2.
 
 namespace Raytracing {
     
+    struct BVHObject {
+        Object* ptr = nullptr;
+        AABB aabb;
+    };
+    
+    struct BVHPartitionedSpace {
+        std::vector<BVHObject> left;
+        std::vector<BVHObject> right;
+    };
+    
     struct BVHNode {
         public:
-            std::vector<Object*> objs;
+            std::vector<BVHObject> objs;
             AABB aabb;
             BVHNode* left;
             BVHNode* right;
-            BVHNode(std::vector<Object*> objs, AABB aabb, BVHNode* left, BVHNode* right): objs(std::move(objs)), aabb(std::move(aabb)),
+            BVHNode(std::vector<BVHObject> objs, AABB aabb, BVHNode* left, BVHNode* right): objs(std::move(objs)), aabb(std::move(aabb)),
                                                                                                         left(left), right(right) {}
             ~BVHNode() {
                 delete (left);
@@ -35,42 +46,30 @@ namespace Raytracing {
             const int MAX_TREE_DEPTH = 50;
             BVHNode* root = nullptr;
             
-            void del() {
-                // delete copied objects
-                for (auto* obj : root->objs)
-                    delete(obj);
-                delete (root);
-            }
-            
             // splits the objs in the vector based on the provided AABBs
-            static std::pair<std::vector<Object*>, std::vector<Object*>>
-                    partition(const std::pair<AABB, AABB>& aabbs, const std::vector<Object*>& objs) {
-                std::vector<Object*> a1;
-                std::vector<Object*> a2;
-                for (auto* obj: objs) {
+            static BVHPartitionedSpace partition(const std::pair<AABB, AABB>& aabbs, const std::vector<BVHObject>& objs) {
+                BVHPartitionedSpace space;
+                for (const auto& obj: objs) {
                     // if this object doesn't have an AABB, we cannot use a BVH on it
-                    if (obj->getAABB().isEmpty()) {
-                        throw std::runtime_error("Invalid AABB provided to the BVH! (Your implementation is flawed)");
+                    // If this ever fails we have a problem with the implementation.
+                    assert(obj.aabb.isEmpty());
+                    if (obj.aabb.intersects(aabbs.first)) {
+                        space.left.push_back(obj);
+                    } else if (obj.aabb.intersects(aabbs.second)) {
+                        space.right.push_back(obj);
                     }
-                    if (obj->getAABB().intersects(aabbs.first)) {
-                        a1.push_back(obj);
-                    } else if (obj->getAABB().intersects(aabbs.second)) {
-                        a2.push_back(obj);
-                    }
-                    //tlog << "OBJ: " << obj->getAABB() << " " << obj->getAABB().intersects(aabbs.first) << " " << obj->getAABB().intersects(aabbs.second) << " " << objs.size() << "\n";
                 }
-                //tlog << "we split into two of sizes: " << a1.size() << "  " << a2.size() << " orig size: " << (a1.size() + a2.size()) << "\n";
-                return {a1, a2};
+                return space;
             }
             
-            BVHNode* addObjectsRecur(const std::vector<Object*>& objects, unsigned long prevSize) {
+            BVHNode* addObjectsRecur(const std::vector<BVHObject>& objects, unsigned long prevSize) {
                 //ilog << "size: " << objects.size() << "\n";
                 // prevSize was required to solve some really weird bugs
                 // which are a TODO:
                 if ((objects.size() <= 2 && !objects.empty()) || prevSize == objects.size()) {
                     AABB local;
                     for (const auto& obj: objects)
-                        local = local.expand(obj->getAABB());
+                        local = local.expand(obj.aabb);
                     return new BVHNode(objects, local, nullptr, nullptr);
                 } else if (objects.empty()) // should never reach here!!
                     return nullptr;
@@ -81,26 +80,24 @@ namespace Raytracing {
                 AABB world;
                 for (const auto& obj: objects) {
                     //tlog << obj->getAABB();
-                    world = world.expand(obj->getAABB());
+                    world = world.expand(obj.aabb);
                 }
                 //tlog << "\n";
                 // then split and partition the world
-                auto spltAABB = world.splitByLongestAxis();
-                //dlog << "We have " << world << " being split into: \n\t" << spltAABB.first << "\n\t" << spltAABB.second << "\n";
-                auto partitionedObjs = partition(spltAABB, objects);
+                auto splitAABBs = world.splitByLongestAxis();
+                auto partitionedObjs = partition(splitAABBs, objects);
                 
                 BVHNode* left = nullptr;
                 BVHNode* right = nullptr;
                 // don't try to explore nodes which don't have anything in them.
-                if (!partitionedObjs.first.empty())
-                    left = addObjectsRecur(partitionedObjs.first, objects.size());
-                if (!partitionedObjs.second.empty())
-                    right = addObjectsRecur(partitionedObjs.second, objects.size());
+                if (!partitionedObjs.left.empty())
+                    left = addObjectsRecur(partitionedObjs.left, objects.size());
+                if (!partitionedObjs.right.empty())
+                    right = addObjectsRecur(partitionedObjs.right, objects.size());
                 
                 return new BVHNode(objects, world, left, right);
             }
-            static std::vector<Object*>
-                    traverseFindRayIntersection(BVHNode* node, const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
+            static std::vector<BVHObject> traverseFindRayIntersection(BVHNode* node, const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
                 // check for intersections on both sides of the tree
                 if (node->left != nullptr) {
                     if (node->left->aabb.intersects(ray, min, max))
@@ -125,30 +122,32 @@ namespace Raytracing {
             
             void addObjects(const std::vector<Object*>& objects) {
                 if (root != nullptr)
-                    del();
+                    throw std::runtime_error("BVHTree already exists. What are you trying to do?");
                 // move all the object's aabb's into world position
-                std::vector<Object*> objs;
+                std::vector<BVHObject> objs;
                 for (auto* obj: objects) {
                     // we don't want to store all the AABBs which don't exist
                     // ie spheres
                     if (obj->getAABB().isEmpty()) {
-                        //tlog << "Goodbye\n";
                         noAABBObjects.push_back(obj);
                         continue;
                     }
-                    Object* objCopy = obj->clone();
-                    objCopy->setAABB(obj->getAABB().translate(obj->getPosition()));
-                    objs.push_back(objCopy);
+                    BVHObject bvhObject;
+                    // returns a copy of the AABB object and assigns it in to the tree storage object
+                    bvhObject.aabb = obj->getAABB().translate(obj->getPosition());
+                    // which means we don't have to do memory management, since we are using the pointer without ownership or coping now.
+                    bvhObject.ptr = obj;
+                    objs.push_back(bvhObject);
                 }
                 root = addObjectsRecur(objs, -1);
             }
             
-            std::vector<Object*> rayIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
+            std::vector<BVHObject> rayIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
                 return traverseFindRayIntersection(root, ray, min, max);
             }
             
             ~BVHTree() {
-                del();
+                delete (root);
             }
     };
     

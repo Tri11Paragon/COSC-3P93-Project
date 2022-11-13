@@ -14,6 +14,7 @@
 
 #include <utility>
 
+
 namespace Raytracing {
 
     class SphereObject : public Object {
@@ -114,14 +115,15 @@ namespace Raytracing {
              * saving on computation
              */
             // TODO: the above todo has been done, now we need to test the performance advantage of the BVH
-            BVHTree* bvhTree = nullptr;
+            std::unique_ptr<BVHTree> bvhObjects;
             std::unordered_map<std::string, Material*> materials;
         public:
             World() = default;
             World(const World& world) = delete;
             World(const World&& world) = delete;
 
-            // call this after you've added all the objects to the world. (Called by the raycaster class)
+            // Called by the raytracer class after all objects have been added to the world
+            // this allows us to generate a statically unchanging BVH for easy rendering
             void generateBVH();
 
             inline void add(Object* object) { objects.push_back(object); }

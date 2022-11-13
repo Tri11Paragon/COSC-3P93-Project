@@ -25,6 +25,8 @@
 #include <algorithm>
 #include <limits>
 #include <random>
+#include <cstdlib>
+#include <memory>
 
 /**
  * defines
@@ -47,33 +49,45 @@ const double EPSILON = 0.0000001;
 /**
  * classes
  */
-static inline double degreeeToRadian(double deg){
-    return deg * PI/180.0;
+static inline double degreeeToRadian(double deg) {
+    return deg * PI / 180.0;
 }
 
 namespace Raytracing {
+    class AlignedAllocator {
+        private:
+        public:
+            // not sure if this actually provides a performance benefit. Testing is inconclusive
+            template<typename T>
+            static T* allocateCacheAligned(int number = 1) {
+                void* allocatedSpace = aligned_alloc(64, sizeof(T) * number);
+                return new(allocatedSpace) T[number];
+            }
+    };
+    
     class Random {
         private:
             std::random_device rd; // obtain a random number from hardware
             std::mt19937 gen;
-            std::uniform_real_distribution<double> doubleDistr {0, 1};
+            std::uniform_real_distribution<double> doubleDistr{0, 1};
         public:
             Random(): gen(std::mt19937(long(rd.entropy() * 691 * 691))) {}
             Random(double min, double max): gen(std::mt19937(long(rd.entropy() * 691 * 691))), doubleDistr{min, max} {}
-            double getDouble(){
+            double getDouble() {
                 return doubleDistr(gen);
             }
     };
+    
     class String {
         public:
-            static inline std::string toLowerCase(const std::string& s){
+            static inline std::string toLowerCase(const std::string& s) {
                 std::stringstream str;
                 std::for_each(s.begin(), s.end(), [&str](unsigned char ch) {
                     str << (char) std::tolower(ch);
                 });
                 return str.str();
             }
-            static inline std::string toUpperCase(const std::string& s){
+            static inline std::string toUpperCase(const std::string& s) {
                 std::stringstream str;
                 std::for_each(s.begin(), s.end(), [&str](unsigned char ch) {
                     str << (char) std::toupper(ch);
@@ -82,7 +96,7 @@ namespace Raytracing {
             }
             // taken from https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
             // extended to return a vector
-            static inline std::vector<std::string> split(std::string s, const std::string& delim){
+            static inline std::vector<std::string> split(std::string s, const std::string& delim) {
                 size_t pos = 0;
                 std::vector<std::string> tokens;
                 while ((pos = s.find(delim)) != std::string::npos) {
@@ -102,7 +116,7 @@ namespace Raytracing {
                 }));
                 return s;
             }
-
+            
             // trim from end (in place)
             static inline std::string& rtrim(std::string& s) {
                 s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
@@ -110,26 +124,26 @@ namespace Raytracing {
                 }).base(), s.end());
                 return s;
             }
-
+            
             // trim from both ends (in place)
             static inline std::string& trim(std::string& s) {
                 ltrim(s);
                 rtrim(s);
                 return s;
             }
-
+            
             // trim from start (copying)
             static inline std::string ltrim_copy(std::string s) {
                 ltrim(s);
                 return s;
             }
-
+            
             // trim from end (copying)
             static inline std::string rtrim_copy(std::string s) {
                 rtrim(s);
                 return s;
             }
-
+            
             // trim from both ends (copying)
             static inline std::string trim_copy(std::string s) {
                 trim(s);
@@ -138,9 +152,9 @@ namespace Raytracing {
     };
 }
 
-static Raytracing::Random rnd {};
+static Raytracing::Random rnd{};
 
-static inline double getRandomDouble(){
+static inline double getRandomDouble() {
     return rnd.getDouble();
 }
 

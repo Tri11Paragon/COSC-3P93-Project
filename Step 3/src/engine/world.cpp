@@ -12,7 +12,7 @@ namespace Raytracing {
             delete (p);
         for (const auto& p: materials)
             delete (p.second);
-        //delete(bvhTree);
+        //delete(bvhObjects);
     }
 
     HitData SphereObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
@@ -58,25 +58,25 @@ namespace Raytracing {
 
     std::pair<HitData, Object*> World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
         // actually speeds up rendering by about 110,000ms (total across 16 threads)
-        if (bvhTree != nullptr){
+        if (bvhObjects != nullptr){
             auto hResult = HitData{false, Vec4(), Vec4(), max};
             Object* objPtr = nullptr;
             
-            auto intersected = bvhTree->rayIntersect(ray, min, max);
+            auto intersected = bvhObjects->rayIntersect(ray, min, max);
             
             //dlog << "Intersections " << intersected.size() << " " << ray << "\n";
             
-            for (auto* ptr : intersected) {
-                auto cResult = ptr->checkIfHit(ray, min, hResult.length);
+            for (const auto& ptr : intersected) {
+                auto cResult = ptr.ptr->checkIfHit(ray, min, hResult.length);
                 if (cResult.hit) {
                     hResult = cResult;
-                    objPtr = ptr;
+                    objPtr = ptr.ptr;
                 }
             }
             // after we check the BVH, we have to check for other missing objects
             // since stuff like spheres currently don't have AABB and AABB isn't a requirement
             // for the object class (to be assigned)
-            for (auto* obj: bvhTree->noAABBObjects) {
+            for (auto* obj: bvhObjects->noAABBObjects) {
                 // check up to the point of the last closest hit,
                 // will give the closest object's hit result
                 auto cResult = obj->checkIfHit(ray, min, hResult.length);
@@ -105,7 +105,7 @@ namespace Raytracing {
     }
 
     void World::generateBVH() {
-        bvhTree = new BVHTree(objects);
+        bvhObjects = std::make_unique<BVHTree>(objects);
     }
 
     ScatterResults DiffuseMaterial::scatter(const Ray& ray, const HitData& hitData) const {
