@@ -83,12 +83,6 @@
 				"file" : 0,
 				"line" : 90,
 				"parent" : 0
-			},
-			{
-				"command" : 1,
-				"file" : 0,
-				"line" : 97,
-				"parent" : 0
 			}
 		]
 	},
@@ -113,10 +107,6 @@
 				{
 					"backtrace" : 10,
 					"path" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-				},
-				{
-					"backtrace" : 11,
-					"path" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 3/test/glm"
 				}
 			],
 			"language" : "CXX",
@@ -170,10 +160,6 @@
 				{
 					"backtrace" : 10,
 					"path" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 3/include"
-				},
-				{
-					"backtrace" : 11,
-					"path" : "/home/brett/Documents/Brock/CS 3P93/Project/Step 3/test/glm"
 				}
 			],
 			"language" : "C",

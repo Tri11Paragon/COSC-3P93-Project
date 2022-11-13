@@ -89,12 +89,12 @@ endif ()
 #Setup project header files
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_subdirectory(test/glm)
+#add_subdirectory(test/glm)
 
 add_executable(${PROJECT_NAME} ${engine_source_files} ${graphics_source_files} ${opencl_source_files})
 
 target_link_libraries(${PROJECT_NAME} pthread)
-target_link_libraries(${PROJECT_NAME} glm)
+#target_link_libraries(${PROJECT_NAME} glm)
 
 if (COMPILE_GUI MATCHES ON AND UNIX)
     target_link_libraries(${PROJECT_NAME} OpenGL::GL OpenGL::GLU OpenGL::GLX)

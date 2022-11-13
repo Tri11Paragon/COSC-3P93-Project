@@ -8,9 +8,9 @@
 
 // AVX512 isn't supported on my CPU. We will use AVX2 since it is supported by most modern CPUs
 #include "config.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+//#include <glm/glm.hpp>
+//#include <glm/gtc/matrix_transform.hpp>
+//#include <glm/gtc/type_ptr.hpp>
 
 // I have tested this and when in release mode the O3 optimizations are capable of creating
 // far better auto-vectorized results. See the table below for more info.
@@ -453,27 +453,7 @@ namespace Raytracing {
                 m22(1);
                 m33(1);
             }
-            explicit Mat4x4(glm::mat4x4 mat) {
-                /*m00(mat[0][0]);
-                m01(mat[0][1]);
-                m02(mat[0][2]);
-                m03(mat[0][3]);
-    
-                m10(mat[1][0]);
-                m11(mat[1][1]);
-                m12(mat[1][2]);
-                m13(mat[1][3]);
-    
-                m20(mat[2][0]);
-                m21(mat[2][1]);
-                m22(mat[2][2]);
-                m23(mat[2][3]);
-    
-                m30(mat[3][0]);
-                m31(mat[3][1]);
-                m32(mat[3][2]);
-                m33(mat[3][3]);*/
-                
+            /*explicit Mat4x4(glm::mat4x4 mat) {
                 m00(mat[0][0]);
                 m01(mat[1][0]);
                 m02(mat[2][0]);
@@ -493,7 +473,7 @@ namespace Raytracing {
                 m31(mat[1][3]);
                 m32(mat[2][3]);
                 m33(mat[3][3]);
-            }
+            }*/
             Mat4x4(const Mat4x4& mat) {
                 for (int i = 0; i < 16; i++) {
                     data.single[i] = mat.data.single[i];
