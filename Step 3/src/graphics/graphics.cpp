@@ -529,7 +529,6 @@ namespace Raytracing {
         });
     
         if (debug){
-            // TODO: temp install GLM to test which function is broken.
             auto projection = m_camera.project();
             if (m_window.isMouseGrabbed()) {
                 yaw += (float) Input::getMouseDelta().x * (1000.0f / ImGui::GetIO().Framerate / 1000.0f) * 3;

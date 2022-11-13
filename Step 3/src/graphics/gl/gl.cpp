@@ -122,6 +122,7 @@ VAO::VAO(const std::vector<Raytracing::Triangle>& triangles): VaoID(createVAO())
     // enable the attributes, prevents us from having to do this later.
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
     // convert vertex data
     std::vector<float> verts;
     std::vector<float> uvs;
