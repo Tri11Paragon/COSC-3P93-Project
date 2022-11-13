@@ -83,6 +83,7 @@ class VAO {
         
         explicit VAO(const std::vector<Raytracing::Triangle> &triangles);
         VAO(const std::vector<float>& verts, const std::vector<float>& uvs, const std::vector<unsigned int>& indices);
+        VAO(const std::vector<float>& verts, const std::vector<float>& uvs);
         
         void bind() const;
         void unbind();

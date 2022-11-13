@@ -13,25 +13,144 @@ extern bool* pauseRaytracing;
 extern bool* haltRaytracing;
 
 namespace Raytracing {
+    
+    struct cubeVertexBuilder {
+        std::vector<float> cubeVerticesRaw = {
+                -0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f,  0.5f, -0.5f,
+                0.5f,  0.5f, -0.5f,
+                -0.5f,  0.5f, -0.5f,
+                -0.5f, -0.5f, -0.5f,
+            
+                -0.5f, -0.5f,  0.5f,
+                0.5f, -0.5f,  0.5f,
+                0.5f,  0.5f,  0.5f,
+                0.5f,  0.5f,  0.5f,
+                -0.5f,  0.5f,  0.5f,
+                -0.5f, -0.5f,  0.5f,
+            
+                -0.5f,  0.5f,  0.5f,
+                -0.5f,  0.5f, -0.5f,
+                -0.5f, -0.5f, -0.5f,
+                -0.5f, -0.5f, -0.5f,
+                -0.5f, -0.5f,  0.5f,
+                -0.5f,  0.5f,  0.5f,
+            
+                0.5f,  0.5f,  0.5f,
+                0.5f,  0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f,  0.5f,
+                0.5f,  0.5f,  0.5f,
+            
+                -0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f,  0.5f,
+                0.5f, -0.5f,  0.5f,
+                -0.5f, -0.5f,  0.5f,
+                -0.5f, -0.5f, -0.5f,
+            
+                -0.5f,  0.5f, -0.5f,
+                0.5f,  0.5f, -0.5f,
+                0.5f,  0.5f,  0.5f,
+                0.5f,  0.5f,  0.5f,
+                -0.5f,  0.5f,  0.5f,
+                -0.5f,  0.5f, -0.5f,
+        };
+        static cubeVertexBuilder getCubeExtends(float xRadius, float yRadius, float zRadius) {
+            cubeVertexBuilder builder;
+            builder.cubeVerticesRaw = {
+                    -0.5f, -0.5f, -zRadius,
+                    0.5f, -0.5f, -zRadius,
+                    0.5f,  0.5f, -zRadius,
+                    0.5f,  0.5f, -zRadius,
+                    -0.5f,  0.5f, -zRadius,
+                    -0.5f, -0.5f, -zRadius,
+            
+                    -0.5f, -0.5f,  zRadius,
+                    0.5f, -0.5f,  zRadius,
+                    0.5f,  0.5f,  zRadius,
+                    0.5f,  0.5f,  zRadius,
+                    -0.5f,  0.5f,  zRadius,
+                    -0.5f, -0.5f,  zRadius,
+            
+                    -xRadius,  0.5f,  0.5f,
+                    -xRadius,  0.5f, -0.5f,
+                    -xRadius, -0.5f, -0.5f,
+                    -xRadius, -0.5f, -0.5f,
+                    -xRadius, -0.5f,  0.5f,
+                    -xRadius,  0.5f,  0.5f,
 
-//    const std::vector<float> vertices = {
-//            1.0f,  1.0f, 0.0f,  // top right
-//            1.0f,  0.0f, 0.0f,  // bottom right
-//            0.0f,  0.0f, 0.0f,  // bottom left
-//            0.0f,  1.0f, 0.0f   // top left
-//    };
-//
-//    const std::vector<unsigned int> indices = {
-//            3, 1, 0,   // first triangle
-//            3, 2, 1    // second triangle
-//    };
-//
-//    const std::vector<float> texCoords = {
-//            1.0f, 1.0f,   // top right
-//            1.0f, 0.0f,   // bottom right
-//            0.0f, 0.0f,   // bottom left
-//            0.0f, 1.0f    // top left
-//    };
+                    xRadius,  0.5f,  0.5f,
+                    xRadius,  0.5f, -0.5f,
+                    xRadius, -0.5f, -0.5f,
+                    xRadius, -0.5f, -0.5f,
+                    xRadius, -0.5f,  0.5f,
+                    xRadius,  0.5f,  0.5f,
+            
+                    -0.5f, -yRadius, -0.5f,
+                    0.5f, -yRadius, -0.5f,
+                    0.5f, -yRadius,  0.5f,
+                    0.5f, -yRadius,  0.5f,
+                    -0.5f, -yRadius,  0.5f,
+                    -0.5f, -yRadius, -0.5f,
+            
+                    -0.5f,  yRadius, -0.5f,
+                    0.5f,  yRadius, -0.5f,
+                    0.5f,  yRadius,  0.5f,
+                    0.5f,  yRadius,  0.5f,
+                    -0.5f,  yRadius,  0.5f,
+                    -0.5f,  yRadius, -0.5f,
+            };
+            return builder;
+        }
+    };
+    
+    std::vector<float> cubeUVs = {
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f,
+
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f,
+
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+
+            0.0f, 1.0f,
+            1.0f, 1.0f,
+            1.0f, 0.0f,
+            1.0f, 0.0f,
+            0.0f, 0.0f,
+            0.0f, 1.0f,
+
+            0.0f, 1.0f,
+            1.0f, 1.0f,
+            1.0f, 0.0f,
+            1.0f, 0.0f,
+            0.0f, 0.0f,
+            0.0f, 1.0f
+    };
+    
     const std::vector<float> vertices = {
             1.0f, 1.0f, 0.0f,  // top right
             1.0f, -1.0f, 0.0f,  // bottom right

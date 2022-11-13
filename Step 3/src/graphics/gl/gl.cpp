@@ -223,6 +223,21 @@ VAO::~VAO() {
     }
     glDeleteBuffers(1, &instanceVBO);
 }
+VAO::VAO(const std::vector<float>& verts, const std::vector<float>& uvs): VaoID(createVAO()) {
+    this->drawCount = (int)verts.size();
+    glBindVertexArray(VaoID);
+    // enable the attributes, prevents us from having to do this later.
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    // store vertex data
+    storeData(0, 3, 3 * sizeof(float), 0, (int)verts.size(), verts.data());
+    // store texture UV data
+    storeData(1, 2, 2 * sizeof(float), 0, (int)uvs.size(), uvs.data());
+    // store normal data
+    //storeData(2, 3, 3 * sizeof(float), 0, (int)normals.size(), normals.data());
+    unbind();
+}
 
 Texture::Texture(){
 
