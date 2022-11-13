@@ -132,11 +132,10 @@ int main(int argc, char** args) {
     world.add(new Raytracing::ModelObject({0, 0, -5}, house, world.getMaterial("blueDiffuse")));
     world.add(new Raytracing::ModelObject({0, 0, 5}, house, world.getMaterial("blueDiffuse")));
     
-    Raytracing::Raycaster raycaster {camera, image, world, parser};
-    
     if (parser.hasOption("--gui") || parser.hasOption("-g")) {
         #ifdef COMPILE_GUI
             XWindow window(1440, 720);
+            Raytracing::Raycaster raycaster {camera, image, world, parser};
             Texture mainImage(&image);
             auto spiderVAO = new VAO(spider.toTriangles());
             auto houseVAO = new VAO(house.toTriangles());
@@ -147,6 +146,9 @@ int main(int argc, char** args) {
             while (!window.shouldWindowClose()) {
                 window.beginUpdate();
                 renderer.draw();
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                world.drawBVH(worldShader);
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                 window.endUpdate();
             }
             *haltExecution = true;
@@ -158,6 +160,7 @@ int main(int argc, char** args) {
             flog << "Program not compiled with GUI support! Unable to continue!\n";
         #endif
     } else {
+        Raytracing::Raycaster raycaster {camera, image, world, parser};
         // run the raycaster the standard way
         ilog << "Running raycaster!\n";
         if(parser.hasOption("--multi")) {

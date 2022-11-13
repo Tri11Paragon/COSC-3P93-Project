@@ -11,6 +11,7 @@
 #include "engine/util/models.h"
 #include "engine/math/bvh.h"
 #include "types.h"
+#include "graphics/gl/shader.h"
 
 #include <utility>
 
@@ -125,6 +126,9 @@ namespace Raytracing {
             // Called by the raytracer class after all objects have been added to the world
             // this allows us to generate a statically unchanging BVH for easy rendering
             void generateBVH();
+            #ifdef COMPILE_GUI
+                void drawBVH(Shader& worldShader) {bvhObjects->render(worldShader);}
+            #endif
 
             inline void add(Object* object) { objects.push_back(object); }
 

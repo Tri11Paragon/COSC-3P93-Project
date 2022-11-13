@@ -105,14 +105,14 @@ namespace Raytracing {
             glfwSetKeyCallback(window, [](GLFWwindow* _window, int key, int scancode, int action, int mods) -> void {
                 if (action == GLFW_PRESS)
                     Input::keyPressed(key);
-                else
+                else if (action == GLFW_RELEASE)
                     Input::keyReleased(key);
             });
     
             glfwSetMouseButtonCallback(window, [](GLFWwindow* _window, int button, int action, int mods) -> void {
                 if (action == GLFW_PRESS)
                     Input::mousePressed(button);
-                else
+                else if (action == GLFW_RELEASE)
                     Input::mouseReleased(button);
             });
     
@@ -517,7 +517,12 @@ namespace Raytracing {
                 pitch += (float) Input::getMouseDelta().y * (1000.0f / ImGui::GetIO().Framerate / 1000.0f) * 1.5f;
                 
                 PRECISION_TYPE moveAtX = 0, moveAtY = 0, moveAtZ = 0;
-                const PRECISION_TYPE speed = 40.0f;
+                PRECISION_TYPE speed = 40.0f;
+                
+                if (Input::isKeyDown(GLFW_KEY_LEFT_ALT))
+                    speed = 5.0f;
+                if (Input::isKeyDown(GLFW_KEY_LEFT_CONTROL))
+                    speed = speed * 2;
                 
                 if (Input::isKeyDown(GLFW_KEY_W))
                     moveAtX = speed * m_window.getFrameTimeSeconds();

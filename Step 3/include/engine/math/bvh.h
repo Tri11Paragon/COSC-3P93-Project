@@ -8,14 +8,24 @@
 
 #include "engine/util/std.h"
 #include "engine/types.h"
+#include <config.h>
+#ifdef COMPILE_GUI
+    #include <graphics/gl/gl.h>
+#endif
 
 #include <utility>
-#include <cassert>
 
 // A currently pure header implementation of a BVH. TODO: make source file.
 // this is also for testing and might not make it into the step 2.
 
 namespace Raytracing {
+    
+    #ifdef COMPILE_GUI
+        struct BVHDebugVAO {
+            VAO* vaoPtr;
+            Vec4 position;
+        };
+    #endif
     
     struct BVHObject {
         Object* ptr = nullptr;
@@ -43,6 +53,9 @@ namespace Raytracing {
     
     class BVHTree {
         private:
+            #ifdef COMPILE_GUI
+                std::vector<BVHDebugVAO> aabbVAOs;
+            #endif
             const int MAX_TREE_DEPTH = 50;
             BVHNode* root = nullptr;
             
@@ -52,7 +65,7 @@ namespace Raytracing {
                 for (const auto& obj: objs) {
                     // if this object doesn't have an AABB, we cannot use a BVH on it
                     // If this ever fails we have a problem with the implementation.
-                    assert(!obj.aabb.isEmpty());
+                    RTAssert(!obj.aabb.isEmpty());
                     if (obj.aabb.intersects(aabbs.first)) {
                         space.left.push_back(obj);
                     }
@@ -133,6 +146,20 @@ namespace Raytracing {
                         noAABBObjects.push_back(obj);
                         continue;
                     }
+    
+                    #ifdef COMPILE_GUI
+                        // create a VAO for debugging the AABB bounds.
+                        BVHDebugVAO vaoStorage {};
+                        auto aabbCenter = obj->getAABB().getCenter();
+                        auto aabbXRadius = obj->getAABB().getXRadius(aabbCenter);
+                        auto aabbYRadius = obj->getAABB().getYRadius(aabbCenter);
+                        auto aabbZRadius = obj->getAABB().getZRadius(aabbCenter);
+                        auto aabbVertexData = Shapes::cubeVertexBuilder::getCubeExtends(float(aabbXRadius), float(aabbYRadius), float(aabbZRadius));
+                        vaoStorage.vaoPtr = new VAO(aabbVertexData.cubeVerticesRaw, aabbVertexData.cubeUVs);
+                        vaoStorage.position = obj->getPosition();
+                        aabbVAOs.push_back(vaoStorage);
+                    #endif
+                    
                     BVHObject bvhObject;
                     // returns a copy of the AABB object and assigns it in to the tree storage object
                     bvhObject.aabb = obj->getAABB().translate(obj->getPosition());
@@ -146,9 +173,26 @@ namespace Raytracing {
             std::vector<BVHObject> rayIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
                 return traverseFindRayIntersection(root, ray, min, max);
             }
+        
+            #ifdef COMPILE_GUI
+                // renders all the debug VAOs on screen.
+                void render (Shader& worldShader){
+                    worldShader.use();
+                    worldShader.setInt("useWhite", 1);
+                    for (const auto& debugVAO : aabbVAOs){
+                        debugVAO.vaoPtr->bind();
+                        debugVAO.vaoPtr->draw(worldShader, {debugVAO.position});
+                    }
+                    worldShader.setInt("useWhite", 0);
+                }
+            #endif
             
             ~BVHTree() {
                 delete (root);
+                #ifdef COMPILE_GUI
+                    for (const auto& debugVAORef : aabbVAOs)
+                        delete(debugVAORef.vaoPtr);
+                #endif
             }
     };
     

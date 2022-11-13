@@ -104,6 +104,16 @@ namespace Raytracing {
             [[nodiscard]] Vec4 getMin() const { return min; }
 
             [[nodiscard]] Vec4 getMax() const { return max; }
+            inline PRECISION_TYPE getXRadius(const Vec4& center){
+                return max.x() - center.x();
+            }
+            inline PRECISION_TYPE getYRadius(const Vec4& center){
+                return max.y() - center.y();
+            }
+            inline PRECISION_TYPE getZRadius(const Vec4& center){
+                return max.z() - center.z();
+            }
+            
 
     };
 

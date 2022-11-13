@@ -28,6 +28,8 @@
 #include <cstdlib>
 #include <memory>
 
+#define RTAssert(condition) static_cast <bool> (condition) ? void(0) : throw std::runtime_error("Assert Failed!");
+
 /**
  * defines
  */
