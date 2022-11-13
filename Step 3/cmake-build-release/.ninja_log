@@ -26,3 +26,9 @@
 2	2242	1668360836450355031	CMakeFiles/Step_3.dir/src/engine/util/parser.cpp.o	1007c86c207ac940
 2	1579	1668362569316307713	CMakeFiles/Step_3.dir/src/engine/world.cpp.o	6470df278966c4
 1579	1704	1668362569440311315	Step_3	f055ce2b85635598
+1	1319	1668362704700239985	CMakeFiles/Step_3.dir/src/engine/util/models.cpp.o	164394d360c43072
+2	1568	1668362704948247191	CMakeFiles/Step_3.dir/src/graphics/graphics.cpp.o	ce988de97a5cb51d
+2	1667	1668362705048250097	CMakeFiles/Step_3.dir/src/engine/world.cpp.o	6470df278966c4
+1	1710	1668362705092251375	CMakeFiles/Step_3.dir/src/engine/raytracing.cpp.o	11f0e227e9fda9ca
+1	2005	1668362705384259861	CMakeFiles/Step_3.dir/src/engine/main.cpp.o	641dce3f86933e2e
+2005	2097	1668362705476262536	Step_3	f055ce2b85635598

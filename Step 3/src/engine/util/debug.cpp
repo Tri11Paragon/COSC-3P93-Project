@@ -58,8 +58,8 @@ namespace Raytracing {
         ImGui::NewLine();*/
     }
     
-    profiler::~profiler() {
+    //profiler::~profiler() {
         // currently unused as we don't have a UI yet.
         //TD::debugUI::deleteTab(this);
-    }
+    //}
 }

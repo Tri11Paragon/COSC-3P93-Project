@@ -10,5 +10,5 @@ bool* pauseRaytracing;
 bool* haltRaytracing;
 
 namespace Raytracing {
-    std::unordered_map<std::string, profiler*> profiles;
+    std::unordered_map<std::string, std::shared_ptr<profiler>> profiles;
 }

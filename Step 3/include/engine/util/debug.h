@@ -20,7 +20,7 @@
 
 namespace Raytracing {
     class profiler;
-    extern std::unordered_map<std::string, profiler*> profiles;
+    extern std::unordered_map<std::string, std::shared_ptr<profiler>> profiles;
     
     class DebugTab{
         protected:
@@ -47,7 +47,7 @@ namespace Raytracing {
                     auto p = profiles.at(name);
                     p->start(tabName);
                 } else {
-                    auto p = new profiler(name);
+                    auto p = std::make_shared<profiler>(name);
                     profiles.insert(std::pair(name, p));
                     p->start(tabName);
                 }
@@ -65,7 +65,6 @@ namespace Raytracing {
             static void print(const std::string& name){
                 try {
                     profiles.at(name)->print();
-                    delete(profiles.at(name));
                 } catch (std::exception& e){}
             }
             
@@ -77,15 +76,11 @@ namespace Raytracing {
             
             void render();
             static void render(int count) {
-                for (auto p : profiles)
+                for (const auto& p : profiles)
                     p.second->render();
             }
             
-            ~profiler();
-            static void cleanup(){
-                for (const auto& p : profiles)
-                    delete(p.second);
-            }
+            ~profiler() = default;
     };
     
 }

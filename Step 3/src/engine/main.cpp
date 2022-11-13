@@ -196,8 +196,5 @@ int main(int argc, char** args) {
         deleteQuad();
     #endif
     
-    for (auto& p : Raytracing::profiles)
-        delete(p.second);
-    
     return 0;
 }

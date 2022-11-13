@@ -52,10 +52,11 @@ namespace Raytracing {
                 for (const auto& obj: objs) {
                     // if this object doesn't have an AABB, we cannot use a BVH on it
                     // If this ever fails we have a problem with the implementation.
-                    assert(obj.aabb.isEmpty());
+                    assert(!obj.aabb.isEmpty());
                     if (obj.aabb.intersects(aabbs.first)) {
                         space.left.push_back(obj);
-                    } else if (obj.aabb.intersects(aabbs.second)) {
+                    }
+                    if (obj.aabb.intersects(aabbs.second)) {
                         space.right.push_back(obj);
                     }
                 }
