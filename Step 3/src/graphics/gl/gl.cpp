@@ -302,9 +302,11 @@ void Texture::updateImage() {
     // slightly different order from STBi
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
-            data[pixelIndex++] = _image->getPixelR(i, j);
-            data[pixelIndex++] = _image->getPixelG(i, j);
-            data[pixelIndex++] = _image->getPixelB(i, j);
+            const auto V = Raytracing::Vec4(255.0, 255.0, 255.0, 255.0);
+            auto pVec = _image->getPixelColor(i, j) * V;
+            data[pixelIndex++] = static_cast<unsigned char>(pVec.r());
+            data[pixelIndex++] = static_cast<unsigned char>(pVec.g());
+            data[pixelIndex++] = static_cast<unsigned char>(pVec.z());
         }
     }
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);

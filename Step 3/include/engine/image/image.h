@@ -32,10 +32,18 @@ namespace Raytracing {
                 return pixelData[(x * height) + y];
             }
 
-            [[nodiscard]] int getPixelR(int x, int y) const;
-            [[nodiscard]] int getPixelG(int x, int y) const;
-            [[nodiscard]] int getPixelB(int x, int y) const;
-            [[nodiscard]] int getPixelA(int x, int y) const;
+            [[nodiscard]] inline int getPixelR(int x, int y) const {
+                return int(255.0 * getPixelColor(x, y).r());
+            };
+            [[nodiscard]] inline int getPixelG(int x, int y) const {
+                return int(255.0 * getPixelColor(x, y).g());
+            };
+            [[nodiscard]] inline int getPixelB(int x, int y) const {
+                return int(255.0 * getPixelColor(x, y).b());
+            }
+            [[nodiscard]] inline int getPixelA(int x, int y) const {
+                return int(255.0 * getPixelColor(x, y).a());
+            }
 
             [[nodiscard]] inline int getWidth() const { return int(width); }
 

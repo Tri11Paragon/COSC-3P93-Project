@@ -156,12 +156,12 @@ namespace Raytracing {
                 view.m23(float(z.w()));
     
                 // view matrix are inverted, dot product to simulate translate matrix multiplication
-                view.m30(-float(Vec4::dot(x, position)));
-                view.m31(-float(Vec4::dot(y, position)));
-                view.m32(-float(Vec4::dot(z, position)));
+                view.m03(-float(Vec4::dot(x, position)));
+                view.m13(-float(Vec4::dot(y, position)));
+                view.m23(-float(Vec4::dot(z, position)));
                 view.m33(1);
     
-                return view.transpose();
+                return view;
             }
             [[nodiscard]] inline Vec4 getPosition() const {return position;};
         

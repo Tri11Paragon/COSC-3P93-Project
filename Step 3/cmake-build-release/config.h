@@ -12,8 +12,8 @@
 /* #undef COMPILER_DEBUG_ENABLED */
 #define COMPILER_DEBUG_ENABLED_BOOL false
 
-/* #undef COMPILE_GUI */
-/* #undef COMPILE_OPENCL */
+#define COMPILE_GUI
+#define COMPILE_OPENCL
 #define USE_GLFW
 
 #define CMAKE_CONFIG

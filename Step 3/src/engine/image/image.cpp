@@ -27,24 +27,6 @@ namespace Raytracing {
         }
     }
 
-    int Image::getPixelR(int x, int y) const {
-        // values are stored as a floating point number [0, 1)
-        // but most formats want an int [0, 255]
-        return int(255.0 * getPixelColor(x, y).r());
-    }
-
-    int Image::getPixelG(int x, int y) const {
-        return int(255.0 * getPixelColor(x, y).g());
-    }
-
-    int Image::getPixelB(int x, int y) const {
-        return int(255.0 * getPixelColor(x, y).b());
-    }
-
-    int Image::getPixelA(int x, int y) const {
-        return int(255.0 * getPixelColor(x, y).a());
-    }
-
     Image::~Image() {
         delete[](pixelData);
     }

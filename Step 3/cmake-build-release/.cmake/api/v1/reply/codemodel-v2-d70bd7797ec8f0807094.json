@@ -10,7 +10,7 @@
 					[
 						1
 					],
-					"jsonFile" : "directory-.-release-f5ebdc15457944623624.json",
+					"jsonFile" : "directory-.-Release-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -28,7 +28,7 @@
 					[
 						2
 					],
-					"jsonFile" : "directory-test.glm-release-95c406af662123ee15d3.json",
+					"jsonFile" : "directory-test.glm-Release-95c406af662123ee15d3.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.2"
@@ -43,7 +43,7 @@
 				},
 				{
 					"build" : "test/glm/glm",
-					"jsonFile" : "directory-test.glm.glm-release-66c907871e1073bd9d10.json",
+					"jsonFile" : "directory-test.glm.glm-Release-66c907871e1073bd9d10.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.2"
@@ -53,7 +53,7 @@
 					"source" : "test/glm/glm"
 				}
 			],
-			"name" : "release",
+			"name" : "Release",
 			"projects" : 
 			[
 				{
@@ -90,14 +90,14 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "Step_3::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Step_3-release-863614f6ec13ccef396b.json",
+					"jsonFile" : "target-Step_3-Release-9d070be2d558db83eab9.json",
 					"name" : "Step_3",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "uninstall::@03d667b7e44308a0e83f",
-					"jsonFile" : "target-uninstall-release-d7545dfc03b98980314f.json",
+					"jsonFile" : "target-uninstall-Release-d7545dfc03b98980314f.json",
 					"name" : "uninstall",
 					"projectIndex" : 1
 				}

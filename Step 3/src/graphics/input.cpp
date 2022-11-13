@@ -4,4 +4,6 @@
  */
 #include <graphics/input.h>
 
-bool* keysDown = new bool[0xffff];
+namespace Raytracing {
+    InputState* _inputState = new InputState{};
+}
