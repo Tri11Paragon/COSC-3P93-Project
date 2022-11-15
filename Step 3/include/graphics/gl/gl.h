@@ -237,6 +237,7 @@ class VAO {
         void draw() const;
         // draw as if it's a box that we need to bulk draw.
         void draw(Raytracing::Shader& shader, const std::vector<Raytracing::Vec4>& positions);
+        void draw(Raytracing::Shader& shader);
         ~VAO();
 };
 

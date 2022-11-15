@@ -516,6 +516,17 @@ namespace Raytracing {
                 yaw += (float) Input::getMouseDelta().x * (1000.0f / ImGui::GetIO().Framerate / 1000.0f) * 3;
                 pitch += (float) Input::getMouseDelta().y * (1000.0f / ImGui::GetIO().Framerate / 1000.0f) * 1.5f;
                 
+                const PRECISION_TYPE turnSpeed = 50;
+                
+                if (Input::isKeyDown(GLFW_KEY_LEFT))
+                    yaw += float(turnSpeed * m_window.getFrameTimeSeconds());
+                if (Input::isKeyDown(GLFW_KEY_RIGHT))
+                    yaw -= float(turnSpeed * m_window.getFrameTimeSeconds());
+                if (Input::isKeyDown(GLFW_KEY_UP))
+                    pitch += float(turnSpeed * m_window.getFrameTimeSeconds());
+                if (Input::isKeyDown(GLFW_KEY_DOWN))
+                    pitch -= float(turnSpeed * m_window.getFrameTimeSeconds());
+                
                 PRECISION_TYPE moveAtX = 0, moveAtY = 0, moveAtZ = 0;
                 PRECISION_TYPE speed = 40.0f;
                 
@@ -554,9 +565,9 @@ namespace Raytracing {
             m_spiderVAO->bind();
             m_spiderVAO->draw(m_worldShader, {{0, 1, 0}});
             m_houseVAO->bind();
-            m_houseVAO->draw(m_worldShader, {{5, 1, 0}, {0, 0, -5}, {0, 0, 5}});
+            m_houseVAO->draw(m_worldShader, {{15, 1, 0}, {0, 0, -15}, {0, 0, 15}});
             m_planeVAO->bind();
-            m_planeVAO->draw(m_worldShader, {{-5, 0.5, 0}});
+            m_planeVAO->draw(m_worldShader, {{-15, 0.5, 0}});
         } else {
             m_imageShader.use();
             m_mainImage.updateImage();

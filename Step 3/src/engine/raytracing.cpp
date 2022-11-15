@@ -33,8 +33,52 @@ namespace Raytracing {
         imageOrigin = position - horizontalAxis / 2 - verticalAxis / 2 - w;
     }
     
-    void Camera::setRotation(const PRECISION_TYPE yaw, const PRECISION_TYPE pitch, const PRECISION_TYPE roll) {
+    void Camera::setRotation(const PRECISION_TYPE yaw, const PRECISION_TYPE pitch) {
         // TODO:
+    }
+    Mat4x4 Camera::view(PRECISION_TYPE yaw, PRECISION_TYPE pitch)  {
+        Mat4x4 view;
+    
+        pitch = degreeeToRadian(pitch);
+        yaw = degreeeToRadian(yaw);
+    
+        PRECISION_TYPE cosPitch = std::cos(pitch);
+        PRECISION_TYPE cosYaw = std::cos(yaw);
+        PRECISION_TYPE sinPitch = std::sin(pitch);
+        PRECISION_TYPE sinYaw = std::sin(yaw);
+    
+        auto x = Vec4{cosYaw, 0, -sinYaw}; // forward
+        auto y = Vec4{sinYaw * sinPitch, cosPitch, cosYaw * sinPitch}; // right
+        auto z = Vec4{sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw}; // up
+    
+        viewportHeight = 1 * tanFovHalf;
+        viewportWidth = aspectRatio * viewportHeight;
+        horizontalAxis = viewportWidth * x;
+        verticalAxis = viewportHeight * y;
+        imageOrigin = position - horizontalAxis / 2 - verticalAxis / 2 - z;
+        
+        view.m00(float(x.x()));
+        view.m01(float(x.y()));
+        view.m02(float(x.z()));
+        view.m03(float(x.w()));
+    
+        view.m10(float(y.x()));
+        view.m11(float(y.y()));
+        view.m12(float(y.z()));
+        view.m13(float(y.w()));
+    
+        view.m20(float(z.x()));
+        view.m21(float(z.y()));
+        view.m22(float(z.z()));
+        view.m23(float(z.w()));
+    
+        // view matrix are inverted, dot product to simulate translate matrix multiplication
+        view.m03(-float(Vec4::dot(x, position)));
+        view.m13(-float(Vec4::dot(y, position)));
+        view.m23(-float(Vec4::dot(z, position)));
+        view.m33(1);
+    
+        return view;
     }
     
     struct RayData {

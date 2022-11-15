@@ -617,6 +617,20 @@ namespace Raytracing {
             inline float m23(float d) { return data.dim[3][2] = d; }
             inline float m33(float d) { return data.dim[3][3] = d; }
             inline float m(int i, int j, float d) { return data.dim[i][j] = d; };
+//            inline float* operator [](int _i) {
+//                return data.dim[_i];
+//            }
+            
+            [[nodiscard]] PRECISION_TYPE determinant() const {
+                return m00() * (m11() * m22() * m33() + m12() * m23() * m31() + m13() * m21() * m32()
+                                    - m31() * m22() * m13() - m32() * m23() * m11() - m33() * m21() * m12())
+                        - m10() * (m01() * m22() * m33() + m02() * m23() * m31() + m03() * m21() * m32()
+                                    - m31() * m32() * m03() - m32() * m23() * m01() - m33() * m21() * m02())
+                        + m20() * (m01() * m12() * m33() + m02() * m13() * m31() + m03() * m11() * m32()
+                                    - m31() * m12() * m03() - m32() * m13() * m01() - m33() * m11() * m02())
+                        - m30() * (m01() * m12() * m23() + m02() * m13() * m21() + m03() * m11() * m22()
+                                    - m21() * m12() * m03() - m22() * m13() * m01() - m23() * m11() * m02());
+            }
     };
     
     // adds the two Mat4x4 left and right

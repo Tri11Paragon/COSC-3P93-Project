@@ -209,6 +209,9 @@ void VAO::draw(Raytracing::Shader& shader, const std::vector<Raytracing::Vec4>& 
         glDrawArrays(GL_TRIANGLES, 0, drawCount);
     }
 }
+void VAO::draw(Raytracing::Shader& shader) {
+    glDrawArrays(GL_TRIANGLES, 0, drawCount);
+}
 void VAO::draw() const {
     if (drawCount < 0)
         return;

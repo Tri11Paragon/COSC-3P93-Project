@@ -104,13 +104,13 @@ namespace Raytracing {
             [[nodiscard]] Vec4 getMin() const { return min; }
 
             [[nodiscard]] Vec4 getMax() const { return max; }
-            inline PRECISION_TYPE getXRadius(const Vec4& center){
+            [[nodiscard]] inline PRECISION_TYPE getXRadius(const Vec4& center) const {
                 return max.x() - center.x();
             }
-            inline PRECISION_TYPE getYRadius(const Vec4& center){
+            [[nodiscard]] inline PRECISION_TYPE getYRadius(const Vec4& center) const {
                 return max.y() - center.y();
             }
-            inline PRECISION_TYPE getZRadius(const Vec4& center){
+            [[nodiscard]] inline PRECISION_TYPE getZRadius(const Vec4& center) const {
                 return max.z() - center.z();
             }
             
@@ -118,8 +118,13 @@ namespace Raytracing {
     };
 
     inline std::ostream& operator<<(std::ostream& out, const AABB& v) {
-        return out << "AABB{min{" << v.getMin().x() << ", " << v.getMin().y() << ", " << v.getMin().z() << "}, max{" << v.getMax().x() << ", " << v.getMax().y()
-                   << ", " << v.getMax().z() << "}} ";
+        auto max = v.getMax();
+        auto min = v.getMin();
+        auto center = v.getCenter();
+        return out << "AABB {\n\t min{" << min.x() << ", " << min.y() << ", " << min.z() << "},\n\t max{" << max.x() << ", " << max.y()
+                   << ", " << max.z() << "},\n\t diff{" << max.x() - min.x() << ", " << max.y() - min.y() << ", " << max.z() - min.z() << "},\n\t "
+                   << "center{" << center.x() << ", " << center.y() << ", " << center.z() << "},\n\t "
+                   << "radi{" << v.getXRadius(center) << ", " << v.getYRadius(center) << ", " << v.getZRadius(center) << "}\n};\n";
     }
 }
 
