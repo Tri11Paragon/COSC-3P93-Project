@@ -77,7 +77,7 @@ namespace Raytracing {
      * https://medium.com/@bromanz/another-view-on-the-classic-ray-aabb-intersection-algorithm-for-bvh-traversal-41125138b525
      */
 
-    bool AABB::simpleSlabRayAABBMethod(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax){
+    AABBHitData AABB::simpleSlabRayAABBMethod(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax){
         // branch less design
         // adapted from 2d to fit our 3d scene.
         // (turns out this is actually a pretty standard design, but could use some optimization)
@@ -86,33 +86,28 @@ namespace Raytracing {
 
         tmin = std::min(tmin, std::min(tx1, tx2));
         tmax = std::max(tmax, std::max(tx1, tx2));
-    
-        // gives us an early exit if we know it's outside the bounds.
-        if (tmax <= tmin)
-            return false;
 
         PRECISION_TYPE ty1 = (min.y() - ray.getStartingPoint().y())*ray.getInverseDirection().y();
         PRECISION_TYPE ty2 = (max.y() - ray.getStartingPoint().y())*ray.getInverseDirection().y();
 
         tmin = std::max(tmin, std::min(ty1, ty2));
         tmax = std::min(tmax, std::max(ty1, ty2));
-    
-        if (tmax <= tmin)
-            return false;
 
         PRECISION_TYPE tz1 = (min.z() - ray.getStartingPoint().z())*ray.getInverseDirection().z();
         PRECISION_TYPE tz2 = (max.z() - ray.getStartingPoint().z())*ray.getInverseDirection().z();
 
         tmin = std::max(tmin, std::min(tz1, tz2));
         tmax = std::min(tmax, std::max(tz1, tz2));
-    
-        if (tmax <= tmin)
-            return false;
-
-        return true;
+        
+        tmin = std::max(tmin, 0.0);
+        
+        // TODO: nans?
+        tlog << "TMin: " << tmin << " TMax: " << tmax << " Case: " << (tmax > tmin) << "\n";
+        
+        return {tmax > tmin, tmin};
     }
-
-    bool AABB::intersects(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax) {
+    
+    AABBHitData AABB::intersects(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax) {
         return simpleSlabRayAABBMethod(ray, tmin, tmax);
     }
     

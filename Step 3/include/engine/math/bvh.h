@@ -53,21 +53,56 @@ namespace Raytracing {
                 return transform;
             }
         public:
+            struct BVHHitData {
+                BVHNode* ptr;
+                AABBHitData data;
+                bool hit = false;
+            };
             std::vector<BVHObject> objs;
             AABB aabb;
             BVHNode* left;
             BVHNode* right;
             int index;
+            int hit = 0;
             BVHNode(std::vector<BVHObject> objs, AABB aabb, BVHNode* left, BVHNode* right): objs(std::move(objs)), aabb(std::move(aabb)),
                                                                                             left(left), right(right) {
                 index = count++;
             }
+            BVHHitData doesRayIntersect(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max){
+                auto ourHitData = aabb.intersects(r, min, max);
+                ilog << "Our hit did hit? " << ourHitData.hit << "\n";
+                if (!ourHitData.hit)
+                    return {this, ourHitData, false};
+                
+                /*this->hit = 2;
+                
+                BVHHitData leftHit{};
+                BVHHitData rightHit{};
+                if (left != nullptr)
+                    leftHit = left->doesRayIntersect(r, min, max);
+                if (right != nullptr)
+                    rightHit = right->doesRayIntersect(r, min, max);
+                
+                if (!leftHit.hit && !rightHit.hit)
+                    return {this, ourHitData, ourHitData.hit};
+                
+                return leftHit.hit ? leftHit : rightHit;*/
+                tlog << ourHitData.hit << "\n";
+                return {this, ourHitData, true};
+            }
             #ifdef COMPILE_GUI
             void draw(Shader& worldShader) {
                 worldShader.setVec3("color", {1.0, 1.0, 1.0});
-                if (selected == index) {
-                    worldShader.setVec3("color", {0.0, 0.0, 1.0});
-                    if (ImGui::BeginListBox("", ImVec2(250, 350))) {
+                if (selected == index || hit) {
+                    if (hit == 1)
+                        worldShader.setVec3("color", {0.0, 0.0, 1.0});
+                    else if (hit == 2)
+                        worldShader.setVec3("color", {0.0, 1.0, 0.0});
+                    else if (hit == 0)
+                        worldShader.setVec3("color", {1.0, 1.0, 1.0});
+                    else
+                        worldShader.setVec3("color", {1.0, 0.5, 0.5});
+                    if (selected == index && ImGui::BeginListBox("", ImVec2(250, 350))) {
                         std::stringstream strs;
                         strs << aabb;
                         ImGui::Text("%s", strs.str().c_str());
@@ -124,7 +159,6 @@ namespace Raytracing {
     
     class BVHTree {
         private:
-            const int MAX_TREE_DEPTH = 50;
             BVHNode* root = nullptr;
             
             // splits the objs in the vector based on the provided AABBs
@@ -174,10 +208,6 @@ namespace Raytracing {
                     return new BVHNode(objects, world, nullptr, nullptr);
                 } else if (objects.empty()) // should never reach here!!
                     return nullptr;
-                    
-                
-                
-                elog << partitionedObjs.left.size() << " :: " << partitionedObjs.right.size() << "\n";
                 
                 BVHNode* left = nullptr;
                 BVHNode* right = nullptr;
@@ -188,23 +218,6 @@ namespace Raytracing {
                     right = addObjectsRecur(partitionedObjs.right, partitionedObjs);
                 
                 return new BVHNode(objects, world, left, right);
-            }
-            static std::vector<BVHObject> traverseFindRayIntersection(BVHNode* node, const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
-                // check for intersections on both sides of the tree
-                if (node->left != nullptr) {
-                    if (node->left->aabb.intersects(ray, min, max))
-                        return traverseFindRayIntersection(node->left, ray, min, max);
-                }
-                // since each aabb should be minimum, we shouldn't have to traverse both sides.
-                // we want to reduce our problem size by half each iteration anyways
-                // divide and conquer and so on
-                if (node->right != nullptr)
-                    if (node->right->aabb.intersects(ray, min, max))
-                        return traverseFindRayIntersection(node->right, ray, min, max);
-                // return the objects of the lowest BVH node we can find
-                // if this is implemented properly this should only contain one, maybe two objects
-                // which is much faster! (especially when dealing with triangles)
-                return node->objs;
             }
             #ifdef COMPILE_GUI
             void drawNodesRecur(Shader& worldShader, BVHNode* node) {
@@ -222,6 +235,13 @@ namespace Raytracing {
                     guiNodesRecur(node->right);
             }
             #endif
+            void reset(BVHNode* node){
+                if (node == nullptr)
+                    return;
+                node->hit = false;
+                reset(node->left);
+                reset(node->right);
+            }
         public:
             std::vector<Object*> noAABBObjects;
             explicit BVHTree(const std::vector<Object*>& objectsInWorld) {
@@ -256,7 +276,13 @@ namespace Raytracing {
             }
             
             std::vector<BVHObject> rayIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
-                return traverseFindRayIntersection(root, ray, min, max);
+                RTAssert(root != nullptr);
+                auto results = root->doesRayIntersect(ray, min, max);
+                results.ptr->hit = 1;
+                return results.ptr->objs;
+            }
+            void resetNodes(){
+                reset(root);
             }
             
             #ifdef COMPILE_GUI

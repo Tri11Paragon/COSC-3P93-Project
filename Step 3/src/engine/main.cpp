@@ -148,7 +148,7 @@ int main(int argc, char** args) {
             auto planeVAO = new VAO(plane.toTriangles());
             Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
             Shader worldShader("../resources/shaders/world.vs", "../resources/shaders/world.fs");
-            Raytracing::DisplayRenderer renderer {window, mainImage, shader, worldShader, raycaster, parser, spiderVAO, houseVAO, planeVAO, camera};
+            Raytracing::DisplayRenderer renderer {window, mainImage, world, shader, worldShader, raycaster, parser, spiderVAO, houseVAO, planeVAO, camera};
             while (!window.shouldWindowClose()) {
                 window.beginUpdate();
                 renderer.draw();

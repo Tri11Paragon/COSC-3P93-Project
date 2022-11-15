@@ -68,6 +68,8 @@ namespace Raytracing {
             
             void setMouseGrabbed(bool grabbed);
             bool isMouseGrabbed();
+            [[nodiscard]] inline int displayWidth() const {return m_displayWidth;}
+            [[nodiscard]] inline int displayHeight() const {return m_displayHeight;}
             
             void closeWindow();
             ~XWindow();
@@ -132,6 +134,7 @@ namespace Raytracing {
         private:
             XWindow& m_window;
             Texture& m_mainImage;
+            World& m_world;
             Shader& m_imageShader;
             Shader& m_worldShader;
             Raycaster& m_raycaster;
@@ -143,6 +146,7 @@ namespace Raytracing {
         public:
             DisplayRenderer(XWindow& mWindow,
                             Texture& mMainImage,
+                            World& world,
                             Shader& mImageShader,
                             Shader& mWorldShader,
                             Raycaster& mRaycaster,
@@ -152,7 +156,7 @@ namespace Raytracing {
                             VAO* mPlaneVao,
                             Camera& mCamera)
                     : m_window(mWindow), m_mainImage(mMainImage), m_imageShader(mImageShader), m_worldShader(mWorldShader), m_raycaster(mRaycaster),
-                      m_parser(mParser), m_spiderVAO(mSpiderVao), m_houseVAO(mHouseVao), m_planeVAO(mPlaneVao), m_camera(mCamera) {}
+                      m_parser(mParser), m_spiderVAO(mSpiderVao), m_houseVAO(mHouseVao), m_planeVAO(mPlaneVao), m_camera(mCamera), m_world(world) {}
             void draw();
     };
 }

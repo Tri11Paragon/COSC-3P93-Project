@@ -64,7 +64,9 @@ namespace Raytracing {
             
             auto intersected = bvhObjects->rayIntersect(ray, min, max);
             
-            //dlog << "Intersections " << intersected.size() << " " << ray << "\n";
+            //tlog << " Our intersections found: " << intersected.size() << " objs\n";
+            
+            //dlog << "Intersections " << intersected.objs.size() << " " << ray << "\n";
             
             for (const auto& ptr : intersected) {
                 auto cResult = ptr.ptr->checkIfHit(ray, min, hResult.length);

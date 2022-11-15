@@ -135,6 +135,7 @@ namespace Raytracing {
             inline void addMaterial(const std::string& materialName, Material* mat) { materials.insert({materialName, mat}); }
 
             inline Material* getMaterial(const std::string& materialName) { return materials.at(materialName); }
+            [[nodiscard]] inline BVHTree* getBVH() { return bvhObjects.get(); }
 
             [[nodiscard]] virtual std::pair<HitData, Object*> checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
             ~World();

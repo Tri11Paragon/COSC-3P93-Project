@@ -10,6 +10,11 @@
 
 namespace Raytracing {
     // 3D Axis Aligned Bounding Box for use in a BVH
+    struct AABBHitData {
+        bool hit;
+        PRECISION_TYPE tMax;
+    };
+    
     class AABB {
         protected:
             Vec4 min;
@@ -68,9 +73,9 @@ namespace Raytracing {
             [[nodiscard]] inline bool intersects(const AABB& other) const {
                 return intersects(other.min, other.max);
             }
-
-            bool intersects(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax);
-            bool simpleSlabRayAABBMethod(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax);
+        
+            AABBHitData intersects(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax);
+            AABBHitData simpleSlabRayAABBMethod(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax);
 
             [[nodiscard]] inline bool isInside(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z) const {
                 return x >= min.x() && x <= max.x() && y >= min.y() && y <= max.y() && z >= min.z() && z <= max.z();

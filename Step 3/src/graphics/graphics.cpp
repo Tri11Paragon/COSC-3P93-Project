@@ -558,6 +558,16 @@ namespace Raytracing {
                 
                 m_camera.setPosition(m_camera.getPosition() + Vec4{deltaX, deltaY, deltaZ});
             }
+            if (Input::isKeyDown(GLFW_KEY_E) && Input::isState(GLFW_KEY_E)) {
+                auto ray = m_camera.projectRay((PRECISION_TYPE) m_window.displayWidth() / 2, (PRECISION_TYPE) m_window.displayHeight() / 2);
+                
+                auto results = m_world.checkIfHit(ray, 0, 1000).first;
+                auto bvh = m_world.getBVH()->rayIntersect(ray, 0, 1000);
+                ilog << "World Results: " << results.hit << " " << results.hitPoint << " " << results.length << "\n";
+                ilog << "BVH Results: " << bvh.size() << " " << bvh[0].ptr->getPosition() << "\n";
+            }
+            if (Input::isKeyDown(GLFW_KEY_R) && Input::isState(GLFW_KEY_R))
+                m_world.getBVH()->resetNodes();
             auto view = m_camera.view(yaw, pitch);
             m_worldShader.setMatrix("projectMatrix", projection);
             m_worldShader.setMatrix("viewMatrix", view);

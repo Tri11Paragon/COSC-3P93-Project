@@ -51,8 +51,10 @@ namespace Raytracing {
         auto y = Vec4{sinYaw * sinPitch, cosPitch, cosYaw * sinPitch}; // right
         auto z = Vec4{sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw}; // up
     
-        viewportHeight = 1 * tanFovHalf;
+        // we can actually take those x, y, z vectors and use them to compute the raytracer camera settings
+        viewportHeight = 2 * tanFovHalf;
         viewportWidth = aspectRatio * viewportHeight;
+        // exactly the same as the look at function.
         horizontalAxis = viewportWidth * x;
         verticalAxis = viewportHeight * y;
         imageOrigin = position - horizontalAxis / 2 - verticalAxis / 2 - z;
