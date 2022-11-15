@@ -115,4 +115,35 @@ namespace Raytracing {
     bool AABB::intersects(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax) {
         return simpleSlabRayAABBMethod(ray, tmin, tmax);
     }
+    
+    // I want this function to be somewhat deterministic
+    // Yet if this is being called divide and conquer isn't working.
+    // so we need a way of splitting the AABB to get different results
+    // preventing the plague of infinite recursion.
+    
+    // this alternating of axis is like K-Trees? Pretty sure the algorithms book I read said to split in alternating order.
+    // Might have been for red-black trees. Either way we are going to take a page from that book.
+    int lastAxis = 2;
+    
+    std::pair<AABB, AABB> AABB::splitAlongAxis() {
+        lastAxis %= 3;
+        lastAxis += 1;
+        // return the new split AABBs based on the calculated max lengths, but only in their respective axis.
+        if (lastAxis == 1){
+            PRECISION_TYPE X = std::abs(max.x() - min.x());
+            PRECISION_TYPE X2 = X/2;
+            // end the first at half the parent.
+            return {{min.x(), min.y(), min.z(), max.x()-X2, max.y(), max.z()},
+                    // start the second AABB at the end of the first AABB.
+                    {min.x()+X2, min.y(), min.z(), max.x(), max.y(), max.z()}};
+        } else if (lastAxis == 2) {
+            PRECISION_TYPE Y = std::abs(max.y() - min.y());
+            PRECISION_TYPE Y2 = Y/2;
+            return {{min.x(), min.y(), min.z(), max.x(), max.y()-Y2, max.z()}, {min.x(), min.y()+Y2, min.z(), max.x(), max.y(), max.z()}};
+        } else {
+            PRECISION_TYPE Z = std::abs(max.z() - min.z());
+            PRECISION_TYPE Z2 = Z/2;
+            return {{min.x(), min.y(), min.z(), max.x(), max.y(), max.z()-Z2}, {min.x(), min.y(), min.z()+Z2, max.x(), max.y(), max.z()}};
+        }
+    }
 }

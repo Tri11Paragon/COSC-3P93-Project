@@ -141,25 +141,41 @@ namespace Raytracing {
                 return space;
             }
             
-            BVHNode* addObjectsRecur(const std::vector<BVHObject>& objects, long prevSize) {
-                ilog << "size: " << objects.size() << " " << prevSize << "\n";
+            static bool vectorEquals(const BVHPartitionedSpace& oldSpace, const BVHPartitionedSpace& newSpace){
+                if (oldSpace.left.size() != newSpace.left.size() || oldSpace.right.size() != newSpace.right.size())
+                    return false;
+                for (int i = 0; i < oldSpace.left.size(); i++){
+                    if (oldSpace.left[i].aabb != newSpace.left[i].aabb)
+                        return false;
+                }
+                for (int i = 0; i < oldSpace.right.size(); i++){
+                    if (oldSpace.right[i].aabb != newSpace.right[i].aabb)
+                        return false;
+                }
+                return true;
+            }
+            
+            BVHNode* addObjectsRecur(const std::vector<BVHObject>& objects, const BVHPartitionedSpace& prevSpace) {
                 // create a volume for the entire world.
-                // yes, we could use the recursion provided AABB,
-                // but that wouldn't be minimum, only half.
-                // this ensures that we have a minimum AABB.
+                // yes, we could use a recursion provided AABB, but that wouldn't be minimum, only half. this ensures that we have a minimum AABB.
                 AABB world;
                 for (const auto& obj: objects)
                     world = world.expand(obj.aabb);
-                // prevSize was required to solve some really weird bugs
-                // which are a TODO:
-                if ((objects.size() <= 1 && !objects.empty()) || prevSize == objects.size()) {
+    
+                // then split and partition the world
+                auto splitAABBs = world.splitByLongestAxis();
+                auto partitionedObjs = partition(splitAABBs, objects);
+                if (vectorEquals(prevSpace, partitionedObjs)){
+                    splitAABBs = world.splitAlongAxis();
+                    partitionedObjs = partition(splitAABBs, objects);
+                }
+                
+                if ((objects.size() <= 1 && !objects.empty())) {
                     return new BVHNode(objects, world, nullptr, nullptr);
                 } else if (objects.empty()) // should never reach here!!
                     return nullptr;
                     
-                // then split and partition the world
-                auto splitAABBs = world.splitByLongestAxis();
-                auto partitionedObjs = partition(splitAABBs, objects);
+                
                 
                 elog << partitionedObjs.left.size() << " :: " << partitionedObjs.right.size() << "\n";
                 
@@ -167,9 +183,9 @@ namespace Raytracing {
                 BVHNode* right = nullptr;
                 // don't try to explore nodes which don't have anything in them.
                 if (!partitionedObjs.left.empty())
-                    left = addObjectsRecur(partitionedObjs.left, (long) objects.size());
+                    left = addObjectsRecur(partitionedObjs.left, partitionedObjs);
                 if (!partitionedObjs.right.empty())
-                    right = addObjectsRecur(partitionedObjs.right, (long) objects.size());
+                    right = addObjectsRecur(partitionedObjs.right, partitionedObjs);
                 
                 return new BVHNode(objects, world, left, right);
             }
@@ -236,7 +252,7 @@ namespace Raytracing {
                     bvhObject.ptr = obj;
                     objs.push_back(bvhObject);
                 }
-                root = addObjectsRecur(objs, 1);
+                root = addObjectsRecur(objs, {});
             }
             
             std::vector<BVHObject> rayIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {

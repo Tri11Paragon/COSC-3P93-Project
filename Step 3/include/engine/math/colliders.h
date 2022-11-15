@@ -99,6 +99,7 @@ namespace Raytracing {
             [[nodiscard]] int longestAxis() const;
             [[nodiscard]] PRECISION_TYPE longestAxisLength() const;
             [[nodiscard]] std::pair<AABB, AABB> splitByLongestAxis();
+            [[nodiscard]] std::pair<AABB, AABB> splitAlongAxis();
 
             [[nodiscard]] PRECISION_TYPE avgDistanceFromCenter() const;
 
@@ -121,6 +122,14 @@ namespace Raytracing {
             
 
     };
+    
+    inline bool operator==(const AABB& a, const AABB& b){
+        const auto& aMax = a.getMax();
+        const auto& aMin = a.getMin();
+        const auto& bMax = b.getMax();
+        const auto& bMin = b.getMin();
+        return aMax == bMax && aMin == bMin;
+    }
 
     inline std::ostream& operator<<(std::ostream& out, const AABB& v) {
         auto max = v.getMax();
