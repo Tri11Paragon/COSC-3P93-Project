@@ -41,6 +41,11 @@ namespace Raytracing {
 
             // returns an expanded version of this AABB is the other AABB is larger then this AABB
             [[nodiscard]] AABB expand(const AABB& other) const {
+                // terrible hack
+                // a 0 init AABB was having issues when being "expanded" to a place which is larger
+                // this should prevent that by side stepping the issue. Which is a TODO:
+                if (isEmpty())
+                    return other;
                 PRECISION_TYPE minX = std::min(min.x(), other.min.x());
                 PRECISION_TYPE minY = std::min(min.y(), other.min.y());
                 PRECISION_TYPE minZ = std::min(min.z(), other.min.z());

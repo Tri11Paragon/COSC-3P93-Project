@@ -9,9 +9,12 @@
 #include "engine/util/std.h"
 #include "engine/types.h"
 #include <config.h>
+
 #ifdef COMPILE_GUI
+    
     #include <graphics/gl/gl.h>
     #include <graphics/imgui/imgui.h>
+
 #endif
 
 #include <utility>
@@ -22,9 +25,9 @@
 namespace Raytracing {
     
     #ifdef COMPILE_GUI
-        extern std::shared_ptr<VAO> aabbVAO;
-        extern int count;
-        extern int selected;
+    extern std::shared_ptr<VAO> aabbVAO;
+    extern int count;
+    extern int selected;
     #endif
     
     struct BVHObject {
@@ -39,8 +42,8 @@ namespace Raytracing {
     
     struct BVHNode {
         private:
-            static Raytracing::Mat4x4 getTransform(const AABB& _aabb){
-                Raytracing::Mat4x4 transform {};
+            static Raytracing::Mat4x4 getTransform(const AABB& _aabb) {
+                Raytracing::Mat4x4 transform{};
                 auto center = _aabb.getCenter();
                 transform.translate(center);
                 auto xRadius = _aabb.getXRadius(center) * 2;
@@ -56,45 +59,62 @@ namespace Raytracing {
             BVHNode* right;
             int index;
             BVHNode(std::vector<BVHObject> objs, AABB aabb, BVHNode* left, BVHNode* right): objs(std::move(objs)), aabb(std::move(aabb)),
-                                                                                                        left(left), right(right) {
+                                                                                            left(left), right(right) {
                 index = count++;
             }
             #ifdef COMPILE_GUI
-                void draw(Shader& worldShader){
-                    worldShader.setVec3("color", {1.0, 1.0, 1.0});
-                    if (selected == index){
-                        worldShader.setVec3("color", {0.0, 0.0, 1.0});
-                        if (ImGui::BeginListBox("")){
-                            for (const auto& item : objs){
-                                auto pos = item.ptr->getPosition();
-                                ImGui::Text("%s", (std::to_string(pos.x()) + " " + std::to_string(pos.y()) + " " + std::to_string(pos.z())).c_str());
-                            }
-                            ImGui::EndListBox();
+            void draw(Shader& worldShader) {
+                worldShader.setVec3("color", {1.0, 1.0, 1.0});
+                if (selected == index) {
+                    worldShader.setVec3("color", {0.0, 0.0, 1.0});
+                    if (ImGui::BeginListBox("", ImVec2(250, 350))) {
+                        std::stringstream strs;
+                        strs << aabb;
+                        ImGui::Text("%s", strs.str().c_str());
+                        for (const auto& item: objs) {
+                            auto pos = item.ptr->getPosition();
+                            std::stringstream stm;
+                            stm << item.aabb;
+                            ImGui::Text("%s,\n\t%s", (std::to_string(pos.x()) + " " + std::to_string(pos.y()) + " " + std::to_string(pos.z())).c_str(),
+                                        stm.str().c_str());
                         }
-                        
-                        aabbVAO->bind();
-                        for (const auto& obj : objs) {
-                            auto transform = getTransform(obj.aabb);
-                            worldShader.setMatrix("transform", transform);
-                            aabbVAO->draw(worldShader);
-                        }
-                        auto transform = getTransform(aabb);
-                        worldShader.setMatrix("transform", transform);
-                        aabbVAO->draw(worldShader);
-                        
-                        auto splitAABBs = aabb.splitByLongestAxis();
-                        transform = getTransform(splitAABBs.second);
-                        worldShader.setMatrix("transform", transform);
-                        aabbVAO->draw(worldShader);
-                        transform = getTransform(splitAABBs.first);
+                        ImGui::EndListBox();
+                    }
+                    
+                    aabbVAO->bind();
+                    for (const auto& obj: objs) {
+                        auto transform = getTransform(obj.aabb);
                         worldShader.setMatrix("transform", transform);
                         aabbVAO->draw(worldShader);
                     }
+                    auto transform = getTransform(aabb);
+                    worldShader.setMatrix("transform", transform);
+                    aabbVAO->draw(worldShader);
+                    
+                    auto splitAABBs = aabb.splitByLongestAxis();
+                    transform = getTransform(splitAABBs.second);
+                    worldShader.setMatrix("transform", transform);
+                    aabbVAO->draw(worldShader);
+                    transform = getTransform(splitAABBs.first);
+                    worldShader.setMatrix("transform", transform);
+                    aabbVAO->draw(worldShader);
                 }
-                void gui() const {
-                    if (ImGui::Selectable(("S: " + std::to_string(objs.size()) + " I: " + std::to_string(index)).c_str(), selected == index))
-                        selected = index;
-                }
+            }
+            void gui() const {
+                int c1 = -1;
+                int c2 = -1;
+                if (left != nullptr)
+                    c1 = left->index;
+                if (right != nullptr)
+                    c2 = right->index;
+                std::string t;
+                if (c1 == -1 && c2 == -1)
+                    t = " LEAF";
+                else
+                    t = " L: " + std::to_string(c1) + " R: " + std::to_string(c2);
+                if (ImGui::Selectable(("S: " + std::to_string(objs.size()) + " I: " + std::to_string(index) + t).c_str(), selected == index))
+                    selected = index;
+            }
             #endif
             ~BVHNode() {
                 delete (left);
@@ -111,40 +131,32 @@ namespace Raytracing {
             static BVHPartitionedSpace partition(const std::pair<AABB, AABB>& aabbs, const std::vector<BVHObject>& objs) {
                 BVHPartitionedSpace space;
                 for (const auto& obj: objs) {
-                    // if this object doesn't have an AABB, we cannot use a BVH on it
-                    // If this ever fails we have a problem with the implementation.
+                    // if this object doesn't have an AABB, we cannot use a BVH on it. If this ever fails we have a problem with the implementation.
                     RTAssert(!obj.aabb.isEmpty());
-                    if (aabbs.first.intersects(obj.aabb)) {
+                    if (aabbs.first.intersects(obj.aabb))
                         space.left.push_back(obj);
-                        tlog << "left\n";
-                    }
-                    if (aabbs.second.intersects(obj.aabb)) {
+                    else if (aabbs.second.intersects(obj.aabb))
                         space.right.push_back(obj);
-                        tlog << "right\n";
-                    }
                 }
                 return space;
             }
             
             BVHNode* addObjectsRecur(const std::vector<BVHObject>& objects, long prevSize) {
                 ilog << "size: " << objects.size() << " " << prevSize << "\n";
-                // prevSize was required to solve some really weird bugs
-                // which are a TODO:
-                if ((objects.size() <= 1 && !objects.empty()) || prevSize == objects.size()) {
-                    AABB local;
-                    for (const auto& obj: objects)
-                        local = local.expand(obj.aabb);
-                    return new BVHNode(objects, local, nullptr, nullptr);
-                } else if (objects.empty()) // should never reach here!!
-                    return nullptr;
                 // create a volume for the entire world.
                 // yes, we could use the recursion provided AABB,
                 // but that wouldn't be minimum, only half.
                 // this ensures that we have a minimum AABB.
                 AABB world;
-                for (const auto& obj: objects) {
+                for (const auto& obj: objects)
                     world = world.expand(obj.aabb);
-                }
+                // prevSize was required to solve some really weird bugs
+                // which are a TODO:
+                if ((objects.size() <= 1 && !objects.empty()) || prevSize == objects.size()) {
+                    return new BVHNode(objects, world, nullptr, nullptr);
+                } else if (objects.empty()) // should never reach here!!
+                    return nullptr;
+                    
                 // then split and partition the world
                 auto splitAABBs = world.splitByLongestAxis();
                 auto partitionedObjs = partition(splitAABBs, objects);
@@ -172,36 +184,36 @@ namespace Raytracing {
                 // divide and conquer and so on
                 if (node->right != nullptr)
                     if (node->right->aabb.intersects(ray, min, max))
-                        return traverseFindRayIntersection(node->left, ray, min, max);
+                        return traverseFindRayIntersection(node->right, ray, min, max);
                 // return the objects of the lowest BVH node we can find
                 // if this is implemented properly this should only contain one, maybe two objects
                 // which is much faster! (especially when dealing with triangles)
                 return node->objs;
             }
             #ifdef COMPILE_GUI
-                void drawNodesRecur(Shader& worldShader, BVHNode* node){
-                    node->draw(worldShader);
-                    if (node->left != nullptr)
-                        drawNodesRecur(worldShader, node->left);
-                    if (node->right != nullptr)
-                        drawNodesRecur(worldShader, node->right);
-                }
-                void guiNodesRecur(BVHNode* node){
-                    node->gui();
-                    if (node->left != nullptr)
-                        guiNodesRecur(node->left);
-                    if (node->right != nullptr)
-                        guiNodesRecur(node->right);
-                }
+            void drawNodesRecur(Shader& worldShader, BVHNode* node) {
+                node->draw(worldShader);
+                if (node->left != nullptr)
+                    drawNodesRecur(worldShader, node->left);
+                if (node->right != nullptr)
+                    drawNodesRecur(worldShader, node->right);
+            }
+            void guiNodesRecur(BVHNode* node) {
+                node->gui();
+                if (node->left != nullptr)
+                    guiNodesRecur(node->left);
+                if (node->right != nullptr)
+                    guiNodesRecur(node->right);
+            }
             #endif
         public:
             std::vector<Object*> noAABBObjects;
             explicit BVHTree(const std::vector<Object*>& objectsInWorld) {
                 addObjects(objectsInWorld);
                 #ifdef COMPILE_GUI
-                    auto aabbVertexData = Shapes::cubeVertexBuilder{};
-                    if (aabbVAO == nullptr)
-                        aabbVAO = std::make_shared<VAO>(aabbVertexData.cubeVerticesRaw, aabbVertexData.cubeUVs);
+                auto aabbVertexData = Shapes::cubeVertexBuilder{};
+                if (aabbVAO == nullptr)
+                    aabbVAO = std::make_shared<VAO>(aabbVertexData.cubeVerticesRaw, aabbVertexData.cubeUVs);
                 #endif
             }
             
@@ -211,8 +223,7 @@ namespace Raytracing {
                 // move all the object's aabb's into world position
                 std::vector<BVHObject> objs;
                 for (auto* obj: objects) {
-                    // we don't want to store all the AABBs which don't exist
-                    // ie spheres
+                    // we don't want to store all the AABBs which don't exist: ie spheres
                     if (obj->getAABB().isEmpty()) {
                         noAABBObjects.push_back(obj);
                         continue;
@@ -231,30 +242,33 @@ namespace Raytracing {
             std::vector<BVHObject> rayIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
                 return traverseFindRayIntersection(root, ray, min, max);
             }
-        
+            
             #ifdef COMPILE_GUI
-                // renders all the debug VAOs on screen.
-                void render (Shader& worldShader){
-                    ImGui::Begin(("BVH Data "), nullptr, ImGuiWindowFlags_NoCollapse);
-                    worldShader.use();
-                    worldShader.setInt("useWhite", 1);
-                    worldShader.setVec3("color", {1.0, 1.0, 1.0});
-                    {
-                        ImGui::BeginChild("left pane", ImVec2(150, 0), true);
-                        guiNodesRecur(root);
-                        ImGui::EndChild();
-                    }
-                    ImGui::SameLine();
-                    {
-                        ImGui::BeginGroup();
-                        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), true, ImGuiWindowFlags_AlwaysAutoResize); // Leave room for 1 line below us
-                        drawNodesRecur(worldShader, root);
-                        ImGui::EndChild();
-                        ImGui::EndGroup();
-                    }
-                    worldShader.setInt("useWhite", 0);
-                    ImGui::End();
+            // renders all the debug VAOs on screen.
+            void render(Shader& worldShader) {
+                ImGui::Begin(("BVH Data "), nullptr, ImGuiWindowFlags_NoCollapse);
+                worldShader.use();
+                worldShader.setInt("useWhite", 1);
+                worldShader.setVec3("color", {1.0, 1.0, 1.0});
+                {
+                    ImGui::BeginChild("left pane", ImVec2(180, 0), true);
+                    guiNodesRecur(root);
+                    ImGui::EndChild();
                 }
+                ImGui::SameLine();
+                {
+                    ImGui::BeginGroup();
+                    ImGui::BeginChild("item view",
+                                      ImVec2(0, -ImGui::GetFrameHeightWithSpacing()),
+                                      true,
+                                      ImGuiWindowFlags_AlwaysAutoResize); // Leave room for 1 line below us
+                    drawNodesRecur(worldShader, root);
+                    ImGui::EndChild();
+                    ImGui::EndGroup();
+                }
+                worldShader.setInt("useWhite", 0);
+                ImGui::End();
+            }
             #endif
             
             ~BVHTree() {

@@ -43,6 +43,7 @@
 // mul
 // 70.9977ms normal
 // 286.656ms avx
+
 #ifdef COMPILER_DEBUG_ENABLED
     #define USE_SIMD_CPU
 #endif
