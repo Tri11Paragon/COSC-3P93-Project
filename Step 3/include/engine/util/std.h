@@ -56,6 +56,11 @@ static inline double degreeeToRadian(double deg) {
 }
 
 namespace Raytracing {
+    struct Signals {
+        bool haltExecution {false};
+        bool pauseRaytracing {false};
+        bool haltRaytracing {false};
+    };
     class AlignedAllocator {
         private:
         public:

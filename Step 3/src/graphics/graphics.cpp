@@ -7,12 +7,11 @@
 #include <graphics/gl/gl.h>
 #include "engine/image/stb_image.h"
 #include "graphics/debug_gui.h"
-
-extern bool* haltExecution;
-extern bool* pauseRaytracing;
-extern bool* haltRaytracing;
+#include <engine/util/std.h>
 
 namespace Raytracing {
+    
+    extern Signals* RTSignal;
     
     const std::vector<float> vertices = {
             1.0f, 1.0f, 0.0f,  // top right
@@ -482,14 +481,14 @@ namespace Raytracing {
     static float yaw = 0, pitch = 0;
     
     void DisplayRenderer::draw() {
-        if (*haltExecution){m_window.closeWindow();}
+        if (RTSignal->haltExecution){m_window.closeWindow();}
         if (Input::isKeyDown(GLFW_KEY_ESCAPE) && Input::isState(GLFW_KEY_ESCAPE))
             m_window.setMouseGrabbed(!m_window.isMouseGrabbed());
     
         DebugUI::render([this]() -> void {
             if (ImGui::Button("Start") && !started){
                 started = true;
-                *haltRaytracing = false;
+                RTSignal->haltRaytracing = false;
                 ilog << "Running raycaster!\n";
                 if(m_parser.hasOption("--multi")) {
                     m_raycaster.runMulti(std::max(std::stoi(m_parser.getOptionValue("-t")), std::stoi(m_parser.getOptionValue("--threads"))));
@@ -497,9 +496,9 @@ namespace Raytracing {
                     m_raycaster.runSingle();
                 }
             }
-            if (ImGui::Checkbox("Pause", pauseRaytracing)){}
+            if (ImGui::Checkbox("Pause", &RTSignal->pauseRaytracing)){}
             if (ImGui::Button("Stop") && started){
-                *haltRaytracing = true;
+                RTSignal->haltRaytracing = true;
                 started = false;
                 m_raycaster.deleteThreads();
             }

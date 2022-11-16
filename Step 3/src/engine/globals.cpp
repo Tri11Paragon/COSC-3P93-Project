@@ -4,19 +4,16 @@
  */
 // Yes, globals are bad.
 #include "engine/util/debug.h"
-
+#include <engine/util/std.h>
 
 #include <config.h>
 #ifdef COMPILE_GUI
     #include <graphics/gl/gl.h>
 #endif
 
-bool* haltExecution;
-bool* pauseRaytracing;
-bool* haltRaytracing;
-
 namespace Raytracing {
     std::unordered_map<std::string, std::shared_ptr<profiler>> profiles;
+    Signals* RTSignal = new Signals {};
     #ifdef COMPILE_GUI
         std::shared_ptr<VAO> aabbVAO = nullptr;
         int count = 0;

@@ -8,11 +8,9 @@
 #include <utility>
 #include <engine/util/debug.h>
 
-extern bool* haltExecution;
-extern bool* pauseRaytracing;
-extern bool* haltRaytracing;
-
 namespace Raytracing {
+    
+    extern Signals* RTSignal;
     
     Ray Camera::projectRay(PRECISION_TYPE x, PRECISION_TYPE y) {
         // transform the x and y to points from image coords to be inside the camera's viewport.
@@ -93,9 +91,9 @@ namespace Raytracing {
         Ray localRay = ray;
         Vec4 color {1.0, 1.0, 1.0};
         for (int CURRENT_BOUNCE = 0; CURRENT_BOUNCE < maxBounceDepth; CURRENT_BOUNCE++){
-            if (*haltExecution || *haltRaytracing)
+            if (RTSignal->haltExecution || RTSignal->haltRaytracing)
                 return color;
-            while (*pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
+            while (RTSignal->pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
                 std::this_thread::sleep_for(std::chrono::milliseconds(16));
             auto hit = world.checkIfHit(localRay, 0.001, infinity);
             if (hit.first.hit) {
@@ -153,9 +151,9 @@ namespace Raytracing {
                     PRECISION_TYPE sf = 1.0 / raysPerPixel;
                     // apply pixel color with gamma correction
                     image.setPixelColor(i, j, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
-                    if (*haltExecution || *haltRaytracing)
+                    if (RTSignal->haltExecution || RTSignal->haltRaytracing)
                         return;
-                    while (*pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
+                    while (RTSignal->pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
                         std::this_thread::sleep_for(std::chrono::milliseconds(16));
                 }
             }
@@ -227,9 +225,9 @@ namespace Raytracing {
                                 PRECISION_TYPE sf = 1.0 / raysPerPixel;
                                 // apply pixel color with gamma correction
                                 image.setPixelColor(x, y, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
-                                if (*haltExecution || *haltRaytracing)
+                                if (RTSignal->haltExecution || RTSignal->haltRaytracing)
                                     return;
-                                while (*pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
+                                while (RTSignal->pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
                                     std::this_thread::sleep_for(std::chrono::milliseconds(16));
                             } catch (std::exception& error) {
                                 flog << "Possibly fatal error in the multithreaded raytracer!\n";

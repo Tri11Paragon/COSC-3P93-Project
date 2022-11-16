@@ -24,11 +24,11 @@
  *
  */
 
-using namespace Raytracing;
+namespace Raytracing{
+    extern Signals* RTSignal;
+}
 
-extern bool* haltExecution;
-extern bool* pauseRaytracing;
-extern bool* haltRaytracing;
+using namespace Raytracing;
 
 int main(int argc, char** args) {
     // since this is linux only we can easily set our process priority to be high with a syscall
@@ -77,20 +77,13 @@ int main(int argc, char** args) {
     if (parser.parse(args, argc))
         return 0;
     
-    // yes this is a very stupid and bad way of doing this.
-    haltExecution = new bool;
-    pauseRaytracing = new bool;
-    haltRaytracing = new bool;
-    *haltExecution = false;
-    *pauseRaytracing = false;
-    *haltRaytracing = false;
     if (signal(SIGTERM, [] (int sig) -> void {
         ilog<<"Computations complete.\nHalting now...\n";
-        *haltExecution = true;
+        RTSignal->haltExecution = true;
     })==SIG_ERR) { elog<<"Unable to change signal handler.\n";   return 1; }
     if (signal(SIGINT, [] (int sig) -> void {
         ilog<<"Computations complete.\nHalting now...\n";
-        *haltExecution = true;
+        RTSignal->haltExecution = true;
     })==SIG_ERR) { elog<<"Unable to change signal handler.\n";   return 1; }
     
     tlog << "Parsing complete! Starting raytracer with options:" << std::endl;
@@ -160,7 +153,7 @@ int main(int argc, char** args) {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                 window.endUpdate();
             }
-            *haltExecution = true;
+            RTSignal->haltExecution= true;
             raycaster.join();
             delete(spiderVAO);
             delete(houseVAO);
@@ -201,9 +194,7 @@ int main(int argc, char** args) {
     ilog << "Writing Image!\n";
     imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
     
-    delete(haltExecution);
-    delete(haltRaytracing);
-    delete(pauseRaytracing);
+    delete(RTSignal);
     #ifdef COMPILE_GUI
         deleteQuad();
     #endif
