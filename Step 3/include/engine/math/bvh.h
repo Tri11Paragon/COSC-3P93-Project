@@ -80,7 +80,7 @@ namespace Raytracing {
                 if (left != nullptr)
                     leftHit = left->doesRayIntersect(r, min, ourHitData.tMax);
                 if (right != nullptr)
-                    rightHit = right->doesRayIntersect(r, min, leftHit.hit ? leftHit.data.tMin : ourHitData.tMax);
+                    rightHit = right->doesRayIntersect(r, min, leftHit.hit ? leftHit.data.tMax : ourHitData.tMax);
                 
                 if (leftHit.data.tMax < rightHit.data.tMax)
                     return leftHit;
