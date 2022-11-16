@@ -12,7 +12,7 @@ namespace Raytracing {
     // 3D Axis Aligned Bounding Box for use in a BVH
     struct AABBHitData {
         bool hit;
-        PRECISION_TYPE tMax;
+        PRECISION_TYPE tMin, tMax;
     };
     
     class AABB {

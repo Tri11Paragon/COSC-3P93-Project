@@ -563,8 +563,14 @@ namespace Raytracing {
                 
                 auto results = m_world.checkIfHit(ray, 0, 1000).first;
                 auto bvh = m_world.getBVH()->rayIntersect(ray, 0, 1000);
-                ilog << "World Results: " << results.hit << " " << results.hitPoint << " " << results.length << "\n";
-                ilog << "BVH Results: " << bvh.size() << " " << bvh[0].ptr->getPosition() << "\n";
+                if (results.hit)
+                    ilog << "World Results: " << results.hitPoint << " " << results.length << "\n";
+                else
+                    ilog << "World not hit.\n";
+                if (!bvh.empty())
+                    ilog << "BVH Results: " << bvh.size() << " " << bvh[0].ptr->getPosition() << "\n";
+                else
+                    ilog << "BVH not hit.\n";
             }
             if (Input::isKeyDown(GLFW_KEY_R) && Input::isState(GLFW_KEY_R))
                 m_world.getBVH()->resetNodes();

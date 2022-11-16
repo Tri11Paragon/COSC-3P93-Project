@@ -102,9 +102,12 @@ namespace Raytracing {
         tmin = std::max(tmin, 0.0);
         
         // TODO: nans?
-        tlog << "TMin: " << tmin << " TMax: " << tmax << " Case: " << (tmax > tmin) << "\n";
-        
-        return {tmax > tmin, tmin};
+        //tlog << "TMin: " << tmin << " TMax: " << tmax << " Case: " << (tmax > tmin) << "\n";
+        AABBHitData data{};
+        data.hit = tmax > tmin;
+        data.tMin = tmin;
+        data.tMax = tmax;
+        return data;
     }
     
     AABBHitData AABB::intersects(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax) {

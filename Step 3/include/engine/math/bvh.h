@@ -70,38 +70,28 @@ namespace Raytracing {
             }
             BVHHitData doesRayIntersect(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max){
                 auto ourHitData = aabb.intersects(r, min, max);
-                ilog << "Our hit did hit? " << ourHitData.hit << "\n";
                 if (!ourHitData.hit)
                     return {this, ourHitData, false};
                 
-                /*this->hit = 2;
+                this->hit = 2;
                 
                 BVHHitData leftHit{};
                 BVHHitData rightHit{};
                 if (left != nullptr)
-                    leftHit = left->doesRayIntersect(r, min, max);
+                    leftHit = left->doesRayIntersect(r, min, ourHitData.tMax);
                 if (right != nullptr)
-                    rightHit = right->doesRayIntersect(r, min, max);
+                    rightHit = right->doesRayIntersect(r, min, leftHit.hit ? leftHit.data.tMin : ourHitData.tMax);
                 
-                if (!leftHit.hit && !rightHit.hit)
-                    return {this, ourHitData, ourHitData.hit};
-                
-                return leftHit.hit ? leftHit : rightHit;*/
-                tlog << ourHitData.hit << "\n";
-                return {this, ourHitData, true};
+                if (leftHit.data.tMax < rightHit.data.tMax)
+                    return leftHit;
+                else if (rightHit.data.tMax > leftHit.data.tMax)
+                    return rightHit;
+                return {this, ourHitData, true};;
             }
             #ifdef COMPILE_GUI
             void draw(Shader& worldShader) {
                 worldShader.setVec3("color", {1.0, 1.0, 1.0});
                 if (selected == index || hit) {
-                    if (hit == 1)
-                        worldShader.setVec3("color", {0.0, 0.0, 1.0});
-                    else if (hit == 2)
-                        worldShader.setVec3("color", {0.0, 1.0, 0.0});
-                    else if (hit == 0)
-                        worldShader.setVec3("color", {1.0, 1.0, 1.0});
-                    else
-                        worldShader.setVec3("color", {1.0, 0.5, 0.5});
                     if (selected == index && ImGui::BeginListBox("", ImVec2(250, 350))) {
                         std::stringstream strs;
                         strs << aabb;
@@ -122,6 +112,14 @@ namespace Raytracing {
                         worldShader.setMatrix("transform", transform);
                         aabbVAO->draw(worldShader);
                     }
+                    if (hit == 1)
+                        worldShader.setVec3("color", {0.0, 0.0, 1.0});
+                    else if (hit == 2)
+                        worldShader.setVec3("color", {0.0, 1.0, 0.0});
+                    else if (hit == 0)
+                        worldShader.setVec3("color", {1.0, 1.0, 1.0});
+                    else
+                        worldShader.setVec3("color", {1.0, 0.5, 0.5});
                     auto transform = getTransform(aabb);
                     worldShader.setMatrix("transform", transform);
                     aabbVAO->draw(worldShader);
@@ -278,8 +276,12 @@ namespace Raytracing {
             std::vector<BVHObject> rayIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
                 RTAssert(root != nullptr);
                 auto results = root->doesRayIntersect(ray, min, max);
-                results.ptr->hit = 1;
-                return results.ptr->objs;
+                RTAssert(results.ptr != nullptr);
+                if (results.hit) {
+                    results.ptr->hit = 1;
+                    return results.ptr->objs;
+                }else
+                    return {};
             }
             void resetNodes(){
                 reset(root);
