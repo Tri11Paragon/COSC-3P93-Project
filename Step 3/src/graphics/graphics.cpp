@@ -558,22 +558,22 @@ namespace Raytracing {
                 
                 m_camera.setPosition(m_camera.getPosition() + Vec4{deltaX, deltaY, deltaZ});
             }
-            if (Input::isKeyDown(GLFW_KEY_E) && Input::isState(GLFW_KEY_E)) {
-                auto ray = m_camera.projectRay((PRECISION_TYPE) m_window.displayWidth() / 2, (PRECISION_TYPE) m_window.displayHeight() / 2);
-                
-                //auto results = m_world.checkIfHit(ray, 0, 1000).first;
-                auto bvh = m_world.getBVH()->rayAnyHitIntersect(ray, 0, 1000);
-                //if (results.hit)
-                //    ilog << "World Results: " << results.hitPoint << " " << results.length << "\n";
-                //else
-                //    ilog << "World not hit.\n";
-                if (!bvh.empty())
-                    ilog << "BVH Results: " << bvh.size() << " " << bvh[0].ptr->getPosition() << "\n";
-                else
-                    ilog << "BVH not hit.\n";
-            }
-            if (Input::isKeyDown(GLFW_KEY_R) && Input::isState(GLFW_KEY_R))
-                m_world.getBVH()->resetNodes();
+//            if (Input::isKeyDown(GLFW_KEY_E) && Input::isState(GLFW_KEY_E)) {
+//                auto ray = m_camera.projectRay((PRECISION_TYPE) m_window.displayWidth() / 2, (PRECISION_TYPE) m_window.displayHeight() / 2);
+//
+//                //auto results = m_world.checkIfHit(ray, 0, 1000).first;
+//                auto bvh = m_world.getBVH()->rayAnyHitIntersect(ray, 0, 1000);
+//                //if (results.hit)
+//                //    ilog << "World Results: " << results.hitPoint << " " << results.length << "\n";
+//                //else
+//                //    ilog << "World not hit.\n";
+//                if (!bvh.empty())
+//                    ilog << "BVH Results: " << bvh.size() << " " << bvh[0].ptr->getPosition() << "\n";
+//                else
+//                    ilog << "BVH not hit.\n";
+//            }
+//            if (Input::isKeyDown(GLFW_KEY_R) && Input::isState(GLFW_KEY_R))
+//                m_world.getBVH()->resetNodes();
             auto view = m_camera.view(yaw, pitch);
             m_worldShader.setMatrix("projectMatrix", projection);
             m_worldShader.setMatrix("viewMatrix", view);

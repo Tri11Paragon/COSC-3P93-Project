@@ -144,4 +144,14 @@ namespace Raytracing {
             return {{min.x(), min.y(), min.z(), max.x(), max.y(), max.z()-Z2}, {min.x(), min.y(), min.z()+Z2, max.x(), max.y(), max.z()}};
         }
     }
+    Mat4x4 AABB::getTransform() const {
+        Raytracing::Mat4x4 transform{};
+        auto center = getCenter();
+        transform.translate(center);
+        auto xRadius = getXRadius(center) * 2;
+        auto yRadius = getYRadius(center) * 2;
+        auto zRadius = getZRadius(center) * 2;
+        transform.scale(float(xRadius), float(yRadius), float(zRadius));
+        return transform;
+    }
 }

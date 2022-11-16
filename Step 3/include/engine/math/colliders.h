@@ -76,6 +76,7 @@ namespace Raytracing {
         
             AABBHitData intersects(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax);
             AABBHitData simpleSlabRayAABBMethod(const Ray& ray, PRECISION_TYPE tmin, PRECISION_TYPE tmax);
+            [[nodiscard]] Mat4x4 getTransform() const;
 
             [[nodiscard]] inline bool isInside(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z) const {
                 return x >= min.x() && x <= max.x() && y >= min.y() && y <= max.y() && z >= min.z() && z <= max.z();

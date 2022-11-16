@@ -127,7 +127,8 @@ namespace Raytracing {
             // this allows us to generate a statically unchanging BVH for easy rendering
             void generateBVH();
             #ifdef COMPILE_GUI
-                void drawBVH(Shader& worldShader) {bvhObjects->render(worldShader);}
+                // currently disabled. TODO: BVH renderer class
+                void drawBVH(Shader& worldShader) {}
             #endif
 
             inline void add(Object* object) { objects.push_back(object); }

@@ -50,3 +50,15 @@
 1293	1371	1668628542127579215	Step_3	9d5d6ad8db7a0552
 1	1142	1668628564072244382	CMakeFiles/Step_3.dir/src/engine/math/bvh.cpp.o	7d05e3e63b85d471
 1142	1242	1668628564172247411	Step_3	9d5d6ad8db7a0552
+1	1337	1668632607895588360	CMakeFiles/Step_3.dir/src/engine/math/bvh.cpp.o	7d05e3e63b85d471
+1337	1457	1668632608015591790	Step_3	9d5d6ad8db7a0552
+2	1291	1668633243861949710	CMakeFiles/Step_3.dir/src/engine/globals.cpp.o	4ef77d2224f86511
+3	1424	1668633243993953547	CMakeFiles/Step_3.dir/src/engine/math/colliders.cpp.o	39e9f435096d066b
+3	1577	1668633244145957965	CMakeFiles/Step_3.dir/src/graphics/gl/gl.cpp.o	330ad35a6abf06c3
+2	1588	1668633244157958315	CMakeFiles/Step_3.dir/src/engine/math/bvh.cpp.o	7d05e3e63b85d471
+3	1697	1668633244265961453	CMakeFiles/Step_3.dir/src/engine/util/models.cpp.o	164394d360c43072
+2	1895	1668633269338690359	CMakeFiles/Step_3.dir/src/engine/world.cpp.o	6470df278966c4
+1	2359	1668633269802703851	CMakeFiles/Step_3.dir/src/engine/main.cpp.o	641dce3f86933e2e
+1	2386	1668633269830704665	CMakeFiles/Step_3.dir/src/engine/raytracing.cpp.o	11f0e227e9fda9ca
+1	1382	1668633279558987547	CMakeFiles/Step_3.dir/src/graphics/graphics.cpp.o	ce988de97a5cb51d
+1382	1513	1668633279690991384	Step_3	9d5d6ad8db7a0552
