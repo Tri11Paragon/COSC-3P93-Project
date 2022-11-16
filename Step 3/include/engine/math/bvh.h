@@ -70,6 +70,7 @@ namespace Raytracing {
             }
             BVHHitData doesRayIntersect(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max){
                 auto ourHitData = aabb.intersects(r, min, max);
+                tlog << "Does " << index << " hit? " << ourHitData.hit << "\n";
                 if (!ourHitData.hit)
                     return {this, ourHitData, false};
                 
@@ -78,20 +79,24 @@ namespace Raytracing {
                 BVHHitData leftHit{};
                 BVHHitData rightHit{};
                 if (left != nullptr)
-                    leftHit = left->doesRayIntersect(r, min, ourHitData.tMax);
+                    leftHit = left->doesRayIntersect(r, min, max);
                 if (right != nullptr)
-                    rightHit = right->doesRayIntersect(r, min, leftHit.hit ? leftHit.data.tMax : ourHitData.tMax);
+                    rightHit = right->doesRayIntersect(r, min, max);
                 
-                if (leftHit.data.tMax < rightHit.data.tMax)
+                if (leftHit.hit && leftHit.data.tMax < rightHit.data.tMax)
                     return leftHit;
-                else if (rightHit.data.tMax > leftHit.data.tMax)
+                else if (rightHit.hit && rightHit.data.tMax > leftHit.data.tMax)
                     return rightHit;
-                return {this, ourHitData, true};;
+                
+                tlog << index << "I " << leftHit.hit << " ? " << rightHit.hit << " " << left << " " << right << " : " << objs.size() << " is empty? " << objs.empty() << "\n" ;
+                this->hit = !objs.empty();
+                return {this, ourHitData, !objs.empty()};
             }
             #ifdef COMPILE_GUI
             void draw(Shader& worldShader) {
                 worldShader.setVec3("color", {1.0, 1.0, 1.0});
-                if (selected == index || hit) {
+                aabbVAO->bind();
+                if (selected == index) {
                     if (selected == index && ImGui::BeginListBox("", ImVec2(250, 350))) {
                         std::stringstream strs;
                         strs << aabb;
@@ -106,29 +111,31 @@ namespace Raytracing {
                         ImGui::EndListBox();
                     }
                     
-                    aabbVAO->bind();
                     for (const auto& obj: objs) {
                         auto transform = getTransform(obj.aabb);
                         worldShader.setMatrix("transform", transform);
                         aabbVAO->draw(worldShader);
                     }
-                    if (hit == 1)
-                        worldShader.setVec3("color", {0.0, 0.0, 1.0});
-                    else if (hit == 2)
-                        worldShader.setVec3("color", {0.0, 1.0, 0.0});
-                    else if (hit == 0)
-                        worldShader.setVec3("color", {1.0, 1.0, 1.0});
-                    else
-                        worldShader.setVec3("color", {1.0, 0.5, 0.5});
                     auto transform = getTransform(aabb);
                     worldShader.setMatrix("transform", transform);
                     aabbVAO->draw(worldShader);
                     
-                    auto splitAABBs = aabb.splitByLongestAxis();
+                    /*auto splitAABBs = aabb.splitByLongestAxis();
                     transform = getTransform(splitAABBs.second);
                     worldShader.setMatrix("transform", transform);
                     aabbVAO->draw(worldShader);
                     transform = getTransform(splitAABBs.first);
+                    worldShader.setMatrix("transform", transform);
+                    aabbVAO->draw(worldShader);*/
+                }
+                if (hit){
+                    if (hit == 1)
+                        worldShader.setVec3("color", {0.0, 0.0, 1.0});
+                    else if (hit == 2)
+                        worldShader.setVec3("color", {0.0, 1.0, 0.0});
+                    else
+                        worldShader.setVec3("color", {1.0, 0.5, 0.5});
+                    auto transform = getTransform(aabb);
                     worldShader.setMatrix("transform", transform);
                     aabbVAO->draw(worldShader);
                 }
@@ -215,7 +222,10 @@ namespace Raytracing {
                 if (!partitionedObjs.right.empty())
                     right = addObjectsRecur(partitionedObjs.right, partitionedObjs);
                 
-                return new BVHNode(objects, world, left, right);
+                if (left == nullptr && right == nullptr)
+                    return new BVHNode(objects, world, left, right);
+                else
+                    return new BVHNode({}, world, left, right);
             }
             #ifdef COMPILE_GUI
             void drawNodesRecur(Shader& worldShader, BVHNode* node) {
@@ -277,10 +287,9 @@ namespace Raytracing {
                 RTAssert(root != nullptr);
                 auto results = root->doesRayIntersect(ray, min, max);
                 RTAssert(results.ptr != nullptr);
-                if (results.hit) {
-                    results.ptr->hit = 1;
+                if (results.hit)
                     return results.ptr->objs;
-                }else
+                else
                     return {};
             }
             void resetNodes(){

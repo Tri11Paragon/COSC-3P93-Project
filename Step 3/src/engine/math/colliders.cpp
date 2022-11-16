@@ -84,8 +84,8 @@ namespace Raytracing {
         PRECISION_TYPE tx1 = (min.x() - ray.getStartingPoint().x())*ray.getInverseDirection().x();
         PRECISION_TYPE tx2 = (max.x() - ray.getStartingPoint().x())*ray.getInverseDirection().x();
 
-        tmin = std::min(tmin, std::min(tx1, tx2));
-        tmax = std::max(tmax, std::max(tx1, tx2));
+        tmin = std::max(tmin, std::min(tx1, tx2));
+        tmax = std::min(tmax, std::max(tx1, tx2));
 
         PRECISION_TYPE ty1 = (min.y() - ray.getStartingPoint().y())*ray.getInverseDirection().y();
         PRECISION_TYPE ty2 = (max.y() - ray.getStartingPoint().y())*ray.getInverseDirection().y();
@@ -102,7 +102,7 @@ namespace Raytracing {
         tmin = std::max(tmin, 0.0);
         
         // TODO: nans?
-        //tlog << "TMin: " << tmin << " TMax: " << tmax << " Case: " << (tmax > tmin) << "\n";
+        tlog << "TMin: " << tmin << " TMax: " << tmax << " Case: " << (tmax > tmin) << "\n";
         AABBHitData data{};
         data.hit = tmax > tmin;
         data.tMin = tmin;
