@@ -14,6 +14,7 @@
 
 #include "std.h"
 #include <config.h>
+#include <mutex>
 #ifdef COMPILE_GUI
     #include <graphics/debug_gui.h>
 #endif
@@ -37,12 +38,15 @@ namespace Raytracing {
             long _start = 0;
             long _end = 0;
             std::unordered_map<std::string, std::pair<long, long>> timings;
+            std::mutex timerLock {};
         public:
             explicit profiler(std::string name);
             
             void start();
             void start(const std::string& name);
             static void start(const std::string& name, const std::string& tabName) {
+                static std::mutex staticLock{};
+                std::scoped_lock lock(staticLock);
                 if (profiles.contains(name)) {
                     auto p = profiles.at(name);
                     p->start(tabName);
@@ -56,6 +60,8 @@ namespace Raytracing {
             void end();
             void end(const std::string& name);
             static void end(const std::string& name, const std::string& tabName){
+                static std::mutex staticLock{};
+                std::scoped_lock lock(staticLock);
                 try {
                     profiles.at(name)->end(tabName);
                 } catch (std::exception& e){}
@@ -63,6 +69,8 @@ namespace Raytracing {
             
             void print();
             static void print(const std::string& name){
+                static std::mutex staticLock{};
+                std::scoped_lock lock(staticLock);
                 try {
                     profiles.at(name)->print();
                 } catch (std::exception& e){}

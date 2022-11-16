@@ -37,6 +37,20 @@ namespace Raytracing {
         std::vector<BVHObject> right;
     };
     
+    inline bool operator==(const BVHPartitionedSpace& left, const BVHPartitionedSpace& right) {
+        if (left.left.size() != right.left.size() || left.right.size() != right.right.size())
+            return false;
+        for (int i = 0; i < left.left.size(); i++){
+            if (left.left[i].aabb != right.left[i].aabb)
+                return false;
+        }
+        for (int i = 0; i < left.right.size(); i++){
+            if (left.right[i].aabb != right.right[i].aabb)
+                return false;
+        }
+        return true;
+    }
+    
     struct BVHNode {
         public:
             struct BVHHitData {
@@ -65,10 +79,8 @@ namespace Raytracing {
         private:
             BVHNode* root = nullptr;
             
-            // splits the objs in the vector based on the provided AABBs
             static BVHPartitionedSpace partition(const std::pair<AABB, AABB>& aabbs, const std::vector<BVHObject>& objs);
-            static bool vectorEquals(const BVHPartitionedSpace& oldSpace, const BVHPartitionedSpace& newSpace);
-            BVHNode* addObjectsRecur(const std::vector<BVHObject>& objects, const BVHPartitionedSpace& prevSpace);
+            BVHNode* addObjectsRecursively(const std::vector<BVHObject>& objects, const BVHPartitionedSpace& prevSpace);
         public:
             std::vector<Object*> noAABBObjects;
             explicit BVHTree(const std::vector<Object*>& objectsInWorld) {

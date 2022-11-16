@@ -23,7 +23,7 @@ namespace Raytracing {
             PRECISION_TYPE radius;
         public:
             SphereObject(const Vec4& position, PRECISION_TYPE radius, Material* material): radius(radius), Object(material, position) {
-               // aabb = AABB(position.x(), position.y(), position.z(), radius);
+               //aabb = AABB(position.x(), position.y(), position.z(), radius);
             }
 
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
@@ -106,6 +106,11 @@ namespace Raytracing {
                 
             }
     };
+    
+    struct WorldConfig {
+        bool useBVH = true;
+        bool padding[7];
+    };
 
     class World {
         private:
@@ -118,8 +123,9 @@ namespace Raytracing {
             // TODO: the above todo has been done, now we need to test the performance advantage of the BVH
             std::unique_ptr<BVHTree> bvhObjects;
             std::unordered_map<std::string, Material*> materials;
+            WorldConfig m_config;
         public:
-            World() = default;
+            explicit World(WorldConfig config): m_config(config) {};
             World(const World& world) = delete;
             World(const World&& world) = delete;
 

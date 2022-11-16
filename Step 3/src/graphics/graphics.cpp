@@ -581,9 +581,9 @@ namespace Raytracing {
             m_spiderVAO->bind();
             m_spiderVAO->draw(m_worldShader, {{0, 1, 0}});
             m_houseVAO->bind();
-            m_houseVAO->draw(m_worldShader, {{15, 1, 0}, {0, 0, -15}, {0, 0, 15}});
+            m_houseVAO->draw(m_worldShader, {{5, 1, 0}, {0, 0, -5}, {0, 0, 5}});
             m_planeVAO->bind();
-            m_planeVAO->draw(m_worldShader, {{-15, 0.5, 0}});
+            m_planeVAO->draw(m_worldShader, {{-5, 0.5, 0}});
         } else {
             m_imageShader.use();
             m_mainImage.updateImage();

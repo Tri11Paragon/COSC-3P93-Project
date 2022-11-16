@@ -58,7 +58,7 @@ namespace Raytracing {
 
     std::pair<HitData, Object*> World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
         // actually speeds up rendering by about 110,000ms (total across 16 threads)
-        if (bvhObjects != nullptr){
+        if (bvhObjects != nullptr && m_config.useBVH){
             auto hResult = HitData{false, Vec4(), Vec4(), max};
             Object* objPtr = nullptr;
             

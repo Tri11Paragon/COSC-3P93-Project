@@ -15,6 +15,10 @@ namespace Raytracing {
         PRECISION_TYPE tMin, tMax;
     };
     
+    enum AABBAxis {
+        X = 0, Y = 1, Z = 2
+    };
+    
     class AABB {
         protected:
             Vec4 min;
@@ -105,7 +109,7 @@ namespace Raytracing {
             [[nodiscard]] int longestAxis() const;
             [[nodiscard]] PRECISION_TYPE longestAxisLength() const;
             [[nodiscard]] std::pair<AABB, AABB> splitByLongestAxis();
-            [[nodiscard]] std::pair<AABB, AABB> splitAlongAxis();
+            [[nodiscard]] std::pair<AABB, AABB> splitAlongAxis(AABBAxis axis);
 
             [[nodiscard]] PRECISION_TYPE avgDistanceFromCenter() const;
 

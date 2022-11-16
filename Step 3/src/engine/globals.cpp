@@ -4,6 +4,8 @@
  */
 // Yes, globals are bad.
 #include "engine/util/debug.h"
+
+
 #include <config.h>
 #ifdef COMPILE_GUI
     #include <graphics/gl/gl.h>

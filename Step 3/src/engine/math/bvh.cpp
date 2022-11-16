@@ -84,7 +84,7 @@ namespace Raytracing {
             bvhObject.ptr = obj;
             objs.push_back(bvhObject);
         }
-        root = addObjectsRecur(objs, {});
+        root = addObjectsRecursively(objs, {});
     }
     
     /**
@@ -152,51 +152,56 @@ namespace Raytracing {
         }
         return objects;
     }
-    BVHNode* BVHTree::addObjectsRecur(const std::vector<BVHObject>& objects, const BVHPartitionedSpace& prevSpace) {
+    
+    BVHNode* BVHTree::addObjectsRecursively(const std::vector<BVHObject>& objects, const BVHPartitionedSpace& prevSpace) {
         // create a volume for the entire world.
         // yes, we could use a recursion provided AABB, but that wouldn't be minimum, only half. this ensures that we have a minimum AABB.
         AABB world;
         for (const auto& obj: objects)
             world = world.expand(obj.aabb);
     
-        // then split and partition the world
-        auto splitAABBs = world.splitByLongestAxis();
-        auto partitionedObjs = partition(splitAABBs, objects);
-        if (vectorEquals(prevSpace, partitionedObjs)){
-            splitAABBs = world.splitAlongAxis();
-            partitionedObjs = partition(splitAABBs, objects);
-        }
-    
+        // if we have a single object then we can create a leaf.
         if ((objects.size() <= 1 && !objects.empty())) {
             return new BVHNode(objects, world, nullptr, nullptr);
         } else if (objects.empty()) // should never reach here!!
             return nullptr;
+            
+        // then split and partition the world
+        auto splitAABBs = world.splitByLongestAxis();
+        auto partitionedObjs = partition(splitAABBs, objects);
+        if (prevSpace == partitionedObjs) {
+            // if we haven't made progress in splitting the world, try inverting the order we add objects first
+            partitionedObjs = partition({splitAABBs.second, splitAABBs.first}, objects);
+            // if we fail then try splitting on another axis
+            if (prevSpace == partitionedObjs) {
+                // try all axis
+                for (int i = 0; i < 3; i++){
+                    splitAABBs = world.splitAlongAxis(i == 0 ? X : i == 1 ? Y : Z);
+                    partitionedObjs = partition(splitAABBs, objects);
+                    // and once we have an axis that works we can break.
+                    if (prevSpace != partitionedObjs)
+                        break;
+                }
+            }
+        }
+        // if we were unable to find a partition that isn't the same as our last, we should create a leaf here
+        // otherwise we'll get infinite recursion
+        if (prevSpace == partitionedObjs) {
+            return new BVHNode(objects, world, nullptr, nullptr);
+        }
     
         BVHNode* left = nullptr;
         BVHNode* right = nullptr;
         // don't try to explore nodes which don't have anything in them.
         if (!partitionedObjs.left.empty())
-            left = addObjectsRecur(partitionedObjs.left, partitionedObjs);
+            left = addObjectsRecursively(partitionedObjs.left, partitionedObjs);
         if (!partitionedObjs.right.empty())
-            right = addObjectsRecur(partitionedObjs.right, partitionedObjs);
+            right = addObjectsRecursively(partitionedObjs.right, partitionedObjs);
     
         if (left == nullptr && right == nullptr)
             return new BVHNode(objects, world, left, right);
         else
             return new BVHNode({}, world, left, right);
-    }
-    bool BVHTree::vectorEquals(const BVHPartitionedSpace& oldSpace, const BVHPartitionedSpace& newSpace) {
-        if (oldSpace.left.size() != newSpace.left.size() || oldSpace.right.size() != newSpace.right.size())
-            return false;
-        for (int i = 0; i < oldSpace.left.size(); i++){
-            if (oldSpace.left[i].aabb != newSpace.left[i].aabb)
-                return false;
-        }
-        for (int i = 0; i < oldSpace.right.size(); i++){
-            if (oldSpace.right[i].aabb != newSpace.right[i].aabb)
-                return false;
-        }
-        return true;
     }
 }
 

@@ -105,7 +105,10 @@ int main(int argc, char** args) {
     camera.setPosition({6, 5, 6});
     camera.lookAt({0, 0, 0});
     
-    Raytracing::World world;
+    WorldConfig worldConfig;
+    worldConfig.useBVH = true;
+    
+    Raytracing::World world {worldConfig};
     
     Raytracing::OBJLoader loader;
     // assumes you are running it from a subdirectory, "build" or "cmake-build-release", etc.
@@ -133,10 +136,10 @@ int main(int argc, char** args) {
     world.add(new Raytracing::ModelObject({0, 0, 5}, house, world.getMaterial("blueDiffuse")));*/
     
     world.add(new Raytracing::ModelObject({0, 1, 0}, spider, world.getMaterial("redDiffuse")));
-    world.add(new Raytracing::ModelObject({-15, 0.5, 0}, plane, world.getMaterial("greenMetal")));
-    world.add(new Raytracing::ModelObject({15, 1, 0}, house, world.getMaterial("redDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 0, -15}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 0, 15}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({-5, 0.5, 0}, plane, world.getMaterial("greenMetal")));
+    world.add(new Raytracing::ModelObject({5, 1, 0}, house, world.getMaterial("redDiffuse")));
+    world.add(new Raytracing::ModelObject({0, 0, -5}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({0, 0, 5}, house, world.getMaterial("blueDiffuse")));
     
     if (parser.hasOption("--gui") || parser.hasOption("-g")) {
         #ifdef COMPILE_GUI

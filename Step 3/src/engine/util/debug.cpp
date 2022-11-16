@@ -16,6 +16,7 @@ namespace Raytracing {
         start("Unnamed");
     }
     void profiler::start(const std::string& name) {
+        std::scoped_lock lock(timerLock);
         auto p1 = std::chrono::high_resolution_clock::now();
         _start = std::chrono::duration_cast<std::chrono::nanoseconds>(p1.time_since_epoch()).count();
         timings[name] = std::pair<long, long>(_start, 0);
@@ -25,6 +26,7 @@ namespace Raytracing {
         end("Unnamed");
     }
     void profiler::end(const std::string& name) {
+        std::scoped_lock lock(timerLock);
         auto p1 = std::chrono::high_resolution_clock::now();
         _end = std::chrono::duration_cast<std::chrono::nanoseconds>(p1.time_since_epoch()).count();
         timings[name] = std::pair<long, long>(timings[name].first, _end);
