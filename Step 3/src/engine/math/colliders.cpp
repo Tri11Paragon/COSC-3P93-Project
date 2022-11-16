@@ -102,7 +102,7 @@ namespace Raytracing {
         tmin = std::max(tmin, 0.0);
         
         // TODO: nans?
-        tlog << "TMin: " << tmin << " TMax: " << tmax << " Case: " << (tmax > tmin) << "\n";
+        //tlog << "TMin: " << tmin << " TMax: " << tmax << " Case: " << (tmax > tmin) << "\n";
         AABBHitData data{};
         data.hit = tmax > tmin;
         data.tMin = tmin;

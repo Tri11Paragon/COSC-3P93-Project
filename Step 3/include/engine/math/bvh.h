@@ -70,27 +70,36 @@ namespace Raytracing {
             }
             BVHHitData doesRayIntersect(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max){
                 auto ourHitData = aabb.intersects(r, min, max);
-                tlog << "Does " << index << " hit? " << ourHitData.hit << "\n";
                 if (!ourHitData.hit)
                     return {this, ourHitData, false};
                 
                 this->hit = 2;
                 
                 BVHHitData leftHit{};
+                leftHit.hit = false;
                 BVHHitData rightHit{};
+                rightHit.hit = false;
                 if (left != nullptr)
-                    leftHit = left->doesRayIntersect(r, min, max);
+                    leftHit = left->doesRayIntersect(r, min, ourHitData.tMax);
                 if (right != nullptr)
-                    rightHit = right->doesRayIntersect(r, min, max);
+                    rightHit = right->doesRayIntersect(r, min, leftHit.hit ? leftHit.data.tMin : ourHitData.tMax);
                 
-                if (leftHit.hit && leftHit.data.tMax < rightHit.data.tMax)
+                //tlog << "On the left we " << (leftHit.hit ? "hit" : "didn't hit") << ". with tmax " << leftHit.data.tMax << " and tmin " << leftHit.data.tMin << "\n";
+                //tlog << "On the right we " << (rightHit.hit ? "hit" : "didn't hit") << ". with tmax " << rightHit.data.tMax << " and tmin " << rightHit.data.tMin << "\n";
+                
+                if (leftHit.hit && (leftHit.data.tMax < rightHit.data.tMax || !rightHit.hit))
                     return leftHit;
-                else if (rightHit.hit && rightHit.data.tMax > leftHit.data.tMax)
+                else if (rightHit.hit && (rightHit.data.tMax < leftHit.data.tMax || !leftHit.hit))
                     return rightHit;
                 
-                tlog << index << "I " << leftHit.hit << " ? " << rightHit.hit << " " << left << " " << right << " : " << objs.size() << " is empty? " << objs.empty() << "\n" ;
+                //tlog << index << "I " << leftHit.hit << " ? " << rightHit.hit << " " << left << " " << right << " : " << objs.size() << " is empty? " << objs.empty() << "\n" ;
                 this->hit = !objs.empty();
-                return {this, ourHitData, !objs.empty()};
+                if (objs.empty()){
+                    //tlog << "we hit an empty box " << index << "\n";
+                    return {this, ourHitData, false};
+                }
+                //tlog << "We hit a box with objects " << objs.size() << " ! " << index << "\n";
+                return {this, ourHitData, true};
             }
             #ifdef COMPILE_GUI
             void draw(Shader& worldShader) {
