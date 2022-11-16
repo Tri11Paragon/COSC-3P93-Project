@@ -62,11 +62,7 @@ namespace Raytracing {
             auto hResult = HitData{false, Vec4(), Vec4(), max};
             Object* objPtr = nullptr;
             
-            auto intersected = bvhObjects->rayIntersect(ray, min, max);
-            
-            //tlog << " Our intersections found: " << intersected.size() << " objs\n";
-            
-            //dlog << "Intersections " << intersected.objs.size() << " " << ray << "\n";
+            auto intersected = bvhObjects->rayAnyHitIntersect(ray, min, max);
             
             for (const auto& ptr : intersected) {
                 auto cResult = ptr.ptr->checkIfHit(ray, min, hResult.length);

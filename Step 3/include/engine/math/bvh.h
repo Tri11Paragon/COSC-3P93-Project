@@ -54,8 +54,8 @@ namespace Raytracing {
             }
         public:
             struct BVHHitData {
-                BVHNode* ptr;
-                AABBHitData data;
+                BVHNode* ptr{};
+                AABBHitData data{};
                 bool hit = false;
             };
             std::vector<BVHObject> objs;
@@ -68,39 +68,7 @@ namespace Raytracing {
                                                                                             left(left), right(right) {
                 index = count++;
             }
-            BVHHitData doesRayIntersect(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max){
-                auto ourHitData = aabb.intersects(r, min, max);
-                if (!ourHitData.hit)
-                    return {this, ourHitData, false};
-                
-                this->hit = 2;
-                
-                BVHHitData leftHit{};
-                leftHit.hit = false;
-                BVHHitData rightHit{};
-                rightHit.hit = false;
-                if (left != nullptr)
-                    leftHit = left->doesRayIntersect(r, min, ourHitData.tMax);
-                if (right != nullptr)
-                    rightHit = right->doesRayIntersect(r, min, leftHit.hit ? leftHit.data.tMin : ourHitData.tMax);
-                
-                //tlog << "On the left we " << (leftHit.hit ? "hit" : "didn't hit") << ". with tmax " << leftHit.data.tMax << " and tmin " << leftHit.data.tMin << "\n";
-                //tlog << "On the right we " << (rightHit.hit ? "hit" : "didn't hit") << ". with tmax " << rightHit.data.tMax << " and tmin " << rightHit.data.tMin << "\n";
-                
-                if (leftHit.hit && (leftHit.data.tMax < rightHit.data.tMax || !rightHit.hit))
-                    return leftHit;
-                else if (rightHit.hit && (rightHit.data.tMax < leftHit.data.tMax || !leftHit.hit))
-                    return rightHit;
-                
-                //tlog << index << "I " << leftHit.hit << " ? " << rightHit.hit << " " << left << " " << right << " : " << objs.size() << " is empty? " << objs.empty() << "\n" ;
-                this->hit = !objs.empty();
-                if (objs.empty()){
-                    //tlog << "we hit an empty box " << index << "\n";
-                    return {this, ourHitData, false};
-                }
-                //tlog << "We hit a box with objects " << objs.size() << " ! " << index << "\n";
-                return {this, ourHitData, true};
-            }
+            BVHHitData firstHitRayIntersectTraversal(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max);
             #ifdef COMPILE_GUI
             void draw(Shader& worldShader) {
                 worldShader.setVec3("color", {1.0, 1.0, 1.0});
@@ -176,18 +144,7 @@ namespace Raytracing {
             BVHNode* root = nullptr;
             
             // splits the objs in the vector based on the provided AABBs
-            static BVHPartitionedSpace partition(const std::pair<AABB, AABB>& aabbs, const std::vector<BVHObject>& objs) {
-                BVHPartitionedSpace space;
-                for (const auto& obj: objs) {
-                    // if this object doesn't have an AABB, we cannot use a BVH on it. If this ever fails we have a problem with the implementation.
-                    RTAssert(!obj.aabb.isEmpty());
-                    if (aabbs.first.intersects(obj.aabb))
-                        space.left.push_back(obj);
-                    else if (aabbs.second.intersects(obj.aabb))
-                        space.right.push_back(obj);
-                }
-                return space;
-            }
+            static BVHPartitionedSpace partition(const std::pair<AABB, AABB>& aabbs, const std::vector<BVHObject>& objs);
             
             static bool vectorEquals(const BVHPartitionedSpace& oldSpace, const BVHPartitionedSpace& newSpace){
                 if (oldSpace.left.size() != newSpace.left.size() || oldSpace.right.size() != newSpace.right.size())
@@ -292,15 +249,8 @@ namespace Raytracing {
                 root = addObjectsRecur(objs, {});
             }
             
-            std::vector<BVHObject> rayIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
-                RTAssert(root != nullptr);
-                auto results = root->doesRayIntersect(ray, min, max);
-                RTAssert(results.ptr != nullptr);
-                if (results.hit)
-                    return results.ptr->objs;
-                else
-                    return {};
-            }
+            std::vector<BVHObject> rayFirstHitIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max);
+            std::vector<BVHObject> rayAnyHitIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max);
             void resetNodes(){
                 reset(root);
             }

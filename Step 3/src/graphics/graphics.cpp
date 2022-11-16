@@ -562,7 +562,7 @@ namespace Raytracing {
                 auto ray = m_camera.projectRay((PRECISION_TYPE) m_window.displayWidth() / 2, (PRECISION_TYPE) m_window.displayHeight() / 2);
                 
                 //auto results = m_world.checkIfHit(ray, 0, 1000).first;
-                auto bvh = m_world.getBVH()->rayIntersect(ray, 0, 1000);
+                auto bvh = m_world.getBVH()->rayAnyHitIntersect(ray, 0, 1000);
                 //if (results.hit)
                 //    ilog << "World Results: " << results.hitPoint << " " << results.length << "\n";
                 //else
