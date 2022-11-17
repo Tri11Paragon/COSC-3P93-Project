@@ -1,0 +1,47 @@
+[
+{
+  "directory": "/home/brett/Documents/Brock/CS 3P93/Project/build",
+  "command": "/usr/bin/g++ -I\"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include\"  -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20 -o CMakeFiles/Step_2.dir/src/globals.cpp.o -c \"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/globals.cpp\"",
+  "file": "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/globals.cpp"
+},
+{
+  "directory": "/home/brett/Documents/Brock/CS 3P93/Project/build",
+  "command": "/usr/bin/g++ -I\"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include\"  -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20 -o CMakeFiles/Step_2.dir/src/image/image.cpp.o -c \"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/image/image.cpp\"",
+  "file": "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/image/image.cpp"
+},
+{
+  "directory": "/home/brett/Documents/Brock/CS 3P93/Project/build",
+  "command": "/usr/bin/g++ -I\"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include\"  -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20 -o CMakeFiles/Step_2.dir/src/main.cpp.o -c \"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/main.cpp\"",
+  "file": "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/main.cpp"
+},
+{
+  "directory": "/home/brett/Documents/Brock/CS 3P93/Project/build",
+  "command": "/usr/bin/g++ -I\"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include\"  -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20 -o CMakeFiles/Step_2.dir/src/math/colliders.cpp.o -c \"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/math/colliders.cpp\"",
+  "file": "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/math/colliders.cpp"
+},
+{
+  "directory": "/home/brett/Documents/Brock/CS 3P93/Project/build",
+  "command": "/usr/bin/g++ -I\"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include\"  -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20 -o CMakeFiles/Step_2.dir/src/raytracing.cpp.o -c \"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/raytracing.cpp\"",
+  "file": "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/raytracing.cpp"
+},
+{
+  "directory": "/home/brett/Documents/Brock/CS 3P93/Project/build",
+  "command": "/usr/bin/g++ -I\"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include\"  -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20 -o CMakeFiles/Step_2.dir/src/util/debug.cpp.o -c \"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/util/debug.cpp\"",
+  "file": "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/util/debug.cpp"
+},
+{
+  "directory": "/home/brett/Documents/Brock/CS 3P93/Project/build",
+  "command": "/usr/bin/g++ -I\"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include\"  -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20 -o CMakeFiles/Step_2.dir/src/util/models.cpp.o -c \"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/util/models.cpp\"",
+  "file": "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/util/models.cpp"
+},
+{
+  "directory": "/home/brett/Documents/Brock/CS 3P93/Project/build",
+  "command": "/usr/bin/g++ -I\"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include\"  -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20 -o CMakeFiles/Step_2.dir/src/util/parser.cpp.o -c \"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/util/parser.cpp\"",
+  "file": "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/util/parser.cpp"
+},
+{
+  "directory": "/home/brett/Documents/Brock/CS 3P93/Project/build",
+  "command": "/usr/bin/g++ -I\"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/include\"  -fsanitize=address -g -march=native -g -fsanitize=address -std=gnu++20 -o CMakeFiles/Step_2.dir/src/world.cpp.o -c \"/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/world.cpp\"",
+  "file": "/home/brett/Documents/Brock/CS 3P93/Project/Step 2/src/world.cpp"
+}
+]

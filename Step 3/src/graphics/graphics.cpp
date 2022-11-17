@@ -490,11 +490,8 @@ namespace Raytracing {
                 started = true;
                 RTSignal->haltRaytracing = false;
                 ilog << "Running raycaster!\n";
-                if(m_parser.hasOption("--multi")) {
-                    m_raycaster.runMulti(std::max(std::stoi(m_parser.getOptionValue("-t")), std::stoi(m_parser.getOptionValue("--threads"))));
-                } else { // we don't actually have to check for --single since it's implied to be default true.
-                    m_raycaster.runSingle();
-                }
+                // we don't actually have to check for --single since it's implied to be default true.
+                raycaster.run(parser.hasOption("--multi"), std::max(std::stoi(parser.getOptionValue("-t")), std::stoi(parser.getOptionValue("--threads")));
             }
             if (ImGui::Checkbox("Pause", &RTSignal->pauseRaytracing)){}
             if (ImGui::Button("Stop") && started){

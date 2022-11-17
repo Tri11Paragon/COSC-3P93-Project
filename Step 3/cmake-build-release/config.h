@@ -12,9 +12,12 @@
 /* #undef COMPILER_DEBUG_ENABLED */
 #define COMPILER_DEBUG_ENABLED_BOOL false
 
-#define COMPILE_GUI
-#define COMPILE_OPENCL
+/* #undef COMPILE_GUI */
+/* #undef COMPILE_OPENCL */
 #define USE_GLFW
+#define USE_OPENMP
+#define USE_MPI
+
 
 #define CMAKE_CONFIG
 #endif

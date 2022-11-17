@@ -137,6 +137,10 @@ namespace Raytracing {
 
     static Random rnd{-1, 1};
 
+    struct RaycasterImageBounds {
+        int width,height, x,y;
+    };
+
     class Raycaster {
         private:
             int maxBounceDepth = 50;
@@ -154,9 +158,10 @@ namespace Raytracing {
             // yes this is actually the only sync we need between the threads
             // and compared to the actual runtime of the raytracing it's very small!
             std::mutex queueSync;
-            std::queue<std::vector<int>>* unprocessedQuads = nullptr;
+            std::queue<RaycasterImageBounds>* unprocessedQuads = nullptr;
 
             Vec4 raycast(const Ray& ray);
+            void runSTDThread(int threads);
         public:
             inline void updateRayInfo(int maxBounce, int perPixel){
                 raysPerPixel = perPixel;
@@ -184,8 +189,7 @@ namespace Raytracing {
             Raycaster(Camera& c, Image& i, World& world, const Parser& p): camera(c), image(i), world(world) {
                 world.generateBVH();
             }
-            void runSingle();
-            void runMulti(unsigned int t);
+            void run(bool multithreaded, int threads = 0);
             [[nodiscard]] inline bool areThreadsStillRunning() const {return finishedThreads == executors.size();}
             inline void join(){
                 for (auto& p : executors)

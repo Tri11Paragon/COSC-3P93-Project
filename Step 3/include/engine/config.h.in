@@ -15,6 +15,9 @@
 #cmakedefine COMPILE_GUI
 #cmakedefine COMPILE_OPENCL
 #cmakedefine USE_GLFW
+#cmakedefine USE_OPENMP
+#cmakedefine USE_MPI
+
 
 #define CMAKE_CONFIG
 #endif

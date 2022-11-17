@@ -156,11 +156,8 @@ int main(int argc, char** args) {
         Raytracing::Raycaster raycaster {camera, image, world, parser};
         // run the raycaster the standard way
         ilog << "Running raycaster!\n";
-        if(parser.hasOption("--multi")) {
-            raycaster.runMulti(std::max(std::stoi(parser.getOptionValue("-t")), std::stoi(parser.getOptionValue("--threads"))));
-        } else { // we don't actually have to check for --single since it's implied to be default true.
-            raycaster.runSingle();
-        }
+        // we don't actually have to check for --single since it's implied to be default true.
+        raycaster.run(parser.hasOption("--multi"), std::max(std::stoi(parser.getOptionValue("-t")), std::stoi(parser.getOptionValue("--threads"))));
         raycaster.join();
     }
     

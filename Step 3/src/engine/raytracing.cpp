@@ -117,82 +117,11 @@ namespace Raytracing {
         }
         
         return color;
-        // old recursive version:
-        /*if (depth > maxBounceDepth)
-            return {0, 0, 0};
-        
-        auto hit = world.checkIfHit(ray, 0.001, infinity);
-        
-        if (hit.first.hit) {
-            auto object = hit.second;
-            auto scatterResults = object->getMaterial()->scatter(ray, hit.first);
-            // if the material scatters the ray, ie casts a new one,
-            if (scatterResults.scattered) // attenuate the recursive raycast by the material's color
-                return scatterResults.attenuationColor * raycast(scatterResults.newRay, depth + 1);
-            //tlog << "Not scattered? " << object->getMaterial() << "\n";
-            return {0, 0, 0};
-        }
-        
-        // skybox color
-        return {0.5, 0.7, 1.0};*/
     }
-    
-    void Raycaster::runSingle() {
-        executors.push_back(std::make_unique<std::thread>([this]() -> void {
-            profiler::start("Raytracer Results", "Single Thread");
-            for (int i = 0; i < image.getWidth(); i++) {
-                for (int j = 0; j < image.getHeight(); j++) {
-                    Raytracing::Vec4 color;
-                    // TODO: profile for speed;
-                    for (int s = 0; s < raysPerPixel; s++) {
-                        // simulate anti aliasing by generating rays with very slight random directions
-                        color = color + raycast(camera.projectRay(i + rnd.getDouble(), j + rnd.getDouble()));
-                    }
-                    PRECISION_TYPE sf = 1.0 / raysPerPixel;
-                    // apply pixel color with gamma correction
-                    image.setPixelColor(i, j, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
-                    if (RTSignal->haltExecution || RTSignal->haltRaytracing)
-                        return;
-                    while (RTSignal->pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
-                        std::this_thread::sleep_for(std::chrono::milliseconds(16));
-                }
-            }
-            profiler::end("Raytracer Results", "Single Thread");
-            finishedThreads++;
-        }));
-    }
-    
-    void Raycaster::runMulti(unsigned int t) {
-        // calculate the max divisions we can have per side
-        // say we have 16 threads, making divs 4
-        // 4 divs per axis, two axis, 16 total quadrants
-        // matching the 16 threads.
-        if (t == 0)
-            t = system_threads;
-        ilog << "Starting multithreaded raytracer with " << t << " threads!\n";
-        int divs = int(std::log(t) / std::log(2));
-        // now double the divs, splitting each quadrant into 4 sub-quadrants which we can queue
-        // the reason to do this is that some of them will finish before others, and the now free threads can keep working
-        // do it without a queue like this leads to a single thread critical path and isn't optimally efficient.
-        divs *= 4; // 2 because two axis getting split makes 4 sub-quadrants, but I tested 4, and it was faster by two seconds, so I'm keeping 4.
-        
-        delete(unprocessedQuads);
-        unprocessedQuads = new std::queue<std::vector<int>>();
-        
-        for (int dx = 0; dx < divs; dx++) {
-            for (int dy = 0; dy < divs; dy++) {
-                // sending functions wasn't working. (fixed, however it feels janky sending lambda functions w/ captures)
-                unprocessedQuads->push({
-                                               image.getWidth() / divs,
-                                               image.getHeight() / divs,
-                                               (image.getWidth() / divs) * dx,
-                                               (image.getHeight() / divs) * dy
-                                       });
-            }
-        }
-        
-        for (int i = 0; i < t; i++) {
-            executors.push_back(std::make_unique<std::thread>([this, i, divs, t]() -> void {
+
+    void Raycaster::runSTDThread(int threads){
+        for (int i = 0; i < threads; i++) {
+            executors.push_back(std::make_unique<std::thread>([this, i, threads]() -> void {
                 // run through all the quadrants
                 std::stringstream str;
                 str << "Threading of #";
@@ -200,22 +129,22 @@ namespace Raytracing {
                 profiler::start("Raytracer Results", str.str());
                 int j = 0;
                 while (true) {
-                    std::vector<int> func;
+                    RaycasterImageBounds imageBoundingData;
                     // get the function for the quadrant
                     queueSync.lock();
                     if (unprocessedQuads->empty()) {
                         queueSync.unlock();
                         break;
                     }
-                    func = unprocessedQuads->front();
+                    imageBoundingData = unprocessedQuads->front();
                     unprocessedQuads->pop();
                     queueSync.unlock();
                     // the run it
-                    for (int kx = 0; kx <= func[0]; kx++) {
-                        for (int ky = 0; ky < func[1]; ky++) {
+                    for (int kx = 0; kx <= imageBoundingData.width; kx++) {
+                        for (int ky = 0; ky < imageBoundingData.height; ky++) {
                             try {
-                                int x = func[2] + kx;
-                                int y = func[3] + ky;
+                                int x = imageBoundingData.x + kx;
+                                int y = imageBoundingData.y + ky;
                                 Raytracing::Vec4 color;
                                 // TODO: profile for speed;
                                 for (int s = 0; s < raysPerPixel; s++) {
@@ -242,4 +171,41 @@ namespace Raytracing {
             }));
         }
     }
+
+    void Raycaster::run(bool multithreaded, int threads) {
+        if (threads == 0)
+            threads = system_threads;
+        // calculate the max divisions we can have per side, then expand by a factor of 4.
+        // the reason to do this is that some of them will finish far quciker than others. The now free threads can keep working.
+        // to do it without a queue like this leads to most threads finishing and a single thread being the critical path which isn't optimally efficient.
+        int divs = int(std::log(threads) / std::log(2)) * 4;
+        
+        // if we are running single threaded, disable everything special
+        // the reason we run single threaded in a seperate thread is because the GUI requires its own set of updating commands
+        // which cannot be blocked by the raytracer, otherwise it would become unresponsive.
+        if (!multithreaded){
+            threads = 1;
+            divs = 1;
+        }
+
+        ilog << "Starting multithreaded raytracer with " << threads << " threads!\n";
+
+        delete(unprocessedQuads);
+        unprocessedQuads = new std::queue<RaycasterImageBounds>();
+        
+        // we need to subdivide the image for the threads, since this is really quick it's fine to due sequentially 
+        for (int dx = 0; dx < divs; dx++) {
+            for (int dy = 0; dy < divs; dy++) {
+                unprocessedQuads->push({
+                                               image.getWidth() / divs,
+                                               image.getHeight() / divs,
+                                               (image.getWidth() / divs) * dx,
+                                               (image.getHeight() / divs) * dy
+                                       });
+            }
+        }
+        
+        runSTDThread(threads);
+    }
+    
 }

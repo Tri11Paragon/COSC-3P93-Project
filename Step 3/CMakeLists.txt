@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 option(EnableDebugMenu "Enable the debug utils" OFF)
 option(COMPILE_GUI "Enable compilation of the GUI + utils" OFF)
 option(USE_GLFW "Will try to use GLFW instead of X11. If libglfw3 and libglfw3-dev are not installed it will default to X11" ON)
+option(USE_OPENMP "Will try to use OpenMP over std::thread. Requires OpenMP on your system." ON)
+option(USE_MPI "Will try to use OpenMPI over OpenMP or std::thread. Requires OpenMPI on your system." ON)
 option(COMPILE_OPENCL "Enable compilation of the OpenCL GPU Compute." OFF)
 
 # used to debug memory related issues
@@ -16,8 +18,10 @@ if ((CMAKE_BUILD_TYPE MATCHES Debug))
         add_link_options(-fsanitize=address)
     endif ()
     set(COMPILER_DEBUG_ENABLED true)
+    message("Building for Debug")
 else ()
     set(COMPILER_DEBUG_ENABLED false)
+    message("Building for Release")
 endif ()
 set(COMPILER_DEBUG_ENABLED_BOOL true)
 
@@ -71,6 +75,29 @@ if (COMPILE_GUI MATCHES ON AND UNIX)
     set(graphics_source_dir "${PROJECT_SOURCE_DIR}/src/graphics")
     file(GLOB_RECURSE graphics_source_files "${graphics_source_dir}/*.cpp" "${graphics_source_dir}/*.c")
 endif ()
+
+if (USE_OPENMP)
+    find_package(OpenMP)
+
+    if (NOT OpenMP_CXX_FOUND)
+        message("OpenMP C++ Requested but was not found on system!")
+    endif()
+
+    include_directories(${OpenMP_CXX_INCLUDE_DIRS})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
+if (USE_MPI)
+    find_package(MPI)
+
+    if (NOT ${MPI_CCX_FOUND})
+        message("MPI Requested but was not found on system!")
+    endif()
+
+    include_directories(${MPI_CXX_INCLUDE_DIRS})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_OPTIONS}")
+endif()
+
 # Windows should be able to handle opencl no problem.
 # i decided that i wanted to use opencl due to it having a much nicer c99 language.
 if (COMPILE_OPENCL MATCHES ON)
@@ -108,3 +135,11 @@ endif ()
 if (COMPILE_OPENCL MATCHES ON)
     target_link_libraries(${PROJECT_NAME} ${OpenCL_LIBRARIES})
 endif ()
+
+if (USE_OPENMP)
+    target_link_libraries(${PROJECT_NAME} ${OpenMP_CXX_LIBRARIES})
+endif()
+
+if (USE_MPI)
+    target_link_libraries(${PROJECT_NAME} ${MPI_CXX_LIBRARIES})
+endif()
