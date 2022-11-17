@@ -90,6 +90,13 @@ int main(int argc, char** args) {
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
     
+    #ifdef COMPILE_GUI
+        XWindow* window;
+        if (parser.hasOption("--gui") || parser.hasOption("-g"))
+            window = new XWindow(1440, 720);
+    #endif
+    
+    
     Raytracing::Image image(1440, 720);
     //Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
     
@@ -109,24 +116,15 @@ int main(int argc, char** args) {
     Raytracing::ModelData house = loader.loadModel(parser.getOptionValue("--resources") + "house.obj");
     Raytracing::ModelData plane = loader.loadModel(parser.getOptionValue("--resources") + "plane.obj");
     
-    world.addMaterial("greenDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 1.0, 0, 1}});
-    world.addMaterial("redDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{1.0, 0, 0, 1}});
-    world.addMaterial("blueDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 0, 1.0, 1}});
+    world.add("greenDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 1.0, 0, 1}});
+    world.add("redDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{1.0, 0, 0, 1}});
+    world.add("blueDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 0, 1.0, 1}});
     
-    world.addMaterial("greenMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 1.0, 0.4, 1}});
-    world.addMaterial("redMetal", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{1.0, 0.4, 0.4, 1}, 0.6f});
-    world.addMaterial("blueMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 0.4, 1.0, 1}});
+    world.add("greenMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 1.0, 0.4, 1}});
+    world.add("redMetal", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{1.0, 0.4, 0.4, 1}, 0.6f});
+    world.add("blueMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 0.4, 1.0, 1}});
     
-    //world.add(new Raytracing::SphereObject({0,0,-1,0{}, 0.5, world.getMaterial("redDiffuse")));
-    //world.add(new Raytracing::SphereObject({-1,0,-1,0}, 0.5, world.getMaterial("blueMetal")));
-    //world.add(new Raytracing::SphereObject({1,0,-1,0}, 0.5, world.getMaterial("redMetal")));
     world.add(new Raytracing::SphereObject({0, -100.5, -1, 0}, 100, world.getMaterial("greenDiffuse")));
-    //world.add(new Raytracing::TriangleObject({0,0.1,-0.5f,0}, {{-0.5, -0.5, 0.0}, {0.5, -0.5, 0.0}, {0.0,  0.5, 0}}, world.getMaterial("greenDiffuse")));
-    /*world.add(new Raytracing::ModelObject({0, 1, 0}, spider, world.getMaterial("redDiffuse")));
-    world.add(new Raytracing::ModelObject({-5, 0.5, 0}, plane, world.getMaterial("greenMetal")));
-    world.add(new Raytracing::ModelObject({5, 1, 0}, house, world.getMaterial("redDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 0, -5}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 0, 5}, house, world.getMaterial("blueDiffuse")));*/
     
     world.add(new Raytracing::ModelObject({0, 1, 0}, spider, world.getMaterial("redDiffuse")));
     world.add(new Raytracing::ModelObject({-5, 0.5, 0}, plane, world.getMaterial("greenMetal")));
@@ -136,28 +134,21 @@ int main(int argc, char** args) {
     
     if (parser.hasOption("--gui") || parser.hasOption("-g")) {
         #ifdef COMPILE_GUI
-            XWindow window(1440, 720);
             Raytracing::Raycaster raycaster {camera, image, world, parser};
             Texture mainImage(&image);
-            auto spiderVAO = new VAO(spider.toTriangles());
-            auto houseVAO = new VAO(house.toTriangles());
-            auto planeVAO = new VAO(plane.toTriangles());
             Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
             Shader worldShader("../resources/shaders/world.vs", "../resources/shaders/world.fs");
-            Raytracing::DisplayRenderer renderer {window, mainImage, world, shader, worldShader, raycaster, parser, spiderVAO, houseVAO, planeVAO, camera};
-            while (!window.shouldWindowClose()) {
-                window.beginUpdate();
+            Raytracing::DisplayRenderer renderer {*window, mainImage, world, shader, worldShader, raycaster, parser, camera};
+            while (!window->shouldWindowClose()) {
+                window->beginUpdate();
                 renderer.draw();
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
                 world.drawBVH(worldShader);
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                window.endUpdate();
+                window->endUpdate();
             }
             RTSignal->haltExecution= true;
             raycaster.join();
-            delete(spiderVAO);
-            delete(houseVAO);
-            delete(planeVAO);
         #else
             flog << "Program not compiled with GUI support! Unable to continue!\n";
         #endif

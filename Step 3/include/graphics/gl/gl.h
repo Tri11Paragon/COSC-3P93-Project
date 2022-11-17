@@ -8,7 +8,7 @@
 #define STEP_3_GL_H
 
 #include <engine/util/std.h>
-#include <engine/types.h>
+#include <engine/util/models.h>
 #include <engine/image/image.h>
 #include <config.h>
 #include <graphics/gl/shader.h>

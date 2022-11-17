@@ -22,14 +22,9 @@ namespace Raytracing {
         private:
             PRECISION_TYPE radius;
         public:
-            SphereObject(const Vec4& position, PRECISION_TYPE radius, Material* material): radius(radius), Object(material, position) {
-               //aabb = AABB(position.x(), position.y(), position.z(), radius);
-            }
+            SphereObject(const Vec4& position, PRECISION_TYPE radius, Material* material): radius(radius), Object(material, position) {}
 
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
-            virtual Object* clone(){
-                return new SphereObject(position, radius, material);
-            }
     };
 
     class TriangleObject : public Object {
@@ -47,28 +42,17 @@ namespace Raytracing {
     class ModelObject : public Object {
         private:
             std::vector<Triangle> triangles;
-            ModelData& data;
-            // basically we have to store this crap here because c++ loves to copy stuff
-            //std::vector<Object*> createdTreeObjects{};
-            //BVHTree* tree = nullptr;
         public:
-            ModelObject(const Vec4& position, ModelData& data, Material* material): Object(material, position), data(data) {
+            ModelObject(const Vec4& position, ModelData& data, Material* material): Object(material, position) {
                 // since all of this occurs before the main ray tracing algorithm it's fine to do sequentially
-                triangles = data.toTriangles();
-                this->aabb = data.aabb;
-                //createdTreeObjects = Raytracing::ModelData::createBVHTree(triangles, position);
-                //tree = new BVHTree(createdTreeObjects);
+                TriangulatedModel model {data};
+                this->triangles = model.triangles;
+                this->aabb = std::move(model.aabb);
+                #ifdef COMPILE_GUI
+                    vao = new VAO(triangles);
+                #endif
             }
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
-            virtual Object* clone() {
-                return new ModelObject(position, data, material);
-            }
-            virtual ~ModelObject() {
-                // Disabled for now, causing bugs when on release mode.
-                //for (auto* p : createdTreeObjects)
-                //    delete(p);
-                //delete(tree);
-            }
     };
 
     class DiffuseMaterial : public Material {
@@ -102,7 +86,7 @@ namespace Raytracing {
 
     class TexturedMaterial : public Material {
         public:
-            TexturedMaterial(const std::string& file): Material({}) {
+            explicit TexturedMaterial(const std::string& file): Material({}) {
                 
             }
     };
@@ -116,11 +100,6 @@ namespace Raytracing {
         private:
             // store all the objects in the world,
             std::vector<Object*> objects;
-            /*TODO: create a kd-tree or bvh version to store the objects
-             * this way we can easily tell if a ray is near and object or not
-             * saving on computation
-             */
-            // TODO: the above todo has been done, now we need to test the performance advantage of the BVH
             std::unique_ptr<BVHTree> bvhObjects;
             std::unordered_map<std::string, Material*> materials;
             WorldConfig m_config;
@@ -139,10 +118,11 @@ namespace Raytracing {
 
             inline void add(Object* object) { objects.push_back(object); }
 
-            inline void addMaterial(const std::string& materialName, Material* mat) { materials.insert({materialName, mat}); }
+            inline void add(const std::string& materialName, Material* mat) { materials.insert({materialName, mat}); }
 
             inline Material* getMaterial(const std::string& materialName) { return materials.at(materialName); }
             [[nodiscard]] inline BVHTree* getBVH() { return bvhObjects.get(); }
+            [[nodiscard]] inline std::vector<Object*> getObjectsInWorld(){return objects; }
 
             [[nodiscard]] virtual std::pair<HitData, Object*> checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
             ~World();

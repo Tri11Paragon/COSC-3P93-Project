@@ -139,9 +139,6 @@ namespace Raytracing {
             Shader& m_worldShader;
             Raycaster& m_raycaster;
             Parser& m_parser;
-            VAO* m_spiderVAO;
-            VAO* m_houseVAO;
-            VAO* m_planeVAO;
             Camera& m_camera;
         public:
             DisplayRenderer(XWindow& mWindow,
@@ -151,12 +148,9 @@ namespace Raytracing {
                             Shader& mWorldShader,
                             Raycaster& mRaycaster,
                             Parser& mParser,
-                            VAO* mSpiderVao,
-                            VAO* mHouseVao,
-                            VAO* mPlaneVao,
                             Camera& mCamera)
                     : m_window(mWindow), m_mainImage(mMainImage), m_imageShader(mImageShader), m_worldShader(mWorldShader), m_raycaster(mRaycaster),
-                      m_parser(mParser), m_spiderVAO(mSpiderVao), m_houseVAO(mHouseVao), m_planeVAO(mPlaneVao), m_camera(mCamera), m_world(world) {}
+                      m_parser(mParser), m_camera(mCamera), m_world(world) {}
             void draw();
     };
 }
