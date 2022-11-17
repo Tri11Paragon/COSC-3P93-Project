@@ -8,6 +8,7 @@
 
 #include "engine/util/std.h"
 #include "engine/types.h"
+#include "engine/util/models.h"
 #include <config.h>
 
 #ifdef COMPILE_GUI
@@ -40,11 +41,11 @@ namespace Raytracing {
     inline bool operator==(const BVHPartitionedSpace& left, const BVHPartitionedSpace& right) {
         if (left.left.size() != right.left.size() || left.right.size() != right.right.size())
             return false;
-        for (int i = 0; i < left.left.size(); i++){
+        for (int i = 0; i < left.left.size(); i++) {
             if (left.left[i].aabb != right.left[i].aabb)
                 return false;
         }
-        for (int i = 0; i < left.right.size(); i++){
+        for (int i = 0; i < left.right.size(); i++) {
             if (left.right[i].aabb != right.right[i].aabb)
                 return false;
         }
@@ -62,12 +63,8 @@ namespace Raytracing {
             AABB aabb;
             BVHNode* left;
             BVHNode* right;
-            int index;
-            int hit = 0;
             BVHNode(std::vector<BVHObject> objs, AABB aabb, BVHNode* left, BVHNode* right): objs(std::move(objs)), aabb(std::move(aabb)),
-                                                                                            left(left), right(right) {
-                index = count++;
-            }
+                                                                                            left(left), right(right) {}
             BVHHitData firstHitRayIntersectTraversal(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max);
             ~BVHNode() {
                 delete (left);
@@ -99,6 +96,35 @@ namespace Raytracing {
             ~BVHTree() {
                 delete (root);
             }
+    };
+    
+    struct TriangleBVHObject {
+        Triangle* ptr = nullptr;
+        AABB aabb;
+    };
+    
+    struct TriangleBVHPartitionedSpace {
+        std::vector<TriangleBVHObject> left;
+        std::vector<TriangleBVHObject> right;
+    };
+    
+    struct TriangleBVHNode {
+        struct BVHHitData {
+            TriangleBVHNode* ptr{};
+            AABBHitData data{};
+            bool hit = false;
+        };
+        std::vector<TriangleBVHObject> objs;
+        AABB aabb;
+        TriangleBVHNode* left;
+        TriangleBVHNode* right;
+        
+        TriangleBVHNode(std::vector<TriangleBVHObject> objs, AABB aabb, TriangleBVHNode* left, TriangleBVHNode* right)
+                : objs(std::move(objs)), aabb(std::move(aabb)), left(left), right(right) {}
+        ~TriangleBVHNode() {
+            delete (left);
+            delete (right);
+        }
     };
     
 }
