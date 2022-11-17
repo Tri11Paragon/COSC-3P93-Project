@@ -331,7 +331,7 @@ USE_GLFW:BOOL=ON
 
 //Will try to use OpenMPI over OpenMP or std::thread. Requires
 // OpenMPI on your system.
-USE_MPI:BOOL=ON
+USE_MPI:BOOL=OFF
 
 //Will try to use OpenMP over std::thread. Requires OpenMP on your
 // system.

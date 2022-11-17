@@ -16,7 +16,7 @@
 /* #undef COMPILE_OPENCL */
 #define USE_GLFW
 #define USE_OPENMP
-#define USE_MPI
+/* #undef USE_MPI */
 
 
 #define CMAKE_CONFIG
