@@ -161,7 +161,10 @@ namespace Raytracing {
             std::queue<RaycasterImageBounds>* unprocessedQuads = nullptr;
 
             Vec4 raycast(const Ray& ray);
+            void runRaycastingAlgorithm(RaycasterImageBounds imageBounds, int loopX, int loopY);
             void runSTDThread(int threads);
+            void runOpenMP(int threads);
+            void runMPI(int threads);
         public:
             inline void updateRayInfo(int maxBounce, int perPixel){
                 raysPerPixel = perPixel;

@@ -11,7 +11,12 @@
 #include "engine/util/models.h"
 #include "engine/math/bvh.h"
 #include "types.h"
-#include "graphics/gl/shader.h"
+
+#include <config.h>
+#ifdef COMPILE_GUI
+    #include "graphics/gl/shader.h"
+    #include "graphics/debug_gui.h"
+#endif
 
 #include <utility>
 
@@ -27,31 +32,30 @@ namespace Raytracing {
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
     };
 
-    class TriangleObject : public Object {
-        private:
-            Triangle theTriangle;
-        public:
-            TriangleObject(const Vec4& position, Triangle tri, Material* material): Object(material, position), 
-                                                                                            theTriangle(std::move(tri)) {}
-            [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
-            virtual Object* clone() {
-                return new TriangleObject(position, theTriangle, material);
-            }
-    };
-
     class ModelObject : public Object {
         private:
-            std::vector<Triangle> triangles;
+            std::vector<std::shared_ptr<Triangle>> triangles;
+            std::unique_ptr<TriangleBVHTree> triangleBVH;
         public:
             ModelObject(const Vec4& position, ModelData& data, Material* material): Object(material, position) {
                 // since all of this occurs before the main ray tracing algorithm it's fine to do sequentially
                 TriangulatedModel model {data};
                 this->triangles = model.triangles;
                 this->aabb = std::move(model.aabb);
+                std::vector<TriangleBVHObject> triangulatedObjects;
+                for (const auto& tri : triangles){
+                    TriangleBVHObject triangleObject;
+                    triangleObject.tri = tri;
+                    triangleObject.aabb = tri->aabb;
+                    triangleObject.position = position;
+                    triangulatedObjects.push_back(triangleObject);
+                }
+                triangleBVH = std::make_unique<TriangleBVHTree>(triangulatedObjects);
                 #ifdef COMPILE_GUI
                     vao = new VAO(triangles);
                 #endif
             }
+            [[nodiscard]] virtual DebugBVHData getBVHTree(){return {triangleBVH.get(), false}; }
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
     };
 
@@ -93,7 +97,10 @@ namespace Raytracing {
     
     struct WorldConfig {
         bool useBVH = true;
-        bool padding[7];
+        bool padding[7]{};
+        Shader& worldShader;
+        
+        WorldConfig(Shader& shader): worldShader(shader) {}
     };
 
     class World {
@@ -116,7 +123,11 @@ namespace Raytracing {
                 void drawBVH(Shader& worldShader) {}
             #endif
 
-            inline void add(Object* object) { objects.push_back(object); }
+            inline void add(Object* object) {
+                    objects.push_back(object);
+                    if (object->getBVHTree().bvhTree != nullptr && !object->getBVHTree().isRegular)
+                        new DebugBVH{(TriangleBVHTree*) object->getBVHTree().bvhTree, m_config.worldShader};
+                }
 
             inline void add(const std::string& materialName, Material* mat) { materials.insert({materialName, mat}); }
 

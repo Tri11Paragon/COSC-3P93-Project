@@ -228,6 +228,7 @@ class VAO {
         VAO& operator=(VAO&&) noexcept = delete; // Disable Move Assignment
         
         explicit VAO(const std::vector<Raytracing::Triangle>& triangles);
+        explicit VAO(const std::vector<std::shared_ptr<Raytracing::Triangle>>& triangles);
         VAO(const std::vector<float>& verts, const std::vector<float>& uvs, const std::vector<unsigned int>& indices);
         VAO(const std::vector<float>& verts, const std::vector<float>& uvs);
         
@@ -236,7 +237,7 @@ class VAO {
         // draws as if it where a fullscreen quad (literally used for that)
         void draw() const;
         // draw as if it's a box that we need to bulk draw.
-        void draw(Raytracing::Shader& shader, const std::vector<Raytracing::Vec4>& positions);
+        void draw(Raytracing::Shader& shader, const std::vector<Raytracing::Vec4>& positions) const;
         void draw(Raytracing::Shader& shader);
         ~VAO();
 };

@@ -53,7 +53,7 @@ namespace Raytracing {
     };
     
     struct TriangulatedModel {
-        std::vector<Triangle> triangles;
+        std::vector<std::shared_ptr<Triangle>> triangles;
         AABB aabb;
     
         explicit TriangulatedModel(const ModelData& data);

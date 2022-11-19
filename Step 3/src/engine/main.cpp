@@ -94,6 +94,7 @@ int main(int argc, char** args) {
         XWindow* window;
         if (parser.hasOption("--gui") || parser.hasOption("-g"))
             window = new XWindow(1440, 720);
+        Shader worldShader("../resources/shaders/world.vs", "../resources/shaders/world.fs");
     #endif
     
     
@@ -105,16 +106,16 @@ int main(int argc, char** args) {
     camera.setPosition({6, 5, 6});
     camera.lookAt({0, 0, 0});
     
-    WorldConfig worldConfig;
+    
+    WorldConfig worldConfig {worldShader};
     worldConfig.useBVH = true;
     
     Raytracing::World world {worldConfig};
     
-    Raytracing::OBJLoader loader;
     // assumes you are running it from a subdirectory, "build" or "cmake-build-release", etc.
-    Raytracing::ModelData spider = loader.loadModel(parser.getOptionValue("--resources") + "spider.obj");
-    Raytracing::ModelData house = loader.loadModel(parser.getOptionValue("--resources") + "house.obj");
-    Raytracing::ModelData plane = loader.loadModel(parser.getOptionValue("--resources") + "plane.obj");
+    Raytracing::ModelData spider = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "spider.obj");
+    Raytracing::ModelData house = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "house.obj");
+    Raytracing::ModelData plane = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "plane.obj");
     
     world.add("greenDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 1.0, 0, 1}});
     world.add("redDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{1.0, 0, 0, 1}});
@@ -137,7 +138,6 @@ int main(int argc, char** args) {
             Raytracing::Raycaster raycaster {camera, image, world, parser};
             Texture mainImage(&image);
             Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
-            Shader worldShader("../resources/shaders/world.vs", "../resources/shaders/world.fs");
             Raytracing::DisplayRenderer renderer {*window, mainImage, world, shader, worldShader, raycaster, parser, camera};
             while (!window->shouldWindowClose()) {
                 window->beginUpdate();

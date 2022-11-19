@@ -7,6 +7,15 @@
 #include <functional>
 #include <utility>
 #include <engine/util/debug.h>
+#include <config.h>
+
+#ifdef USE_MPI
+    #include <mpi/mpi.h>
+#else
+    #ifdef USE_OPENMP
+        #include <omp.h>
+    #endif
+#endif
 
 namespace Raytracing {
     
@@ -119,7 +128,32 @@ namespace Raytracing {
         return color;
     }
 
+    void Raycaster::runRaycastingAlgorithm(RaycasterImageBounds imageBounds, int loopX, int loopY) {
+        try {
+            int x = imageBounds.x + loopX;
+            int y = imageBounds.y + loopY;
+            Raytracing::Vec4 color;
+            // TODO: profile for speed;
+            for (int s = 0; s < raysPerPixel; s++) {
+                // simulate anti aliasing by generating rays with very slight random directions
+                color = color + raycast(camera.projectRay(x + rnd.getDouble(), y + rnd.getDouble()));
+            }
+            PRECISION_TYPE sf = 1.0 / raysPerPixel;
+            // apply pixel color with gamma correction
+            image.setPixelColor(x, y, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
+            if (RTSignal->haltExecution || RTSignal->haltRaytracing)
+                return;
+            while (RTSignal->pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
+                std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        } catch (std::exception& error) {
+            flog << "Possibly fatal error in the multithreaded raytracer!\n";
+            flog << error.what() << "\n";
+        }
+    }
+
+
     void Raycaster::runSTDThread(int threads){
+        ilog << "Running std::thread\n";
         for (int i = 0; i < threads; i++) {
             executors.push_back(std::make_unique<std::thread>([this, i, threads]() -> void {
                 // run through all the quadrants
@@ -127,9 +161,8 @@ namespace Raytracing {
                 str << "Threading of #";
                 str << (i+1);
                 profiler::start("Raytracer Results", str.str());
-                int j = 0;
-                while (true) {
-                    RaycasterImageBounds imageBoundingData;
+                while (unprocessedQuads != nullptr) {
+                    RaycasterImageBounds imageBoundingData{};
                     // get the function for the quadrant
                     queueSync.lock();
                     if (unprocessedQuads->empty()) {
@@ -142,29 +175,9 @@ namespace Raytracing {
                     // the run it
                     for (int kx = 0; kx <= imageBoundingData.width; kx++) {
                         for (int ky = 0; ky < imageBoundingData.height; ky++) {
-                            try {
-                                int x = imageBoundingData.x + kx;
-                                int y = imageBoundingData.y + ky;
-                                Raytracing::Vec4 color;
-                                // TODO: profile for speed;
-                                for (int s = 0; s < raysPerPixel; s++) {
-                                    // simulate anti aliasing by generating rays with very slight random directions
-                                    color = color + raycast(camera.projectRay(x + rnd.getDouble(), y + rnd.getDouble()));
-                                }
-                                PRECISION_TYPE sf = 1.0 / raysPerPixel;
-                                // apply pixel color with gamma correction
-                                image.setPixelColor(x, y, {std::sqrt(sf * color.r()), std::sqrt(sf * color.g()), std::sqrt(sf * color.b())});
-                                if (RTSignal->haltExecution || RTSignal->haltRaytracing)
-                                    return;
-                                while (RTSignal->pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
-                                    std::this_thread::sleep_for(std::chrono::milliseconds(16));
-                            } catch (std::exception& error) {
-                                flog << "Possibly fatal error in the multithreaded raytracer!\n";
-                                flog << error.what() << "\n";
-                            }
+                            runRaycastingAlgorithm(imageBoundingData, kx, ky);
                         }
                     }
-                    j++;
                 }
                 finishedThreads++;
                 profiler::end("Raytracer Results", str.str());
@@ -172,9 +185,58 @@ namespace Raytracing {
         }
     }
 
+    void Raycaster::runOpenMP(int threads){
+        #ifdef USE_OPENMP
+        ilog << "Running OpenMP\n";
+        #pragma omp parallel num_threads(threads+1) default(none) shared(threads)
+        {
+            int threadID = omp_get_thread_num();
+            // an attempt at making the omp command non-blocking.
+            if (threadID != 0) {
+                std::stringstream str;
+                str << "Threading of #";
+                str << (threadID);
+                profiler::start("Raytracer Results", str.str());
+                int j = 0;
+                // run through all the quadrants
+                bool running = true;
+                while (running) {
+                    RaycasterImageBounds imageBoundingData{};
+                    #pragma omp critical
+                    {
+                        if (unprocessedQuads->empty())
+                            running = false;
+                        if (running) {
+                            imageBoundingData = unprocessedQuads->front();
+                            unprocessedQuads->pop();
+                        }
+                    }
+                    if (running) {
+                        for (int kx = 0; kx <= imageBoundingData.width; kx++) {
+                            for (int ky = 0; ky < imageBoundingData.height; ky++) {
+                                runRaycastingAlgorithm(imageBoundingData, kx, ky);
+                            }
+                        }
+                    }
+                }
+                #pragma omp critical
+                finishedThreads++;
+                profiler::end("Raytracer Results", str.str());
+            }
+        }
+        tlog << "OpenMP finished!\n";
+        #else
+            flog << "Not compiled with OpenMP! Unable to run raytracing.\n";
+            system_threads;
+        #endif
+    }
+    void Raycaster::runMPI(int threads){
+        ilog << "Running MPI\n";
+    }
+
     void Raycaster::run(bool multithreaded, int threads) {
         if (threads == 0)
-            threads = system_threads;
+            threads = (int)system_threads;
         // calculate the max divisions we can have per side, then expand by a factor of 4.
         // the reason to do this is that some of them will finish far quciker than others. The now free threads can keep working.
         // to do it without a queue like this leads to most threads finishing and a single thread being the critical path which isn't optimally efficient.
@@ -205,7 +267,15 @@ namespace Raytracing {
             }
         }
         
-        runSTDThread(threads);
+        #ifdef USE_MPI
+            runMPI(threads);
+        #else
+            #ifdef USE_OPENMP
+                runOpenMP(threads);
+            #else
+                runSTDThread(threads);
+            #endif
+        #endif
     }
     
 }

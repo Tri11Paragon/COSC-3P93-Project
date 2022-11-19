@@ -177,6 +177,59 @@ VAO::VAO(const std::vector<Raytracing::Triangle>& triangles): VaoID(createVAO())
 //    addInstancedAttribute(6, 4, sizeof(Raytracing::Mat4x4), 48);
     unbind();
 }
+VAO::VAO(const std::vector<std::shared_ptr<Raytracing::Triangle>>& triangles): VaoID(createVAO()) {
+    this->drawCount = (int)triangles.size() * 3;
+    glBindVertexArray(VaoID);
+    // enable the attributes, prevents us from having to do this later.
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    // convert vertex data
+    std::vector<float> verts;
+    std::vector<float> uvs;
+    std::vector<float> normals;
+    for (const auto& t : triangles){
+        verts.push_back(float(t->vertex1.x()));
+        verts.push_back(float(t->vertex1.y()));
+        verts.push_back(float(t->vertex1.z()));
+        
+        uvs.push_back(float(t->uv1.x()));
+        uvs.push_back(float(t->uv1.y()));
+        
+        normals.push_back(float(t->normal1.x()));
+        normals.push_back(float(t->normal1.y()));
+        normals.push_back(float(t->normal1.z()));
+        
+        verts.push_back(float(t->vertex2.x()));
+        verts.push_back(float(t->vertex2.y()));
+        verts.push_back(float(t->vertex2.z()));
+        
+        uvs.push_back(float(t->uv2.x()));
+        uvs.push_back(float(t->uv2.y()));
+        
+        normals.push_back(float(t->normal2.x()));
+        normals.push_back(float(t->normal2.y()));
+        normals.push_back(float(t->normal2.z()));
+        
+        verts.push_back(float(t->vertex3.x()));
+        verts.push_back(float(t->vertex3.y()));
+        verts.push_back(float(t->vertex3.z()));
+        
+        uvs.push_back(float(t->uv3.x()));
+        uvs.push_back(float(t->uv3.y()));
+        
+        normals.push_back(float(t->normal3.x()));
+        normals.push_back(float(t->normal3.y()));
+        normals.push_back(float(t->normal3.z()));
+    }
+    // store vertex data
+    storeData(0, 3, 3 * sizeof(float), 0, (int)verts.size(), verts.data());
+    // store texture UV data
+    storeData(1, 2, 2 * sizeof(float), 0, (int)uvs.size(), uvs.data());
+    // store normal data
+    storeData(2, 3, 3 * sizeof(float), 0, (int)normals.size(), normals.data());
+    unbind();
+}
 void VAO::bind() const {
     glBindVertexArray(VaoID);
 }
@@ -184,7 +237,7 @@ void VAO::unbind() {
     glBindVertexArray(0);
     VaoID;
 }
-void VAO::draw(Raytracing::Shader& shader, const std::vector<Raytracing::Vec4>& positions) {
+void VAO::draw(Raytracing::Shader& shader, const std::vector<Raytracing::Vec4>& positions) const {
     // this should only update if we are drawing with more positions than we already have allocated.
 //    createInstanceVBO((int)positions.size(), sizeof(Raytracing::Mat4x4));
 //    std::vector<Raytracing::Mat4x4> data;

@@ -491,7 +491,7 @@ namespace Raytracing {
                 RTSignal->haltRaytracing = false;
                 ilog << "Running raycaster!\n";
                 // we don't actually have to check for --single since it's implied to be default true.
-                raycaster.run(parser.hasOption("--multi"), std::max(std::stoi(parser.getOptionValue("-t")), std::stoi(parser.getOptionValue("--threads")));
+                m_raycaster.run(m_parser.hasOption("--multi"), std::max(std::stoi(m_parser.getOptionValue("-t")), std::stoi(m_parser.getOptionValue("--threads"))));
             }
             if (ImGui::Checkbox("Pause", &RTSignal->pauseRaytracing)){}
             if (ImGui::Button("Stop") && started){
@@ -507,6 +507,7 @@ namespace Raytracing {
         });
     
         if (debug){
+            DebugMenus::render();
             auto projection = m_camera.project();
             if (m_window.isMouseGrabbed()) {
                 yaw += (float) Input::getMouseDelta().x * (1000.0f / ImGui::GetIO().Framerate / 1000.0f) * 3;

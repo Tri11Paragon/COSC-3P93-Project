@@ -15,6 +15,9 @@
 #define COMPILE_GUI
 #define COMPILE_OPENCL
 #define USE_GLFW
+/* #undef USE_OPENMP */
+/* #undef USE_MPI */
+
 
 #define CMAKE_CONFIG
 #endif

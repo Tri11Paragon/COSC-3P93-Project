@@ -8,7 +8,7 @@
 namespace Raytracing {
     
     /*
-     * BVH Node Class
+     * Triangle BVH Node Class
      * -------------------------------------------------------------------------
      */
     
@@ -19,7 +19,7 @@ namespace Raytracing {
      * @param max the max t value allowed in intersection
      * @return BVHHitData, a structure containing the node, AABB intersection and whether we actually hit anything or not.
      */
-    BVHNode::BVHHitData BVHNode::firstHitRayIntersectTraversal(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max) {
+    TriangleBVHNode::BVHHitData TriangleBVHNode::firstHitRayIntersectTraversal(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max) {
         // first we need to check if the ray actually intersects with this node,
         auto ourHitData = aabb.intersects(r, min, max);
         // if it doesn't we need to immediately return, which prunes all subtrees to this node.
@@ -57,7 +57,7 @@ namespace Raytracing {
     
     
     /*
-     * BVH Node Class
+     * BVH Tree Class
      * -------------------------------------------------------------------------
      */
     
@@ -107,19 +107,6 @@ namespace Raytracing {
         return space;
     }
     
-    /**
-     * Returns the object array from the first bounding tree with objects in it hit by the provided ray.
-     * @firstHitRayIntersectTraversal for more information.
-     */
-    std::vector<BVHObject> BVHTree::rayFirstHitIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
-        RTAssert(root != nullptr);
-        auto results = root->firstHitRayIntersectTraversal(ray, min, max);
-        RTAssert(results.ptr != nullptr);
-        if (results.hit)
-            return results.ptr->objs;
-        else
-            return {};
-    }
     /**
      * Returns all the objects intersected by the provided ray. The returned objects are in no particular order.
      * @param ray to use in AABB intersection
@@ -203,6 +190,163 @@ namespace Raytracing {
         else
             return new BVHNode({}, world, left, right);
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /*
+     * Triangle BVH Tree Class
+     * -------------------------------------------------------------------------
+     */
+    
+    /**
+     * Returns the object array from the first bounding tree with objects in it hit by the provided ray.
+     * @firstHitRayIntersectTraversal for more information.
+     */
+    std::vector<TriangleBVHObject> TriangleBVHTree::rayFirstHitIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
+        RTAssert(root != nullptr);
+        auto results = root->firstHitRayIntersectTraversal(ray, min, max);
+        RTAssert(results.ptr != nullptr);
+        if (results.hit)
+            return results.ptr->objs;
+        else
+            return {};
+    }
+    
+    /**
+     * Splits the objects into the two distinct spaces provided in the aabbs param based on their intersection
+     * This is left side based and produces two vectors which are unique.
+     * @param aabbs the two spaces which to split the objs vector into
+     * @param objs object vector to be split into aabbs
+     * @return BVHPartitionedSpace, a structure with two vectors containing the split objects. Is left side based and unique.
+     */
+    TriangleBVHPartitionedSpace TriangleBVHTree::partition(const std::pair<AABB, AABB>& aabbs, const std::vector<TriangleBVHObject>& objs) {
+        TriangleBVHPartitionedSpace space;
+        for (const auto& obj: objs) {
+            // if this object doesn't have an AABB, we cannot use a BVH on it. If this ever fails we have a problem with the implementation.
+            RTAssert(!obj.aabb.isEmpty());
+            if (aabbs.first.intersects(obj.aabb))
+                space.left.push_back(obj);
+            else if (aabbs.second.intersects(obj.aabb))
+                space.right.push_back(obj);
+        }
+        return space;
+    }
+    
+    TriangleBVHNode* TriangleBVHTree::addObjectsRecursively(const std::vector<TriangleBVHObject>& objects, const TriangleBVHPartitionedSpace& prevSpace) {
+        // create a volume for the entire world.
+        // yes, we could use a recursion provided AABB, but that wouldn't be minimum, only half. this ensures that we have a minimum AABB.
+        AABB world;
+        for (const auto& obj: objects)
+            world = world.expand(obj.aabb);
+        
+        // if we have a single object then we can create a leaf.
+        if ((objects.size() <= 1 && !objects.empty())) {
+            return new TriangleBVHNode(objects, world, nullptr, nullptr);
+        } else if (objects.empty()) // should never reach here!!
+            return nullptr;
+        
+        // then split and partition the world
+        auto splitAABBs = world.splitByLongestAxis();
+        auto partitionedObjs = partition(splitAABBs, objects);
+        if (prevSpace == partitionedObjs) {
+            // if we haven't made progress in splitting the world, try inverting the order we add objects first
+            partitionedObjs = partition({splitAABBs.second, splitAABBs.first}, objects);
+            // if we fail then try splitting on another axis
+            if (prevSpace == partitionedObjs) {
+                // try all axis
+                for (int i = 0; i < 3; i++){
+                    splitAABBs = world.splitAlongAxis(i == 0 ? X : i == 1 ? Y : Z);
+                    partitionedObjs = partition(splitAABBs, objects);
+                    // and once we have an axis that works we can break.
+                    if (prevSpace != partitionedObjs)
+                        break;
+                }
+            }
+        }
+        // if we were unable to find a partition that isn't the same as our last, we should create a leaf here
+        // otherwise we'll get infinite recursion
+        if (prevSpace == partitionedObjs) {
+            return new TriangleBVHNode(objects, world, nullptr, nullptr);
+        }
+    
+        TriangleBVHNode* left = nullptr;
+        TriangleBVHNode* right = nullptr;
+        // don't try to explore nodes which don't have anything in them.
+        if (!partitionedObjs.left.empty())
+            left = addObjectsRecursively(partitionedObjs.left, partitionedObjs);
+        if (!partitionedObjs.right.empty())
+            right = addObjectsRecursively(partitionedObjs.right, partitionedObjs);
+        
+        if (left == nullptr && right == nullptr)
+            return new TriangleBVHNode(objects, world, left, right);
+        else
+            return new TriangleBVHNode({}, world, left, right);
+    }
+    
+    /**
+ * Creates a BVH using the supplied vector of objects
+ * @param objects objects used to generate the BVH
+ */
+    void TriangleBVHTree::addObjects(const std::vector<TriangleBVHObject>& objects) {
+        if (root != nullptr)
+            throw std::runtime_error("Triangle BVHTree already exists. What are you trying to do?");
+        // move all the object's aabb's into world position
+        std::vector<TriangleBVHObject> objs;
+        for (const auto& obj: objects) {
+            // we don't want to store all the AABBs which don't exist
+            RTAssert(!obj.aabb.isEmpty());
+            
+            TriangleBVHObject bvhObject;
+            // returns a copy of the AABB object and assigns it in to the tree storage object
+            bvhObject.position = obj.position;
+            bvhObject.aabb = obj.tri->aabb.translate(obj.position);
+            bvhObject.tri = obj.tri;
+            objs.push_back(bvhObject);
+        }
+        root = addObjectsRecursively(objs, {});
+    }
+    
+    /**
+ * Returns all the objects intersected by the provided ray. The returned objects are in no particular order.
+ * @param ray to use in AABB intersection
+ * @param min min t allowed for intersection search
+ * @param max max t allowed
+ * @return a unordered array of objects intersected by ray in this BVH.
+ */
+    std::vector<TriangleBVHObject> TriangleBVHTree::rayAnyHitIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
+        std::queue<TriangleBVHNode*> nodes{};
+        std::vector<TriangleBVHObject> objects;
+        nodes.push(root);
+        
+        while (!nodes.empty()) {
+            auto* node = nodes.front();
+            
+            auto AABB = node->aabb;
+            auto nodeHitData = AABB.intersects(ray, min, max);
+            if (nodeHitData.hit) {
+                if (node->left != nullptr)
+                    nodes.push(node->left);
+                if (node->right != nullptr)
+                    nodes.push(node->right);
+                
+                if (!node->objs.empty()) {
+                    for (const auto& obj: node->objs)
+                        objects.push_back(obj);
+                }
+            }
+            nodes.pop();
+        }
+        return objects;
+    }
+    
 }
 
 /**

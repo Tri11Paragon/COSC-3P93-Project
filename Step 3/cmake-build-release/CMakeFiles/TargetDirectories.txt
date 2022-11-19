@@ -1,3 +1,0 @@
-/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-release/CMakeFiles/Step_3.dir
-/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-release/CMakeFiles/edit_cache.dir
-/home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-release/CMakeFiles/rebuild_cache.dir

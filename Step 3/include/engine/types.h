@@ -57,6 +57,11 @@ namespace Raytracing {
             [[nodiscard]] Vec4 getBaseColor() const { return baseColor; }
             virtual ~Material() = default;
     };
+    
+    struct DebugBVHData {
+        void* bvhTree;
+        bool isRegular;
+    };
 
     class Object {
         protected:
@@ -72,9 +77,11 @@ namespace Raytracing {
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const = 0;
 
             [[nodiscard]] Material* getMaterial() const { return material; }
-            virtual AABB& getAABB() { return aabb; }
-            virtual void setAABB(const AABB& ab) { this->aabb = ab; }
+            [[nodiscard]] virtual AABB& getAABB() { return aabb; }
+            // FIXME: Use of void* is inadvisable. Although this is only for debug consider another method.
+            [[nodiscard]] virtual DebugBVHData getBVHTree(){ return {nullptr, false}; }
             [[nodiscard]] Vec4 getPosition() const { return position; }
+            virtual void setAABB(const AABB& ab) { this->aabb = ab; }
             #ifdef COMPILE_GUI
                 [[nodiscard]] inline VAO* getVAO(){return vao;}
             #endif

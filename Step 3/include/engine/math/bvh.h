@@ -63,9 +63,10 @@ namespace Raytracing {
             AABB aabb;
             BVHNode* left;
             BVHNode* right;
+            // debug ints.
+            int index, hit = 0;
             BVHNode(std::vector<BVHObject> objs, AABB aabb, BVHNode* left, BVHNode* right): objs(std::move(objs)), aabb(std::move(aabb)),
-                                                                                            left(left), right(right) {}
-            BVHHitData firstHitRayIntersectTraversal(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max);
+                                                                                            left(left), right(right) {index = count++;}
             ~BVHNode() {
                 delete (left);
                 delete (right);
@@ -90,8 +91,8 @@ namespace Raytracing {
             }
             
             void addObjects(const std::vector<Object*>& objects);
+            BVHNode* getRoot() {return root;}
             
-            std::vector<BVHObject> rayFirstHitIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max);
             std::vector<BVHObject> rayAnyHitIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max);
             ~BVHTree() {
                 delete (root);
@@ -99,7 +100,8 @@ namespace Raytracing {
     };
     
     struct TriangleBVHObject {
-        Triangle* ptr = nullptr;
+        Vec4 position;
+        std::shared_ptr<Triangle> tri;
         AABB aabb;
     };
     
@@ -107,6 +109,20 @@ namespace Raytracing {
         std::vector<TriangleBVHObject> left;
         std::vector<TriangleBVHObject> right;
     };
+    
+    inline bool operator==(const TriangleBVHPartitionedSpace& left, const TriangleBVHPartitionedSpace& right) {
+        if (left.left.size() != right.left.size() || left.right.size() != right.right.size())
+            return false;
+        for (int i = 0; i < left.left.size(); i++) {
+            if (left.left[i].aabb != right.left[i].aabb)
+                return false;
+        }
+        for (int i = 0; i < left.right.size(); i++) {
+            if (left.right[i].aabb != right.right[i].aabb)
+                return false;
+        }
+        return true;
+    }
     
     struct TriangleBVHNode {
         struct BVHHitData {
@@ -118,13 +134,41 @@ namespace Raytracing {
         AABB aabb;
         TriangleBVHNode* left;
         TriangleBVHNode* right;
-        
+        // debug ints.
+        int index, hit = 0;
+        BVHHitData firstHitRayIntersectTraversal(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max);
         TriangleBVHNode(std::vector<TriangleBVHObject> objs, AABB aabb, TriangleBVHNode* left, TriangleBVHNode* right)
                 : objs(std::move(objs)), aabb(std::move(aabb)), left(left), right(right) {}
         ~TriangleBVHNode() {
             delete (left);
             delete (right);
         }
+    };
+    
+    class TriangleBVHTree {
+        private:
+            TriangleBVHNode* root = nullptr;
+            
+            static TriangleBVHPartitionedSpace partition(const std::pair<AABB, AABB>& aabbs, const std::vector<TriangleBVHObject>& objs);
+            TriangleBVHNode* addObjectsRecursively(const std::vector<TriangleBVHObject>& objects, const TriangleBVHPartitionedSpace& prevSpace);
+        public:
+            explicit TriangleBVHTree(const std::vector<TriangleBVHObject>& objectsInWorld) {
+                addObjects(objectsInWorld);
+                #ifdef COMPILE_GUI
+                auto aabbVertexData = Shapes::cubeVertexBuilder{};
+                if (aabbVAO == nullptr)
+                    aabbVAO = std::make_shared<VAO>(aabbVertexData.cubeVerticesRaw, aabbVertexData.cubeUVs);
+                #endif
+            }
+            
+            void addObjects(const std::vector<TriangleBVHObject>& objects);
+            TriangleBVHNode* getRoot() {return root;}
+            
+            std::vector<TriangleBVHObject> rayFirstHitIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max);
+            std::vector<TriangleBVHObject> rayAnyHitIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max);
+            ~TriangleBVHTree() {
+                delete (root);
+            }
     };
     
 }

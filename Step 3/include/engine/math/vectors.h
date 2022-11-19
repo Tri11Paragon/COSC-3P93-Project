@@ -54,7 +54,7 @@
 
 #endif
 
-#include <cmath>
+//#include <cmath>
 #include "engine/util/std.h"
 
 namespace Raytracing {
