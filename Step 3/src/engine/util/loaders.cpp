@@ -100,8 +100,6 @@ namespace Raytracing {
             }
         }
         
-        tlog << stringStream.str();
-        
         return stringStream.str();
     }
     void ShaderLoader::define(const std::string& key, const std::string& replacement) {
