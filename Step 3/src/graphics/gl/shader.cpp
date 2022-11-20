@@ -9,27 +9,34 @@
 #include <engine/util/loaders.h>
 
 namespace Raytracing {
+    
+    void checkLinkerErrors(GLuint programID, const std::string& vertex, const std::string& fragment, const std::string& geometry){
+        GLint success;
+        GLchar infoLog[2048];
+        glGetProgramiv(programID, GL_LINK_STATUS, &success);
+        if(!success) {
+            glGetProgramInfoLog(programID, 2048, NULL, infoLog);
+            flog << "Unable to link program! " << vertex << " " << fragment << " " << geometry << "\n";
+            flog << infoLog << "\n";
+            return;
+        }
+    }
+    
     Shader::Shader(const std::string& vertex, const std::string& fragment, bool loadString) {
         if (loadString){
             vertexShaderID = loadShaderString(vertex, GL_VERTEX_SHADER);
-            checkCompileErrors(vertexShaderID, "VERTEX", vertex);
             fragmentShaderID = loadShaderString(fragment, GL_FRAGMENT_SHADER);
-            checkCompileErrors(fragmentShaderID, "FRAGMENT", fragment);
         } else {
             vertexShaderID = loadShader(vertex, GL_VERTEX_SHADER);
-            checkCompileErrors(vertexShaderID, "VERTEX", vertex);
             fragmentShaderID = loadShader(fragment, GL_FRAGMENT_SHADER);
-            checkCompileErrors(fragmentShaderID, "FRAGMENT", fragment);
         }
         programID = glCreateProgram();
         // attach the loaded shaders to the Shader program
         glAttachShader(programID, vertexShaderID);
-        checkCompileErrors(vertexShaderID, "VERTEX", vertex);
         glAttachShader(programID, fragmentShaderID);
-        checkCompileErrors(fragmentShaderID, "FRAGMENT", fragment);
         // link and make sure that our program is valid.
         glLinkProgram(programID);
-        checkCompileErrors(programID, "PROGRAM", vertex);
+        checkLinkerErrors(programID, vertex, fragment, "");
         glValidateProgram(programID);
         use();
         setUniformBlockLocation("Matrices", 1);
@@ -40,18 +47,12 @@ namespace Raytracing {
     Shader::Shader(const std::string& vertex, const std::string& geometry, const std::string& fragment, bool loadString) {
         if (loadString){
             vertexShaderID = loadShaderString(vertex, GL_VERTEX_SHADER);
-            checkCompileErrors(vertexShaderID, "VERTEX", vertex);
             geometryShaderID = loadShaderString(geometry, GL_GEOMETRY_SHADER);
-            checkCompileErrors(geometryShaderID, "GEOMETRY", geometry);
             fragmentShaderID = loadShaderString(fragment, GL_FRAGMENT_SHADER);
-            checkCompileErrors(fragmentShaderID, "FRAGMENT", fragment);
         } else {
             vertexShaderID = loadShader(vertex, GL_VERTEX_SHADER);
-            checkCompileErrors(vertexShaderID, "VERTEX", vertex);
             geometryShaderID = loadShader(geometry, GL_GEOMETRY_SHADER);
-            checkCompileErrors(geometryShaderID, "GEOMETRY", geometry);
             fragmentShaderID = loadShader(fragment, GL_FRAGMENT_SHADER);
-            checkCompileErrors(fragmentShaderID, "FRAGMENT", fragment);
         }
         programID = glCreateProgram();
         // attach the loaded shaders to the Shader program
@@ -60,7 +61,7 @@ namespace Raytracing {
         glAttachShader(programID, fragmentShaderID);
         // link and make sure that our program is valid.
         glLinkProgram(programID);
-        checkCompileErrors(programID, "PROGRAM", vertex);
+        checkLinkerErrors(programID, vertex, fragment, geometry);
         glValidateProgram(programID);
         use();
         setUniformBlockLocation("Matrices", 1);
@@ -80,31 +81,7 @@ namespace Raytracing {
     }
     
     unsigned int Shader::loadShader(const std::string &file, int type) {
-        // 1. retrieve the vertex/fragment source code from filePath
-        std::string shaderSource;
-        std::ifstream vShaderFile;
-        if (!vShaderFile.good()){
-            flog << "Shader file not found.\n";
-            throw std::runtime_error("Shader file not found!");
-        }
-        // ensure ifstream objects can throw exceptions:
-        vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        try {
-            // open files
-            vShaderFile.open(file);
-            std::stringstream shaderStream;
-            // read file's buffer contents into streams
-            shaderStream << vShaderFile.rdbuf();
-            // close file handlers
-            vShaderFile.close();
-            // convert stream into std::string
-            shaderSource = shaderStream.str();
-        } catch(std::ifstream::failure& e) {
-            flog << "Unable to read Shader file! " << file << "\n";
-            return -1;
-        }
-        
-        shaderSource = ShaderLoader::loadShaderFile(file);
+        auto shaderSource = ShaderLoader::loadShaderFile(file);
         const char* shaderCode = shaderSource.c_str();
         // creates a Shader
         unsigned int shaderID = glCreateShader(type);
@@ -112,20 +89,16 @@ namespace Raytracing {
         glShaderSource(shaderID, 1, &shaderCode, NULL);
         // Compile it
         glCompileShader(shaderID);
-        // make sure there is no errors
-        /*int status = 0;
-        glGetShaderiv(shaderID, GL_COMPILE_STATUS, &status);
-        if (!status) {
-            char* log;
-            int length = 0;
-            glGetShaderInfoLog(shaderID, 512, &length, log);
-            flog << "Error long length: " << length << "\n";
-            flog << (log) << "\n";
-            flog << "Could not compile Shader! (Shader type: "
-                                 << (type == GL_VERTEX_SHADER ? "vertex" : type == GL_GEOMETRY_SHADER ? "geometry" : "fragment") << ")\n";
-            flog << "Shader File: " << file << "\n";
-            return -1;
-        }*/
+        // make sure there are no errors
+        GLint success;
+        GLchar infoLog[2048];
+        glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
+        if(!success) {
+            glGetShaderInfoLog(shaderID, 2048, NULL, infoLog);
+            flog << "Unable to compile " << file << "\n";
+            flog << "Of type " << (type == GL_VERTEX_SHADER ? "Vertex Shader" : type == GL_FRAGMENT_SHADER ? "Fragment Shader" : "Other Shader") << "\n";
+            flog << infoLog << "\n";
+        }
         return shaderID;
     }
     
@@ -207,25 +180,5 @@ namespace Raytracing {
     
     void Shader::setVec4(const std::string &name, float x, float y, float z, float w) {
         glUniform4f(getUniformLocation(name), x, y, z, w);
-    }
-    
-    void Shader::checkCompileErrors(GLuint Shader, const std::string& type, const std::string& shaderPath) {
-        GLint success;
-        GLchar infoLog[2048];
-        if(type != "PROGRAM") {
-            glGetShaderiv(Shader, GL_COMPILE_STATUS, &success);
-            if(!success) {
-                glGetShaderInfoLog(Shader, 2048, NULL, infoLog);
-                std::cout << shaderPath << "\n";
-                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
-            }
-        } else {
-            glGetProgramiv(Shader, GL_LINK_STATUS, &success);
-            if(!success) {
-                glGetProgramInfoLog(Shader, 2048, NULL, infoLog);
-                std::cout << shaderPath << "\n";
-                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
-            }
-        }
     }
 }
