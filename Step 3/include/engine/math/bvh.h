@@ -114,11 +114,11 @@ namespace Raytracing {
         if (left.left.size() != right.left.size() || left.right.size() != right.right.size())
             return false;
         for (int i = 0; i < left.left.size(); i++) {
-            if (left.left[i].aabb != right.left[i].aabb)
+            if (!(left.left[i].aabb == right.left[i].aabb))
                 return false;
         }
         for (int i = 0; i < left.right.size(); i++) {
-            if (left.right[i].aabb != right.right[i].aabb)
+            if (!(left.right[i].aabb == right.right[i].aabb))
                 return false;
         }
         return true;
@@ -138,7 +138,7 @@ namespace Raytracing {
         int index, hit = 0;
         BVHHitData firstHitRayIntersectTraversal(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max);
         TriangleBVHNode(std::vector<TriangleBVHObject> objs, AABB aabb, TriangleBVHNode* left, TriangleBVHNode* right)
-                : objs(std::move(objs)), aabb(std::move(aabb)), left(left), right(right) {}
+                : objs(std::move(objs)), aabb(std::move(aabb)), left(left), right(right) {index = count++;}
         ~TriangleBVHNode() {
             delete (left);
             delete (right);
@@ -152,6 +152,7 @@ namespace Raytracing {
             static TriangleBVHPartitionedSpace partition(const std::pair<AABB, AABB>& aabbs, const std::vector<TriangleBVHObject>& objs);
             TriangleBVHNode* addObjectsRecursively(const std::vector<TriangleBVHObject>& objects, const TriangleBVHPartitionedSpace& prevSpace);
         public:
+            int index;
             explicit TriangleBVHTree(const std::vector<TriangleBVHObject>& objectsInWorld) {
                 addObjects(objectsInWorld);
                 #ifdef COMPILE_GUI
@@ -159,6 +160,7 @@ namespace Raytracing {
                 if (aabbVAO == nullptr)
                     aabbVAO = std::make_shared<VAO>(aabbVertexData.cubeVerticesRaw, aabbVertexData.cubeUVs);
                 #endif
+                index = count++;
             }
             
             void addObjects(const std::vector<TriangleBVHObject>& objects);

@@ -6,6 +6,7 @@
 #include "graphics/gl/shader.h"
 #include <fstream>
 #include <ios>
+#include <engine/util/loaders.h>
 
 namespace Raytracing {
     Shader::Shader(const std::string& vertex, const std::string& fragment, bool loadString) {
@@ -103,6 +104,7 @@ namespace Raytracing {
             return -1;
         }
         
+        shaderSource = ShaderLoader::loadShaderFile(file);
         const char* shaderCode = shaderSource.c_str();
         // creates a Shader
         unsigned int shaderID = glCreateShader(type);

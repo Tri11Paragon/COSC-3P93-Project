@@ -232,6 +232,7 @@ namespace Raytracing {
     }
     
     void DebugBVH::render() {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         if (m_bvhTree != nullptr) {
             ImGui::Begin(("BVH Data "), nullptr, ImGuiWindowFlags_NoCollapse);
             m_shader.use();
@@ -257,12 +258,12 @@ namespace Raytracing {
             ImGui::End();
         }
         if (m_triangleBVHTree) {
-            ImGui::Begin(("TBVH Data "), nullptr, ImGuiWindowFlags_NoCollapse);
+            ImGui::Begin((std::string("TBVH Data ") + std::to_string(m_triangleBVHTree->index)).c_str(), nullptr, ImGuiWindowFlags_NoCollapse);
             m_shader.use();
             m_shader.setInt("useWhite", 1);
             m_shader.setVec3("color", {1.0, 1.0, 1.0});
             {
-                ImGui::BeginChild("left pane", ImVec2(180, 0), true);
+                ImGui::BeginChild("left pane", ImVec2(280, 0), true);
                 guiNodesRecur(m_triangleBVHTree->getRoot());
                 ImGui::EndChild();
             }
@@ -280,6 +281,7 @@ namespace Raytracing {
             m_shader.setInt("useWhite", 0);
             ImGui::End();
         }
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     DebugBVH::~DebugBVH() {
         DebugMenus::remove(std::shared_ptr<DebugObject>(this));

@@ -315,12 +315,12 @@ namespace Raytracing {
     }
     
     /**
- * Returns all the objects intersected by the provided ray. The returned objects are in no particular order.
- * @param ray to use in AABB intersection
- * @param min min t allowed for intersection search
- * @param max max t allowed
- * @return a unordered array of objects intersected by ray in this BVH.
- */
+     * Returns all the objects intersected by the provided ray. The returned objects are in no particular order.
+     * @param ray to use in AABB intersection
+     * @param min min t allowed for intersection search
+     * @param max max t allowed
+     * @return a unordered array of objects intersected by ray in this BVH.
+     */
     std::vector<TriangleBVHObject> TriangleBVHTree::rayAnyHitIntersect(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
         std::queue<TriangleBVHNode*> nodes{};
         std::vector<TriangleBVHObject> objects;

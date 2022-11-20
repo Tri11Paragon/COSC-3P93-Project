@@ -3,6 +3,7 @@ Building for Debug
 release mode
 Compiling with GUI.
 Found GLFW3!
+Compiling OpenCL /usr/lib/x86_64-linux-gnu/libOpenCL.so || /usr/lib/x86_64-linux-gnu/libOpenCL.so
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/brett/Documents/Brock/CS 3P93/Project/Step 3/cmake-build-debug

@@ -349,9 +349,39 @@ namespace Raytracing {
         return {left.x() + right.x(), left.y() + right.y(), left.z() + right.z(), left.w() + right.w()};
     }
     
+    // adds all vector axis with a constant
+    inline Vec4 operator+(const Vec4& left, const PRECISION_TYPE right) {
+        return {left.x() + right, left.y() + right, left.z() + right, left.w() + right};
+    }
+    
+    // checks if the 3 major axis on the left are less than the right
+    inline bool operator<(const Vec4& left, const Vec4& right) {
+        return left.x() < right.x() && left.y() < right.y() && left.z() < right.z();
+    }
+    
+    // checks if the 3 major axis on the left are greater than the right
+    inline bool operator>(const Vec4& left, const Vec4& right) {
+        return left.x() > right.x() && left.y() > right.y() && left.z() > right.z();
+    }
+    
+    // checks if the 3 major axis on the left are less equal than the right
+    inline bool operator<=(const Vec4& left, const Vec4& right) {
+        return left.x() <= right.x() && left.y() <= right.y() && left.z() <= right.z() && left.w() <= right.w();
+    }
+    
+    // checks if all major axis on the left are greater equal than the right
+    inline bool operator>=(const Vec4& left, const Vec4& right) {
+        return left.x() >= right.x() && left.y() >= right.y() && left.z() >= right.z() && left.w() >= right.w();
+    }
+    
     // subtracts the right vector from the left.
     inline Vec4 operator-(const Vec4& left, const Vec4& right) {
         return {left.x() - right.x(), left.y() - right.y(), left.z() - right.z(), left.w() - right.w()};
+    }
+    
+    // subtracts all vector axis with a constant
+    inline Vec4 operator-(const Vec4& left, const PRECISION_TYPE right) {
+        return {left.x() - right, left.y() - right, left.z() - right, left.w() - right};
     }
     
     // multiples the left with the right

@@ -18,6 +18,12 @@
 
 #endif
 
+#ifdef COMPILE_OPENCL
+
+    #include <opencl/cl.h>
+
+#endif
+
 
 /**
  * Brett Terpstra 6920201
@@ -89,6 +95,10 @@ int main(int argc, char** args) {
     tlog << "Parsing complete! Starting raytracer with options:" << std::endl;
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
+    
+    #ifdef COMPILE_OPENCL
+        OpenCL::init();
+    #endif
     
     #ifdef COMPILE_GUI
         XWindow* window;

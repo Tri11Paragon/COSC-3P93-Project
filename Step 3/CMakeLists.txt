@@ -101,7 +101,7 @@ endif()
 # Windows should be able to handle opencl no problem.
 # i decided that i wanted to use opencl due to it having a much nicer c99 language.
 if (COMPILE_OPENCL MATCHES ON)
-    find_package(OpenCL)
+    find_package(OpenCL REQUIRED)
 
     if (NOT OpenCL_FOUND)
         message("Unable to find OpenCL on your system. Do you have the required libs?")
@@ -132,8 +132,11 @@ if (USE_GLFW MATCHES ON AND glfw3_FOUND)
     target_link_libraries(${PROJECT_NAME} glfw)
 endif ()
 
-if (COMPILE_OPENCL MATCHES ON)
+if (COMPILE_OPENCL)
+    message("Compiling OpenCL ${OpenCL_LIBRARIES} || ${OpenCL_LIBRARY}")
     target_link_libraries(${PROJECT_NAME} ${OpenCL_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} ${OpenCL_LIBRARY})
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CL_TARGET_OPENCL_VERSION=220)
 endif ()
 
 if (USE_OPENMP)

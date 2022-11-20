@@ -143,4 +143,27 @@ namespace Raytracing {
         transform.scale(float(xRadius), float(yRadius), float(zRadius));
         return transform;
     }
+    int lastAxis = 2;
+    
+    std::pair<AABB, AABB> AABB::splitAlongAxis() {
+        lastAxis %= 3;
+        lastAxis += 1;
+        // return the new split AABBs based on the calculated max lengths, but only in their respective axis.
+        if (lastAxis == 1){
+            PRECISION_TYPE X = std::abs(max.x() - min.x());
+            PRECISION_TYPE X2 = X/2;
+            // end the first at half the parent.
+            return {{min.x(), min.y(), min.z(), max.x()-X2, max.y(), max.z()},
+                    // start the second AABB at the end of the first AABB.
+                    {min.x()+X2, min.y(), min.z(), max.x(), max.y(), max.z()}};
+        } else if (lastAxis == 2) {
+            PRECISION_TYPE Y = std::abs(max.y() - min.y());
+            PRECISION_TYPE Y2 = Y/2;
+            return {{min.x(), min.y(), min.z(), max.x(), max.y()-Y2, max.z()}, {min.x(), min.y()+Y2, min.z(), max.x(), max.y(), max.z()}};
+        } else {
+            PRECISION_TYPE Z = std::abs(max.z() - min.z());
+            PRECISION_TYPE Z2 = Z/2;
+            return {{min.x(), min.y(), min.z(), max.x(), max.y(), max.z()-Z2}, {min.x(), min.y(), min.z()+Z2, max.x(), max.y(), max.z()}};
+        }
+    }
 }

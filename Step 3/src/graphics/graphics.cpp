@@ -507,7 +507,6 @@ namespace Raytracing {
         });
     
         if (debug){
-            DebugMenus::render();
             auto projection = m_camera.project();
             if (m_window.isMouseGrabbed()) {
                 yaw += (float) Input::getMouseDelta().x * (1000.0f / ImGui::GetIO().Framerate / 1000.0f) * 3;
@@ -582,6 +581,7 @@ namespace Raytracing {
                     obj->getVAO()->draw(m_worldShader, {obj->getPosition()});
                 }
             }
+            DebugMenus::render();
         } else {
             m_imageShader.use();
             m_mainImage.updateImage();

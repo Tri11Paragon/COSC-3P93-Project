@@ -182,13 +182,13 @@ namespace Raytracing {
     HitData ModelObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
         auto hResult = HitData{false, Vec4(), Vec4(), max};
         
-        auto tris = triangleBVH->rayAnyHitIntersect(ray, min, max);
+        //auto tris = triangleBVH->rayAnyHitIntersect(ray, min, max);
         
         // must check through all the triangles in the object
         // respecting depth along the way
         // but reducing the max it can reach my the last longest vector length.
-        for (const auto& t : tris) {
-            auto cResult = checkIfTriangleGotHit(*t.tri, position, ray, min, hResult.length);
+        for (const auto& t : triangles) {
+            auto cResult = checkIfTriangleGotHit(*t, position, ray, min, hResult.length);
             if (cResult.hit)
                 hResult = cResult;
         }

@@ -100,7 +100,7 @@ namespace Raytracing {
         bool padding[7]{};
         Shader& worldShader;
         
-        WorldConfig(Shader& shader): worldShader(shader) {}
+        explicit WorldConfig(Shader& shader): worldShader(shader) {}
     };
 
     class World {
