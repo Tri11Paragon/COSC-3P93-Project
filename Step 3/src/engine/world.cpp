@@ -57,7 +57,7 @@ namespace Raytracing {
         // calculate the uv coords and normalize to [0, 1]
         PRECISION_TYPE u = (atan2(-RayAtRoot.z(), RayAtRoot.x()) + std::numbers::pi) / (2 * std::numbers::pi);
         PRECISION_TYPE v = acos(RayAtRoot.y()) / std::numbers::pi;
-        return {true, RayAtRoot, normal, root, u, v};
+        return {true, RayAtRoot, normal, root, clamp(u, 0, 1.0), clamp(v, 0, 1.0)};
     }
 
     std::pair<HitData, Object*> World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
@@ -149,7 +149,7 @@ namespace Raytracing {
         // if we are unable to load the image return the debug color.
         // This causes major issues (force this to happen, you'll see), indicates issue + looks really cool.
         if (!data)
-            Vec4{0, 1, 0.2} * Vec4{u, v, 1.0};
+            return Vec4{0, 1, 0.2} * Vec4{u, v, 1.0};
         
         // if you render out the debug color above you'll notice that the UV coords are rotated.
         // you can also see this from the debug view, which *as of now* is rendering based on UV coords * normals * red
@@ -244,7 +244,7 @@ namespace Raytracing {
             // that area is how much each UV factors into the final UV coord
             auto uv = theTriangle.uv1 * areaVert1 + theTriangle.uv2 * areaVert2 + theTriangle.uv3 * areaVert3;
             
-            return {true, rayIntersectionPoint, normal, t, uv.x(), uv.y()};
+            return {true, rayIntersectionPoint, normal, t, clamp(uv.x(), 0, 1.0), clamp(uv.y(), 0, 1.0)};
         }
         
         return {false, Vec4(), Vec4(), 0};
