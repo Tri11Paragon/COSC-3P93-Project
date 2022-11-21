@@ -12,7 +12,7 @@ namespace Raytracing {
     OpenCL openCl {0};
     
     void OpenCL::init() {
-        openCl = OpenCL{0};
+    
     }
     OpenCL::OpenCL(int platformID, int deviceID): m_activePlatform(platformID) {
         m_CL_ERR = CL_SUCCESS;

@@ -4,6 +4,7 @@
  */
 #include "engine/world.h"
 #include "engine/raytracing.h"
+#include "engine/image/stb_image.h"
 
 namespace Raytracing {
 
@@ -53,7 +54,10 @@ namespace Raytracing {
         } else
             tlog << "ray outside sphere\n";
         */
-        return {true, RayAtRoot, normal, root};
+        // calculate the uv coords and normalize to [0, 1]
+        PRECISION_TYPE u = (atan2(-RayAtRoot.z(), RayAtRoot.x()) + std::numbers::pi) / (2 * std::numbers::pi);
+        PRECISION_TYPE v = acos(RayAtRoot.y()) / std::numbers::pi;
+        return {true, RayAtRoot, normal, root, u, v};
     }
 
     std::pair<HitData, Object*> World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
@@ -131,7 +135,56 @@ namespace Raytracing {
         bool shouldReflect = Vec4::dot(newRay, hitData.normal) > 0;
         return {shouldReflect, Ray{hitData.hitPoint, newRay + Raycaster::randomUnitVector() * fuzzyness}, getBaseColor()};
     }
-
+    
+    ScatterResults TexturedMaterial::scatter(const Ray& ray, const HitData& hitData) const {
+        Vec4 newRay = hitData.normal + Raytracing::Raycaster::randomUnitVector().normalize();
+    
+        // rays that are close to zero are liable to floating point precision errors
+        if (newRay.x() < EPSILON && newRay.y() < EPSILON && newRay.z() < EPSILON && newRay.w() < EPSILON)
+            newRay = hitData.normal;
+    
+        return {true, Ray{hitData.hitPoint, newRay}, getColor(hitData.u, hitData.v, hitData.hitPoint)};
+    }
+    Vec4 TexturedMaterial::getColor(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& point) const {
+        // if we are unable to load the image return the debug color.
+        // This causes major issues (force this to happen, you'll see), indicates issue + looks really cool.
+        if (!data)
+            Vec4{0, 1, 0.2} * Vec4{u, v, 1.0};
+        
+        // if you render out the debug color above you'll notice that the UV coords are rotated.
+        // you can also see this from the debug view, which *as of now* is rendering based on UV coords * normals * red
+        // so let's transform it back and ensure that our UV coords are within image bounds.
+        u = clamp(u, 0, 1);
+        // fix that pesky issue
+        v = 1.0 - clamp(v, 0, 1);
+        
+        auto imageX = (int)(width * u);
+        auto imageY = (int)(height * v);
+    
+        if (imageX >= width)  imageX = width-1;
+        if (imageY >= height) imageY = height-1;
+        
+        // since stbi loads in RGB8 [0, 255] but the engine works on [0, 1] we need to scale the data down.
+        // this is best done with a single division followed by multiple multiplication.
+        // since this function needs to be cheap to run.
+        const PRECISION_TYPE colorFactor = 1.0 / 255.0;
+        const auto pixelData = data + (imageY * rowWidth + imageX * channels);
+        
+        return {pixelData[0] * colorFactor, pixelData[1] * colorFactor, pixelData[2] * colorFactor};
+    }
+    TexturedMaterial::TexturedMaterial(const std::string& file) : Material({}) {
+        // we are going to have to ignore transparency for now. TODO:?
+        data = stbi_load(file.c_str(), &width, &height, &channels, 0);
+        if (!data)
+            flog << "Unable to load image file " << file << "!\n";
+        else
+            ilog << "Loaded image " << file << "!\n";
+        rowWidth = width * channels;
+    }
+    TexturedMaterial::~TexturedMaterial() {
+        delete(data);
+    }
+    
     static HitData checkIfTriangleGotHit(const Triangle& theTriangle, const Vec4& position, const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
         // Möller–Trumbore intersection algorithm
         // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
@@ -174,8 +227,26 @@ namespace Raytracing {
                 normal = Vec4{edge1.y() * edge2.z(), edge1.z() * edge2.x(), edge1.x() * edge2.y()} -
                          Vec4{edge1.z() * edge2.y(), edge1.x() * edge2.z(), edge1.y() * edge2.x()};
             }
-            return {true, rayIntersectionPoint, normal, t};
+            
+            // calculate triangle UV
+            // calculate the vector that runs between the vertex and the intersection point for all three vertices
+            auto vertex1ToIntersect = theTriangle.vertex1 - rayIntersectionPoint;
+            auto vertex2ToIntersect = theTriangle.vertex2 - rayIntersectionPoint;
+            auto vertex3ToIntersect = theTriangle.vertex3 - rayIntersectionPoint;
+            
+            // the magnitude of the cross product of two vectors is double the area formed by the triangle of their intersection.
+            auto fullArea = 1 / Vec4::cross(theTriangle.vertex1 - theTriangle.vertex2, theTriangle.vertex1 - theTriangle.vertex3).magnitude();
+            // scale the area of sub triangles to be proportion to the area of the triangle
+            auto areaVert1 = Vec4::cross(vertex2ToIntersect, vertex3ToIntersect).magnitude() * fullArea;
+            auto areaVert2 = Vec4::cross(vertex3ToIntersect, vertex1ToIntersect).magnitude() * fullArea;
+            auto areaVert3 = Vec4::cross(vertex1ToIntersect, vertex2ToIntersect).magnitude() * fullArea;
+            
+            // that area is how much each UV factors into the final UV coord
+            auto uv = theTriangle.uv1 * areaVert1 + theTriangle.uv2 * areaVert2 + theTriangle.uv3 * areaVert3;
+            
+            return {true, rayIntersectionPoint, normal, t, uv.x(), uv.y()};
         }
+        
         return {false, Vec4(), Vec4(), 0};
     }
 
