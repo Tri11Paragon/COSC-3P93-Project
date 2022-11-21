@@ -33,7 +33,7 @@ namespace Raytracing {
         // the length of the vector from its origin in its direction.
         PRECISION_TYPE length{0};
         // Texture UV Coords.
-        PRECISION_TYPE u,v;
+        PRECISION_TYPE u, v;
     };
 
     struct ScatterResults {
@@ -55,7 +55,6 @@ namespace Raytracing {
             // returns true if the ray was scattered along with the scattered ray, otherwise will return false with empty ray.
             // the returned vec4 is the attenuation color
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const = 0;
-            [[nodiscard]] virtual Vec4 getColor(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& point) const = 0;
 
             [[nodiscard]] Vec4 getBaseColor() const { return baseColor; }
             virtual ~Material() = default;

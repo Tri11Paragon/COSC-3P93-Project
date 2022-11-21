@@ -135,7 +135,10 @@ int main(int argc, char** args) {
     world.add("greenMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 1.0, 0.4, 1}});
     world.add("redMetal", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{1.0, 0.4, 0.4, 1}, 0.6f});
     world.add("blueMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 0.4, 1.0, 1}});
-    world.add("test", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "029a_-_Survival_of_the_Idiots_349.jpg"});
+    world.add("magic", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "760213.png"});
+    world.add("thinkers", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "1616466348379.png"});
+    world.add("sponge", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "029a_-_Survival_of_the_Idiots_349.jpg"});
+    world.add("cat", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "livingmylifeinstereodoesntseemthatbad.PNG"});
     
     world.add(new Raytracing::SphereObject({0, -100.5, -1, 0}, 100, world.getMaterial("greenDiffuse")));
     
@@ -144,7 +147,7 @@ int main(int argc, char** args) {
     world.add(new Raytracing::ModelObject({5, 1, 0}, house, world.getMaterial("redDiffuse")));
     world.add(new Raytracing::ModelObject({0, 0, -5}, house, world.getMaterial("blueDiffuse")));
     world.add(new Raytracing::ModelObject({0, 0, 5}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 5, 0}, debugCube, world.getMaterial("test")));
+    world.add(new Raytracing::ModelObject({0, 5, 0}, debugCube, world.getMaterial("magic")));
     
     if (parser.hasOption("--gui") || parser.hasOption("-g")) {
         #ifdef COMPILE_GUI

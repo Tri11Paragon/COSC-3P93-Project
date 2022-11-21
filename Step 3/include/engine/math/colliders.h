@@ -142,6 +142,7 @@ namespace Raytracing {
         return aMax == bMax && aMin == bMin;
     }
     
+    #ifndef USE_SIMD_CPU
     inline bool operator&=(const AABB& a, const AABB& b) {
         const auto& aMax = a.getMax();
         const auto& aMin = a.getMin();
@@ -151,6 +152,7 @@ namespace Raytracing {
         return (aMax < bMax + E && aMax > bMax - E && aMin < bMin + E && aMin > bMin - E);
         return aMax == bMax && aMin == bMin;
     }
+    #endif
 
     inline std::ostream& operator<<(std::ostream& out, const AABB& v) {
         auto max = v.getMax();

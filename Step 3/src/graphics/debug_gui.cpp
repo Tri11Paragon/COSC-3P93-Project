@@ -50,9 +50,9 @@ namespace Raytracing {
     void DebugMenus::add(const std::shared_ptr<DebugObject>& object) {
         objects.push_back(object);
     }
-    void DebugMenus::remove(const std::shared_ptr<DebugObject>& object) {
+    void DebugMenus::remove(DebugObject* object) {
         objects.erase(std::remove_if(objects.begin(), objects.end(), [&](const auto& item) -> bool {
-            return item.get() == object.get();
+            return item.get() == object;
         }), objects.end());
     }
     DebugBVH::DebugBVH(BVHTree* bvhTree, Shader& shader): m_bvhTree(bvhTree), m_shader(shader) {
@@ -284,6 +284,6 @@ namespace Raytracing {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     DebugBVH::~DebugBVH() {
-        DebugMenus::remove(std::shared_ptr<DebugObject>(this));
+        DebugMenus::remove(this);
     }
 }

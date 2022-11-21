@@ -25,7 +25,7 @@ namespace Raytracing {
     class DebugMenus {
         public:
             static void add(const std::shared_ptr<DebugObject>& object);
-            static void remove(const std::shared_ptr<DebugObject>& object);
+            static void remove(DebugObject* object);
             static void render();
     };
     class DebugBVH : public DebugObject {

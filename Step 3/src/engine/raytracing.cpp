@@ -133,7 +133,6 @@ namespace Raytracing {
             int x = imageBounds.x + loopX;
             int y = imageBounds.y + loopY;
             Raytracing::Vec4 color;
-            // TODO: profile for speed;
             for (int s = 0; s < raysPerPixel; s++) {
                 // simulate anti aliasing by generating rays with very slight random directions
                 color = color + raycast(camera.projectRay(x + rnd.getDouble(), y + rnd.getDouble()));

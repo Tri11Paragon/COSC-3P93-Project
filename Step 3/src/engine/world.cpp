@@ -47,7 +47,7 @@ namespace Raytracing {
         // the hit point is where the ray is when extended to the root
         auto RayAtRoot = ray.along(root);
         // The normal of a sphere is just the point of the hit minus the center position
-        auto normal = (RayAtRoot - position).normalize();
+        auto normal = (RayAtRoot - position) / radius;
 
         /*if (Raytracing::vec4::dot(ray.getDirection(), normal) > 0.0) {
             tlog << "ray inside sphere\n";
@@ -55,9 +55,10 @@ namespace Raytracing {
             tlog << "ray outside sphere\n";
         */
         // calculate the uv coords and normalize to [0, 1]
-        PRECISION_TYPE u = (atan2(-RayAtRoot.z(), RayAtRoot.x()) + std::numbers::pi) / (2 * std::numbers::pi);
-        PRECISION_TYPE v = acos(RayAtRoot.y()) / std::numbers::pi;
-        return {true, RayAtRoot, normal, root, clamp(u, 0, 1.0), clamp(v, 0, 1.0)};
+        PRECISION_TYPE u = (atan2(-normal.z(), normal.x()) + std::numbers::pi) / (2 * std::numbers::pi);
+        PRECISION_TYPE v = acos(normal.y()) / std::numbers::pi;
+        // have to invert the v since we have to invert the v again later due to triangles
+        return {true, RayAtRoot, normal, root, u, 1.0 - v};
     }
 
     std::pair<HitData, Object*> World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
@@ -147,16 +148,12 @@ namespace Raytracing {
     }
     Vec4 TexturedMaterial::getColor(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& point) const {
         // if we are unable to load the image return the debug color.
-        // This causes major issues (force this to happen, you'll see), indicates issue + looks really cool.
         if (!data)
-            return Vec4{0, 1, 0.2} * Vec4{u, v, 1.0};
+            return Vec4{0.2, 1, 0} * Vec4{u, v, 1.0};
         
-        // if you render out the debug color above you'll notice that the UV coords are rotated.
-        // you can also see this from the debug view, which *as of now* is rendering based on UV coords * normals * red
-        // so let's transform it back and ensure that our UV coords are within image bounds.
-        u = clamp(u, 0, 1);
-        // fix that pesky issue
-        v = 1.0 - clamp(v, 0, 1);
+        u = clamp(u, 0.0, 1.0);
+        // fix that pesky issue of the v being rotated 90* compared to the image
+        v = 1.0 - clamp(v, 0.0, 1.0);
         
         auto imageX = (int)(width * u);
         auto imageY = (int)(height * v);
@@ -168,7 +165,7 @@ namespace Raytracing {
         // this is best done with a single division followed by multiple multiplication.
         // since this function needs to be cheap to run.
         const PRECISION_TYPE colorFactor = 1.0 / 255.0;
-        const auto pixelData = data + (imageY * rowWidth + imageX * channels);
+        const auto pixelData = data + (imageY * channels * width + imageX * channels);
         
         return {pixelData[0] * colorFactor, pixelData[1] * colorFactor, pixelData[2] * colorFactor};
     }
@@ -178,11 +175,14 @@ namespace Raytracing {
         if (!data)
             flog << "Unable to load image file " << file << "!\n";
         else
-            ilog << "Loaded image " << file << "!\n";
-        rowWidth = width * channels;
+            ilog << "Loaded image " << file << " with " << width << " " << height << " " << channels << "!\n";
     }
     TexturedMaterial::~TexturedMaterial() {
-        delete(data);
+        stbi_image_free(data);
+    }
+    
+    PRECISION_TYPE sign(PRECISION_TYPE i){
+        return i >= 0 ? 1 : -1;
     }
     
     static HitData checkIfTriangleGotHit(const Triangle& theTriangle, const Vec4& position, const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
@@ -219,32 +219,47 @@ namespace Raytracing {
             // ray intersects
             Vec4 rayIntersectionPoint = ray.along(t);
             Vec4 normal;
+    
+            // calculate triangle berry centric coords
+            // first we need the vector that runs between the vertex and the intersection point for all three vertices
+            // we must subtract the position of the triangle from the intersection point because this calc must happen in triangle space not world space.
+            // you won't believe the time it took me to figure this out, since the U coord was correct but the V coord was always 1.
+            auto vertex1ToIntersect = theTriangle.vertex1 - (rayIntersectionPoint - position);
+            auto vertex2ToIntersect = theTriangle.vertex2 - (rayIntersectionPoint - position);
+            auto vertex3ToIntersect = theTriangle.vertex3 - (rayIntersectionPoint - position);
+    
+            // the magnitude of the cross product of two vectors is double the area formed by the triangle of their intersection.
+            auto fullAreaVec = Vec4::cross(theTriangle.vertex1 - theTriangle.vertex2, theTriangle.vertex1 - theTriangle.vertex3);
+            auto areaVert1Vec = Vec4::cross(vertex2ToIntersect, vertex3ToIntersect);
+            auto areaVert2Vec = Vec4::cross(vertex3ToIntersect, vertex1ToIntersect);
+            auto areaVert3Vec = Vec4::cross(vertex1ToIntersect, vertex2ToIntersect);
+            auto fullArea = 1.0 / fullAreaVec.magnitude();
+            // scale the area of sub triangles to be proportion to the area of the triangle
+            auto areaVert1 = areaVert1Vec.magnitude() * fullArea;
+            auto areaVert2 = areaVert2Vec.magnitude() * fullArea;
+            auto areaVert3 = areaVert3Vec.magnitude() * fullArea;
+            
             // normal = theTriangle.findClosestNormal(rayIntersectionPoint - position);
-            if (theTriangle.hasNormals) // returning the closest normal is extra computation when n1 would likely be fine.
+            if (theTriangle.hasNormals) {
+                // returning the closest normal is extra computation when n1 would likely be fine.
                 normal = theTriangle.normal1;
-            else {
+                // the above point still stands, but since we have to compute the berry centric factors anyway
+                // we can use them in the same way to use from for UVs to get the correct normal.
+                // but since the three normals should always be facing the same way anyway, so we really don't need to do this.
+                // I'm keeping this here in case that fact changes.
+                //normal = theTriangle.normal1 * areaVert1 + theTriangle.normal2 * areaVert2 + theTriangle.normal3 * areaVert3;
+            } else {
                 // standard points to normal algorithm but using already computed edges
                 normal = Vec4{edge1.y() * edge2.z(), edge1.z() * edge2.x(), edge1.x() * edge2.y()} -
                          Vec4{edge1.z() * edge2.y(), edge1.x() * edge2.z(), edge1.y() * edge2.x()};
             }
             
-            // calculate triangle UV
-            // calculate the vector that runs between the vertex and the intersection point for all three vertices
-            auto vertex1ToIntersect = theTriangle.vertex1 - rayIntersectionPoint;
-            auto vertex2ToIntersect = theTriangle.vertex2 - rayIntersectionPoint;
-            auto vertex3ToIntersect = theTriangle.vertex3 - rayIntersectionPoint;
-            
-            // the magnitude of the cross product of two vectors is double the area formed by the triangle of their intersection.
-            auto fullArea = 1 / Vec4::cross(theTriangle.vertex1 - theTriangle.vertex2, theTriangle.vertex1 - theTriangle.vertex3).magnitude();
-            // scale the area of sub triangles to be proportion to the area of the triangle
-            auto areaVert1 = Vec4::cross(vertex2ToIntersect, vertex3ToIntersect).magnitude() * fullArea;
-            auto areaVert2 = Vec4::cross(vertex3ToIntersect, vertex1ToIntersect).magnitude() * fullArea;
-            auto areaVert3 = Vec4::cross(vertex1ToIntersect, vertex2ToIntersect).magnitude() * fullArea;
-            
             // that area is how much each UV factors into the final UV coord
-            auto uv = theTriangle.uv1 * areaVert1 + theTriangle.uv2 * areaVert2 + theTriangle.uv3 * areaVert3;
+            // since the z and w component isn't used it's best to do this individually. (Where's that TODO on lower order vectors!!!)
+            auto t_u = theTriangle.uv1.x() * areaVert1 + theTriangle.uv2.x() * areaVert2 + theTriangle.uv3.x() * areaVert3;
+            auto t_v = theTriangle.uv1.y() * areaVert1 + theTriangle.uv2.y() * areaVert2 + theTriangle.uv3.y() * areaVert3;
             
-            return {true, rayIntersectionPoint, normal, t, clamp(uv.x(), 0, 1.0), clamp(uv.y(), 0, 1.0)};
+            return {true, rayIntersectionPoint, normal, t, t_u, t_v};
         }
         
         return {false, Vec4(), Vec4(), 0};

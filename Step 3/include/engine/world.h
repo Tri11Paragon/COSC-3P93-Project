@@ -65,9 +65,6 @@ namespace Raytracing {
             explicit DiffuseMaterial(const Vec4& scatterColor): Material(scatterColor) {}
 
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
-            [[nodiscard]] virtual Vec4 getColor(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& point) const override {
-                return this->baseColor;
-            }
     };
 
     class MetalMaterial : public Material {
@@ -80,9 +77,6 @@ namespace Raytracing {
             explicit MetalMaterial(const Vec4& metalColor): Material(metalColor) {}
 
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
-            [[nodiscard]] virtual Vec4 getColor(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& point) const override {
-                return this->baseColor;
-            }
     };
 
     class BrushedMetalMaterial : public MetalMaterial {
@@ -92,20 +86,18 @@ namespace Raytracing {
             explicit BrushedMetalMaterial(const Vec4& metalColor, PRECISION_TYPE fuzzyness): MetalMaterial(metalColor), fuzzyness(fuzzyness) {}
 
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
-            [[nodiscard]] virtual Vec4 getColor(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& point) const override {
-                return this->baseColor;
-            }
+
     };
 
     class TexturedMaterial : public Material {
         protected:
-            int width{}, height{}, channels{}, rowWidth{};
+            int width{}, height{}, channels{};
             unsigned char* data;
         public:
             explicit TexturedMaterial(const std::string& file);
         
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
-            [[nodiscard]] virtual Vec4 getColor(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& point) const override;
+            [[nodiscard]] Vec4 getColor(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& point) const;
             
             ~TexturedMaterial();
     };

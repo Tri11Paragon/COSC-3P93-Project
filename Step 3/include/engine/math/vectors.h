@@ -401,7 +401,7 @@ namespace Raytracing {
     
     // same as above but for right sided constants
     inline Vec4 operator*(const Vec4& v, PRECISION_TYPE c) {
-        return c * v;
+        return {v.x() * c, v.y() * c, v.z() * c, v.w() * c};
     }
     
     // divides the vector by the constant c

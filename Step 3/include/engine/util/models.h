@@ -21,12 +21,6 @@ namespace Raytracing {
             bool hasNormals = false;
             AABB aabb;
             
-            Triangle(const Vec4& v1, const Vec4& v2, const Vec4& v3): vertex1(v1), vertex2(v2), vertex3(v3) {}
-            
-            Triangle(const Vec4& v1, const Vec4& v2, const Vec4& v3,
-                     const Vec4& n1, const Vec4& n2, const Vec4& n3): vertex1(v1), vertex2(v2), vertex3(v3),
-                                                                      hasNormals(true), normal1(n1), normal2(n2), normal3(n3) {}
-            
             Triangle(const Vec4& v1, const Vec4& v2, const Vec4& v3,
                      const Vec4& uv1, const Vec4& uv2, const Vec4& uv3,
                      const Vec4& n1, const Vec4& n2, const Vec4& n3): vertex1(v1), vertex2(v2), vertex3(v3),
