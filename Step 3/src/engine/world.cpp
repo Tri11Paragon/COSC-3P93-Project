@@ -144,9 +144,9 @@ namespace Raytracing {
         if (newRay.x() < EPSILON && newRay.y() < EPSILON && newRay.z() < EPSILON && newRay.w() < EPSILON)
             newRay = hitData.normal;
     
-        return {true, Ray{hitData.hitPoint, newRay}, getColor(hitData.u, hitData.v, hitData.hitPoint)};
+        return {true, Ray{hitData.hitPoint, newRay}, getColor(hitData.u, hitData.v)};
     }
-    Vec4 TexturedMaterial::getColor(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& point) const {
+    Vec4 TexturedMaterial::getColor(PRECISION_TYPE u, PRECISION_TYPE v) const {
         // if we are unable to load the image return the debug color.
         if (!data)
             return Vec4{0.2, 1, 0} * Vec4{u, v, 1.0};
@@ -179,6 +179,13 @@ namespace Raytracing {
     }
     TexturedMaterial::~TexturedMaterial() {
         stbi_image_free(data);
+    }
+    ScatterResults LightMaterial::scatter(const Ray& ray, const HitData& hitData) const {
+        // do not scatter. The light emits.
+        return {false, ray, baseColor};
+    }
+    Vec4 LightMaterial::emission(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& hitPoint) const {
+        return baseColor;
     }
     
     PRECISION_TYPE sign(PRECISION_TYPE i){

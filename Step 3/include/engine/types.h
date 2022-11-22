@@ -55,6 +55,11 @@ namespace Raytracing {
             // returns true if the ray was scattered along with the scattered ray, otherwise will return false with empty ray.
             // the returned vec4 is the attenuation color
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const = 0;
+            // emission value for this material
+            // this allows for a material to glow slightly or emit full on light
+            // the light can of course be of any color
+            // and the UV coords along with the actual hit point are provided for your convince
+            [[nodiscard]] virtual Vec4 emission(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& hitPoint) const { return {}; }
 
             [[nodiscard]] Vec4 getBaseColor() const { return baseColor; }
             virtual ~Material() = default;

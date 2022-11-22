@@ -96,6 +96,10 @@ namespace Raytracing {
         Vec4 color;
     };
     
+    Vec4 Raycaster::raycasti(const Ray& ray, int depth){
+        return {};
+    }
+    
     Vec4 Raycaster::raycast(const Ray& ray) {
         Ray localRay = ray;
         Vec4 color {1.0, 1.0, 1.0};
@@ -104,22 +108,28 @@ namespace Raytracing {
                 return color;
             while (RTSignal->pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
                 std::this_thread::sleep_for(std::chrono::milliseconds(16));
+            
             auto hit = world.checkIfHit(localRay, 0.001, infinity);
             if (hit.first.hit) {
                 auto object = hit.second;
                 auto scatterResults = object->getMaterial()->scatter(localRay, hit.first);
+                //auto emission = object->getMaterial()->emission(hit.first.u, hit.first.v, hit.first.hitPoint);
                 // if the material scatters the ray, ie casts a new one,
                 if (scatterResults.scattered) { // attenuate the recursive raycast by the material's color
                     color = color * scatterResults.attenuationColor;
                     localRay = scatterResults.newRay;
                 } else {
                     // if we don't scatter, we don't need to keep looping
-                    color = {0.0, 0.0, 0.0};
+                    // but we should return whatever the material's emission is
+                    // which for all that aren't lights (currently) is the old black color.
+                    //color = color + emission;
+                    color = {};
                     break;
                 }
             } else {
                 // since we didn't hit, we hit the sky.
                 color = color * Vec4{0.5, 0.7, 1.0};
+                //color = Vec4{};
                 // if we don't hit we cannot keep looping.
                 break;
             }

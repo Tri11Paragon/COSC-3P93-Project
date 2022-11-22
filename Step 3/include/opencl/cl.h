@@ -52,10 +52,10 @@ namespace Raytracing {
             int m_activePlatform;
             
             cl_platform_id* m_platformIDs;
-            cl_uint m_numOfPlatformIDs;
+            cl_uint m_numOfPlatformIDs{};
             
-            cl_device_id m_deviceID;
-            cl_uint m_numOfDevices;
+            cl_device_id m_deviceID{};
+            cl_uint m_numOfDevices{};
             
             cl_context m_context;
             

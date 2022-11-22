@@ -88,6 +88,13 @@ namespace Raytracing {
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
 
     };
+    
+    class LightMaterial : public Material {
+        public:
+            explicit LightMaterial(const Vec4& lightColor): Material(lightColor) {}
+            [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
+            [[nodiscard]] virtual Vec4 emission(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& hitPoint) const override;
+    };
 
     class TexturedMaterial : public Material {
         protected:
@@ -97,7 +104,7 @@ namespace Raytracing {
             explicit TexturedMaterial(const std::string& file);
         
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
-            [[nodiscard]] Vec4 getColor(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& point) const;
+            [[nodiscard]] Vec4 getColor(PRECISION_TYPE u, PRECISION_TYPE v) const;
             
             ~TexturedMaterial();
     };

@@ -77,11 +77,21 @@ namespace Raytracing {
             std::random_device rd; // obtain a random number from hardware
             std::mt19937 gen;
             std::uniform_real_distribution<double> doubleDistr{0, 1};
+            std::uniform_int_distribution<long> longDistr{0, 1};
+            std::uniform_int_distribution<unsigned long> ulongDistr{0, 1};
         public:
             Random(): gen(std::mt19937(long(rd.entropy() * 691 * 691))) {}
             Random(double min, double max): gen(std::mt19937(long(rd.entropy() * 691 * 691))), doubleDistr{min, max} {}
+            Random(long min, long max): gen(std::mt19937(long(rd.entropy() * 691 * 691))), longDistr{min, max} {}
+            Random(unsigned long min, unsigned long max): gen(std::mt19937(long(rd.entropy() * 691 * 691))), ulongDistr{min, max} {}
             double getDouble() {
                 return doubleDistr(gen);
+            }
+            long getLong(){
+                return longDistr(gen);
+            }
+            unsigned long getULong(){
+                return ulongDistr(gen);
             }
     };
     

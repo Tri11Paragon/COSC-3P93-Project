@@ -36,7 +36,143 @@ namespace Raytracing{
 
 using namespace Raytracing;
 
+typedef unsigned long binsType;
+
+std::queue<binsType> sort(std::queue<binsType>& q, bool dir = false){
+    std::queue<binsType> ret;
+    auto size = q.size();
+    binsType vals[size];
+    for (int i = 0; i < size; i++){
+        vals[i] = q.front();
+        q.pop();
+    }
+    for (int i = 0; i < size; i++){
+        for (int j = i; j < size; j++){
+            if (dir) {
+                if (vals[j] < vals[i]) {
+                    auto temp = vals[j];
+                    vals[j] = vals[i];
+                    vals[i] = temp;
+                }
+            } else{
+                if (vals[j] > vals[i]) {
+                    auto temp = vals[j];
+                    vals[j] = vals[i];
+                    vals[i] = temp;
+                }
+            }
+        }
+    }
+    for (int i = 0; i < size; i++){
+        ret.push(vals[i]);
+    }
+    return ret;
+};
+
 int main(int argc, char** args) {
+    /*int numOfObjects = 50000;
+    binsType binCapacity = 100.0;
+    
+    Random rnd1{0, binCapacity};
+    
+    binsType objects[numOfObjects];
+    std::vector<binsType> bins;
+    
+    for (int i = 0; i < numOfObjects; i++)
+        objects[i] = (rnd1.getULong());
+    
+    std::queue<binsType> less;
+    std::queue<binsType> more;
+    
+    for (int i = 0; i < numOfObjects; i++){
+        if (objects[i] >= binCapacity){
+            bins.push_back(objects[i]);
+            continue;
+        }
+        if (objects[i] < binCapacity/2)
+            less.push(objects[i]);
+        else
+            more.push(objects[i]);
+    }
+    
+    //less = sort(less, true);
+    //more = sort(more, false);
+    
+    binsType currentBin = 0;
+    
+    
+    while (true){
+        if (!more.empty()) {
+            auto moreVal = more.front();
+            while (!more.empty() && moreVal + currentBin <= binCapacity){
+                currentBin += moreVal;
+                more.pop();
+                moreVal = more.front();
+            }
+            ilog << currentBin << "\n";
+            auto lessVal = less.front();
+            while (!less.empty() && lessVal + currentBin <= binCapacity){
+                currentBin += lessVal;
+                less.pop();
+                lessVal = less.front();
+            }
+            dlog << currentBin << " " << lessVal << "\n";
+        } else {
+            if (less.empty())
+                break;
+            auto lessVal = less.front();
+            while (!less.empty() && lessVal + currentBin <= binCapacity){
+                currentBin += lessVal;
+                less.pop();
+                lessVal = less.front();
+            }
+            wlog << currentBin << " " << lessVal << "\n";
+        }
+        if (currentBin <= 0)
+            break;
+        bins.push_back(currentBin);
+        currentBin = 0;
+    }*/
+    
+    /*while (!more.empty()) {
+        currentBin = more.front();
+        more.pop();
+        double lessVal = less.front();
+        while (!less.empty() && currentBin + lessVal < binCapacity){
+            currentBin += lessVal;
+            less.pop();
+            lessVal = less.front();
+        }
+        if (currentBin > 0)
+            bins.push_back(currentBin);
+        currentBin = 0;
+        if (less.empty()) {
+            double moreVal = more.front();
+            while (!more.empty()){
+                while (!more.empty() && currentBin + moreVal < binCapacity) {
+                    currentBin += moreVal;
+                    more.pop();
+                    moreVal = more.front();
+                }
+                if (currentBin > 0)
+                    bins.push_back(currentBin);
+                currentBin = 0;
+            }
+        }
+    }*/
+    /*int goodCount = 0;
+    int greatCount = 0;
+    for (binsType bin : bins) {
+        tlog << bin << "\n";
+        if (bin >= (binsType)((double)binCapacity * 0.95))
+            goodCount++;
+        if (bin >= (binsType)((double)binCapacity * 0.99))
+            greatCount++;
+    }
+    tlog << "We made " << bins.size() << " bins!\n";
+    tlog << "With " << goodCount << " good bins and " << greatCount << " great bins!\n";
+    
+    return 0;*/
     // since this is linux only we can easily set our process priority to be high with a syscall
     // requires root. TODO: find way to doing this without root even if asking for user privilege escalation
     //setpriority(PRIO_PROCESS, 0, -20);
@@ -126,11 +262,12 @@ int main(int argc, char** args) {
     Raytracing::ModelData spider = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "spider.obj");
     Raytracing::ModelData house = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "house.obj");
     Raytracing::ModelData plane = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "plane.obj");
-    Raytracing::ModelData debugCube = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "debug.obj");
+    Raytracing::ModelData debugCube = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "skybox.obj");
     
     world.add("greenDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 1.0, 0, 1}});
     world.add("redDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{1.0, 0, 0, 1}});
     world.add("blueDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 0, 1.0, 1}});
+    world.add("light", new Raytracing::LightMaterial{Raytracing::Vec4{10.0, 10.0, 10.0}});
     
     world.add("greenMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 1.0, 0.4, 1}});
     world.add("redMetal", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{1.0, 0.4, 0.4, 1}, 0.6f});
@@ -147,7 +284,7 @@ int main(int argc, char** args) {
     world.add(new Raytracing::ModelObject({5, 1, 0}, house, world.getMaterial("redDiffuse")));
     world.add(new Raytracing::ModelObject({0, 0, -5}, house, world.getMaterial("blueDiffuse")));
     world.add(new Raytracing::ModelObject({0, 0, 5}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 5, 0}, debugCube, world.getMaterial("magic")));
+    //world.add(new Raytracing::ModelObject({0, 0, 0}, debugCube, world.getMaterial("cat")));
     
     if (parser.hasOption("--gui") || parser.hasOption("-g")) {
         #ifdef COMPILE_GUI

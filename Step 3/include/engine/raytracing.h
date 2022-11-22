@@ -135,7 +135,7 @@ namespace Raytracing {
             void lookAt(const Vec4& lookAtPos);
     };
 
-    static Random rnd{-1, 1};
+    static Random rnd{-1.0, 1.0};
 
     struct RaycasterImageBounds {
         int width,height, x,y;
@@ -160,6 +160,7 @@ namespace Raytracing {
             std::mutex queueSync;
             std::queue<RaycasterImageBounds>* unprocessedQuads = nullptr;
 
+            Vec4 raycasti(const Ray& ray, int depth);
             Vec4 raycast(const Ray& ray);
             void runRaycastingAlgorithm(RaycasterImageBounds imageBounds, int loopX, int loopY);
             void runSTDThread(int threads);
