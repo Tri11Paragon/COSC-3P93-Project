@@ -19,4 +19,8 @@ namespace Raytracing {
         int count = 0;
         int selected = 0;
     #endif
+    #ifdef USE_MPI
+        int numberOfProcesses;
+        int currentProcessID;
+    #endif
 }

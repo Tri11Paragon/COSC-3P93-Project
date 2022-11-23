@@ -131,7 +131,7 @@ namespace Raytracing {
             int version = gladLoadGL(glfwGetProcAddress);
             if(!version)
                 throw std::runtime_error("Unable to load Glad GL!\n");
-    
+            
             glfwShowWindow(window);
             ilog << "Loaded GL" << GLAD_VERSION_MAJOR(version) << "." << GLAD_VERSION_MINOR(version) << "!\n";
         }

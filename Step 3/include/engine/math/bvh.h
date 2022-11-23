@@ -66,7 +66,11 @@ namespace Raytracing {
             // debug ints.
             int index, hit = 0;
             BVHNode(std::vector<BVHObject> objs, AABB aabb, BVHNode* left, BVHNode* right): objs(std::move(objs)), aabb(std::move(aabb)),
-                                                                                            left(left), right(right) {index = count++;}
+                                                                                            left(left), right(right) {
+#ifdef COMPILE_GUI
+                index = count++;
+#endif
+            }
             ~BVHNode() {
                 delete (left);
                 delete (right);
@@ -138,7 +142,11 @@ namespace Raytracing {
         int index, hit = 0;
         BVHHitData firstHitRayIntersectTraversal(const Ray& r, PRECISION_TYPE min, PRECISION_TYPE max);
         TriangleBVHNode(std::vector<TriangleBVHObject> objs, AABB aabb, TriangleBVHNode* left, TriangleBVHNode* right)
-                : objs(std::move(objs)), aabb(std::move(aabb)), left(left), right(right) {index = count++;}
+                : objs(std::move(objs)), aabb(std::move(aabb)), left(left), right(right) {
+#ifdef COMPILE_GUI
+            index = count++;
+#endif
+        }
         ~TriangleBVHNode() {
             delete (left);
             delete (right);
@@ -159,8 +167,8 @@ namespace Raytracing {
                 auto aabbVertexData = Shapes::cubeVertexBuilder{};
                 if (aabbVAO == nullptr)
                     aabbVAO = std::make_shared<VAO>(aabbVertexData.cubeVerticesRaw, aabbVertexData.cubeUVs);
-                #endif
                 index = count++;
+                #endif
             }
             
             void addObjects(const std::vector<TriangleBVHObject>& objects);

@@ -202,6 +202,7 @@ class Texture {
         void bind() const;
         void unbind();
         void enableGlTextures(int textureCount);
+        [[nodiscard]] inline unsigned int getTextureID() const { return textureID; }
 };
 
 class VAO {

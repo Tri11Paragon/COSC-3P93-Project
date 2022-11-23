@@ -102,6 +102,7 @@ namespace Raytracing {
             if (!defaultValues.contains(opt.first))
                 ilog << "With: " << opt.first;
         }
+        std::cout << "\n";
     }
 
     void Parser::printDifferenceInInfo() {

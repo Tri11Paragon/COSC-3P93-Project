@@ -7,11 +7,17 @@
 #include "engine/util/debug.h"
 #include <config.h>
 #include <csignal>
+
+#ifdef USE_MPI
+    
+    #include <engine/mpi.h>
+
+#endif
 //#include <sys/time.h>
 //#include <sys/resource.h>
 
 #ifdef COMPILE_GUI
-        
+    
     #include <graphics/graphics.h>
     #include <graphics/gl/gl.h>
     #include <graphics/gl/shader.h>
@@ -19,7 +25,7 @@
 #endif
 
 #ifdef COMPILE_OPENCL
-
+    
     #include <opencl/cl.h>
 
 #endif
@@ -30,149 +36,13 @@
  *
  */
 
-namespace Raytracing{
+namespace Raytracing {
     extern Signals* RTSignal;
 }
 
 using namespace Raytracing;
 
-typedef unsigned long binsType;
-
-std::queue<binsType> sort(std::queue<binsType>& q, bool dir = false){
-    std::queue<binsType> ret;
-    auto size = q.size();
-    binsType vals[size];
-    for (int i = 0; i < size; i++){
-        vals[i] = q.front();
-        q.pop();
-    }
-    for (int i = 0; i < size; i++){
-        for (int j = i; j < size; j++){
-            if (dir) {
-                if (vals[j] < vals[i]) {
-                    auto temp = vals[j];
-                    vals[j] = vals[i];
-                    vals[i] = temp;
-                }
-            } else{
-                if (vals[j] > vals[i]) {
-                    auto temp = vals[j];
-                    vals[j] = vals[i];
-                    vals[i] = temp;
-                }
-            }
-        }
-    }
-    for (int i = 0; i < size; i++){
-        ret.push(vals[i]);
-    }
-    return ret;
-};
-
 int main(int argc, char** args) {
-    /*int numOfObjects = 50000;
-    binsType binCapacity = 100.0;
-    
-    Random rnd1{0, binCapacity};
-    
-    binsType objects[numOfObjects];
-    std::vector<binsType> bins;
-    
-    for (int i = 0; i < numOfObjects; i++)
-        objects[i] = (rnd1.getULong());
-    
-    std::queue<binsType> less;
-    std::queue<binsType> more;
-    
-    for (int i = 0; i < numOfObjects; i++){
-        if (objects[i] >= binCapacity){
-            bins.push_back(objects[i]);
-            continue;
-        }
-        if (objects[i] < binCapacity/2)
-            less.push(objects[i]);
-        else
-            more.push(objects[i]);
-    }
-    
-    //less = sort(less, true);
-    //more = sort(more, false);
-    
-    binsType currentBin = 0;
-    
-    
-    while (true){
-        if (!more.empty()) {
-            auto moreVal = more.front();
-            while (!more.empty() && moreVal + currentBin <= binCapacity){
-                currentBin += moreVal;
-                more.pop();
-                moreVal = more.front();
-            }
-            ilog << currentBin << "\n";
-            auto lessVal = less.front();
-            while (!less.empty() && lessVal + currentBin <= binCapacity){
-                currentBin += lessVal;
-                less.pop();
-                lessVal = less.front();
-            }
-            dlog << currentBin << " " << lessVal << "\n";
-        } else {
-            if (less.empty())
-                break;
-            auto lessVal = less.front();
-            while (!less.empty() && lessVal + currentBin <= binCapacity){
-                currentBin += lessVal;
-                less.pop();
-                lessVal = less.front();
-            }
-            wlog << currentBin << " " << lessVal << "\n";
-        }
-        if (currentBin <= 0)
-            break;
-        bins.push_back(currentBin);
-        currentBin = 0;
-    }*/
-    
-    /*while (!more.empty()) {
-        currentBin = more.front();
-        more.pop();
-        double lessVal = less.front();
-        while (!less.empty() && currentBin + lessVal < binCapacity){
-            currentBin += lessVal;
-            less.pop();
-            lessVal = less.front();
-        }
-        if (currentBin > 0)
-            bins.push_back(currentBin);
-        currentBin = 0;
-        if (less.empty()) {
-            double moreVal = more.front();
-            while (!more.empty()){
-                while (!more.empty() && currentBin + moreVal < binCapacity) {
-                    currentBin += moreVal;
-                    more.pop();
-                    moreVal = more.front();
-                }
-                if (currentBin > 0)
-                    bins.push_back(currentBin);
-                currentBin = 0;
-            }
-        }
-    }*/
-    /*int goodCount = 0;
-    int greatCount = 0;
-    for (binsType bin : bins) {
-        tlog << bin << "\n";
-        if (bin >= (binsType)((double)binCapacity * 0.95))
-            goodCount++;
-        if (bin >= (binsType)((double)binCapacity * 0.99))
-            greatCount++;
-    }
-    tlog << "We made " << bins.size() << " bins!\n";
-    tlog << "With " << goodCount << " good bins and " << greatCount << " great bins!\n";
-    
-    return 0;*/
     // since this is linux only we can easily set our process priority to be high with a syscall
     // requires root. TODO: find way to doing this without root even if asking for user privilege escalation
     //setpriority(PRIO_PROCESS, 0, -20);
@@ -196,8 +66,7 @@ int main(int argc, char** args) {
     // not implemented yet
     parser.addOption({{"--gpu"},
                       {"-c"}}, "Enables GPU Compute\n"
-                               "\tRequires the --gui/-g flag enabled,\n"
-                               "\tWill use OpenGL compute shaders to render the image\n");
+                               "\tWill use OpenCL compute to render the image\n");
     parser.addOption("--output", "Output Directory\n"
                                  "\tSet the output directory for the rendered image. Defaults to the local directory.\n", "./");
     parser.addOption("--format", "Output Format\n"
@@ -219,21 +88,28 @@ int main(int argc, char** args) {
     if (parser.parse(args, argc))
         return 0;
     
-    if (signal(SIGTERM, [] (int sig) -> void {
-        ilog<<"Computations complete.\nHalting now...\n";
+    if (signal(SIGTERM, [](int sig) -> void {
+        ilog << "Computations complete.\nHalting now...\n";
         RTSignal->haltExecution = true;
-    })==SIG_ERR) { elog<<"Unable to change signal handler.\n";   return 1; }
-    if (signal(SIGINT, [] (int sig) -> void {
-        ilog<<"Computations complete.\nHalting now...\n";
+    }) == SIG_ERR) {
+        elog << "Unable to change signal handler.\n";
+        return 1;
+    }
+    if (signal(SIGINT, [](int sig) -> void {
+        ilog << "Computations complete.\nHalting now...\n";
         RTSignal->haltExecution = true;
-    })==SIG_ERR) { elog<<"Unable to change signal handler.\n";   return 1; }
+    }) == SIG_ERR) {
+        elog << "Unable to change signal handler.\n";
+        return 1;
+    }
     
     tlog << "Parsing complete! Starting raytracer with options:" << std::endl;
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
     
-    #ifdef COMPILE_OPENCL
-        OpenCL::init();
+    #ifdef USE_MPI
+        Raytracing::MPI::init();
+        if (currentProcessID == 0) {
     #endif
     
     #ifdef COMPILE_GUI
@@ -242,6 +118,12 @@ int main(int argc, char** args) {
             window = new XWindow(1440, 720);
         Shader worldShader("../resources/shaders/world.vs", "../resources/shaders/world.fs");
     #endif
+    
+    #ifdef COMPILE_OPENCL
+    OpenCL::init();
+    
+    #endif
+    
     
     
     Raytracing::Image image(1440, 720);
@@ -253,10 +135,14 @@ int main(int argc, char** args) {
     camera.lookAt({0, 0, 0});
     
     
-    WorldConfig worldConfig {worldShader};
+    #ifdef COMPILE_GUI
+    WorldConfig worldConfig{worldShader};
+    #else
+    WorldConfig worldConfig;
+    #endif
     worldConfig.useBVH = true;
     
-    Raytracing::World world {worldConfig};
+    Raytracing::World world{worldConfig};
     
     // assumes you are running it from a subdirectory, "build" or "cmake-build-release", etc.
     Raytracing::ModelData spider = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "spider.obj");
@@ -288,25 +174,49 @@ int main(int argc, char** args) {
     
     if (parser.hasOption("--gui") || parser.hasOption("-g")) {
         #ifdef COMPILE_GUI
-            Raytracing::Raycaster raycaster {camera, image, world, parser};
-            Texture mainImage(&image);
-            Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
-            Raytracing::DisplayRenderer renderer {*window, mainImage, world, shader, worldShader, raycaster, parser, camera};
-            while (!window->shouldWindowClose()) {
-                window->beginUpdate();
-                renderer.draw();
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                world.drawBVH(worldShader);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                window->endUpdate();
+        Raytracing::Raycaster raycaster{camera, image, world, parser};
+        Texture mainImage(&image);
+    
+        CLProgram program(parser.getOptionValue("--resources") + "opencl/image.cl");
+        OpenCL::createCLProgram(program);
+        program.createKernel("drawImage");
+        program.createImage("mainImage", image.getWidth(), image.getHeight());
+        program.setKernelArgument("drawImage", "mainImage", 0);
+        
+        size_t works[2] {(size_t) image.getWidth(), (size_t) image.getHeight()};
+        size_t localWorks[2] {64, 64};
+        
+        unsigned char bytes[image.getWidth() * image.getHeight() * 4];
+        for (int i = 0; i < image.getWidth() * image.getHeight() * 4; i++)
+            bytes[i] = 0;
+        
+        Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
+        Raytracing::DisplayRenderer renderer{*window, mainImage, world, shader, worldShader, raycaster, parser, camera};
+        while (!window->shouldWindowClose()) {
+            window->beginUpdate();
+            renderer.draw();
+            program.runKernel("drawImage", works, NULL, 2);
+            program.readImage("mainImage", image.getWidth(), image.getHeight(), bytes);
+            const PRECISION_TYPE colorFactor = 1.0 / 255.0;
+            for (int i = 0; i < image.getWidth(); i++){
+                for (int j = 0; j < image.getHeight(); j++){
+                    const auto pixelData = bytes + (j * 4 * image.getWidth() + i * 4);
+                    //tlog << (int)pixelData[0] << " " << (int)pixelData[1] << " " << (int)pixelData[2] << "\n";
+                    image.setPixelColor(i, j, {pixelData[0] * colorFactor, pixelData[1] * colorFactor, pixelData[2] * colorFactor});
+                }
             }
-            RTSignal->haltExecution= true;
-            raycaster.join();
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            world.drawBVH(worldShader);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            window->endUpdate();
+        }
+        RTSignal->haltExecution = true;
+        raycaster.join();
         #else
-            flog << "Program not compiled with GUI support! Unable to continue!\n";
+        flog << "Program not compiled with GUI support! Unable to open GUI\n";
         #endif
     } else {
-        Raytracing::Raycaster raycaster {camera, image, world, parser};
+        Raytracing::Raycaster raycaster{camera, image, world, parser};
         // run the raycaster the standard way
         ilog << "Running raycaster!\n";
         // we don't actually have to check for --single since it's implied to be default true.
@@ -335,9 +245,13 @@ int main(int argc, char** args) {
     ilog << "Writing Image!\n";
     imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
     
-    delete(RTSignal);
+    delete (RTSignal);
     #ifdef COMPILE_GUI
-        deleteQuad();
+    deleteQuad();
+    #endif
+    #ifdef USE_MPI
+    }
+    MPI_Finalize();
     #endif
     
     return 0;

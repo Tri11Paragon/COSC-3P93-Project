@@ -112,9 +112,11 @@ namespace Raytracing {
     struct WorldConfig {
         bool useBVH = true;
         bool padding[7]{};
+#ifdef COMPILE_GUI
         Shader& worldShader;
         
         explicit WorldConfig(Shader& shader): worldShader(shader) {}
+#endif
     };
 
     class World {
@@ -139,8 +141,10 @@ namespace Raytracing {
 
             inline void add(Object* object) {
                     objects.push_back(object);
+#ifdef COMPILE_GUI
                     if (object->getBVHTree().bvhTree != nullptr && !object->getBVHTree().isRegular)
                         new DebugBVH{(TriangleBVHTree*) object->getBVHTree().bvhTree, m_config.worldShader};
+#endif
                 }
 
             inline void add(const std::string& materialName, Material* mat) { materials.insert({materialName, mat}); }

@@ -70,6 +70,7 @@ namespace Raytracing {
             bool isMouseGrabbed();
             [[nodiscard]] inline int displayWidth() const {return m_displayWidth;}
             [[nodiscard]] inline int displayHeight() const {return m_displayHeight;}
+            [[nodiscard]] inline GLFWwindow* getWindow() const {return window;}
             
             void closeWindow();
             ~XWindow();
