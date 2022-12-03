@@ -5,6 +5,7 @@
 #include "engine/world.h"
 #include <chrono>
 #include "engine/util/debug.h"
+#include "opencl/open_ray_tracing.h"
 #include <config.h>
 #include <csignal>
 
@@ -51,39 +52,63 @@ int main(int argc, char** args) {
     
     parser.addOption("--single", "Enable Single Thread\n\tUse a single thread for ray tracing\n", "true");
     // not implemented yet
-    parser.addOption("--multi", "Enable Multi-threading\n"
-                                "\tUse multiple threads for ray tracing,\n"
-                                "\tYou can set the max threads using -t or --threads\n");
-    parser.addOption({{"-t"},
-                      {"--threads"}}, "Max Usable Threads\n"
-                                      "\tSet the max threads the ray tracer will attempt to use.\n"
-                                      "\tDefaults to all cores of your cpu.\n", "0");
+    parser.addOption(
+            "--multi", "Enable Multi-threading\n"
+                       "\tUse multiple threads for ray tracing,\n"
+                       "\tYou can set the max threads using -t or --threads\n"
+    );
+    parser.addOption(
+            {{"-t"},
+             {"--threads"}}, "Max Usable Threads\n"
+                             "\tSet the max threads the ray tracer will attempt to use.\n"
+                             "\tDefaults to all cores of your cpu.\n", "0"
+    );
     // not implemented yet
-    parser.addOption({{"--gui"},
-                      {"-g"}}, "Enable GUI\n"
-                               "\tWill create a GUI using X11 and display the image there.\n"
-                               "\tRequires the you compile with the option -DCOMPILE_GUI=ON. Will do nothing otherwise\n");
+    parser.addOption(
+            {{"--gui"},
+             {"-g"}}, "Enable GUI\n"
+                      "\tWill create a GUI using X11 and display the image there.\n"
+                      "\tRequires the you compile with the option -DCOMPILE_GUI=ON. Will do nothing otherwise\n"
+    );
     // not implemented yet
-    parser.addOption({{"--gpu"},
-                      {"-c"}}, "Enables GPU Compute\n"
-                               "\tWill use OpenCL compute to render the image\n");
-    parser.addOption("--output", "Output Directory\n"
-                                 "\tSet the output directory for the rendered image. Defaults to the local directory.\n", "./");
-    parser.addOption("--format", "Output Format\n"
-                                 "\tSets the output format to BMP, PNG, or JPEG. \n", "PNG");
-    parser.addOption("-w", "Image Width\n"
-                           "\tSets the width of the output image.\n", "1440");
-    parser.addOption("-h", "Image Height\n"
-                           "\tSets the height of the output image.\n", "720");
-    parser.addOption("--fov", "Camera FOV\n"
-                              "\tSets the FOV used to render the camera.\n", "90");
-    parser.addOption("--resources", "Resources Directory\n"
-                                    "\tSets the directory where the resources are stored.\n"
-                                    "\tThis can be relative.Must have trailing '/' \n", "../resources/");
-    parser.addOption("--mpi", "Use OpenMPI\n"
-                              "\tTells the raycaster to use OpenMPI to run the raycaster algorithm\n");
-    parser.addOption("--openmp", "Use OpenMP\n"
-                                 "\tTells the raycaster to use OpenMP to run the raycaster algorithm\n");
+    parser.addOption(
+            {{"--gpu"},
+             {"-c"}}, "Enables GPU Compute\n"
+                      "\tWill use OpenCL compute to render the image\n"
+    );
+    parser.addOption(
+            "--output", "Output Directory\n"
+                        "\tSet the output directory for the rendered image. Defaults to the local directory.\n", "./"
+    );
+    parser.addOption(
+            "--format", "Output Format\n"
+                        "\tSets the output format to BMP, PNG, or JPEG. \n", "PNG"
+    );
+    parser.addOption(
+            "-w", "Image Width\n"
+                  "\tSets the width of the output image.\n", "1440"
+    );
+    parser.addOption(
+            "-h", "Image Height\n"
+                  "\tSets the height of the output image.\n", "720"
+    );
+    parser.addOption(
+            "--fov", "Camera FOV\n"
+                     "\tSets the FOV used to render the camera.\n", "90"
+    );
+    parser.addOption(
+            "--resources", "Resources Directory\n"
+                           "\tSets the directory where the resources are stored.\n"
+                           "\tThis can be relative.Must have trailing '/' \n", "../resources/"
+    );
+    parser.addOption(
+            "--mpi", "Use OpenMPI\n"
+                     "\tTells the raycaster to use OpenMPI to run the raycaster algorithm\n"
+    );
+    parser.addOption(
+            "--openmp", "Use OpenMP\n"
+                        "\tTells the raycaster to use OpenMP to run the raycaster algorithm\n"
+    );
     
     // disabled because don't currently have a way to parse vectors. TODO
     //parser.addOption("--position", "Camera Position\n\tSets the position used to render the scene with the camera.\n", "{0, 0, 0}");
@@ -93,17 +118,21 @@ int main(int argc, char** args) {
     if (parser.parse(args, argc))
         return 0;
     
-    if (signal(SIGTERM, [](int sig) -> void {
-        ilog << "Computations complete.\nHalting now...\n";
-        RTSignal->haltExecution = true;
-    }) == SIG_ERR) {
+    if (signal(
+            SIGTERM, [](int sig) -> void {
+                ilog << "Computations complete.\nHalting now...\n";
+                RTSignal->haltExecution = true;
+            }
+    ) == SIG_ERR) {
         elog << "Unable to change signal handler.\n";
         return 1;
     }
-    if (signal(SIGINT, [](int sig) -> void {
-        ilog << "Computations complete.\nHalting now...\n";
-        RTSignal->haltExecution = true;
-    }) == SIG_ERR) {
+    if (signal(
+            SIGINT, [](int sig) -> void {
+                ilog << "Computations complete.\nHalting now...\n";
+                RTSignal->haltExecution = true;
+            }
+    ) == SIG_ERR) {
         elog << "Unable to change signal handler.\n";
         return 1;
     }
@@ -179,24 +208,16 @@ int main(int argc, char** args) {
         Raytracing::RayCaster rayCaster{camera, image, world, parser};
         Texture mainImage(&image);
         
-        CLProgram program(parser.getOptionValue("--resources") + "opencl/image.cl");
-        OpenCL::createCLProgram(program);
-        program.createKernel("drawImage");
-        program.createImage("mainImage", image.getWidth(), image.getHeight());
-        program.setKernelArgument("drawImage", "mainImage", 0);
-        program.setKernelArgument("drawImage", "mainImage", 1);
         
-        size_t works[2]{(size_t) image.getWidth(), (size_t) image.getHeight()};
-        size_t localWorks[2]{8, 8};
-        
+        OpenClRaytracer openClRaytracer{parser.getOptionValue("--resources") + "opencl/raytracer.cl", image, world};
+        openClRaytracer.run();
         
         Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
         Raytracing::DisplayRenderer renderer{*window, mainImage, world, shader, worldShader, rayCaster, parser, camera};
         while (!window->shouldWindowClose()) {
             window->beginUpdate();
             renderer.draw();
-            program.runKernel("drawImage", works, localWorks, 2);
-            program.readImage("mainImage", image);
+            
             
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             world.drawBVH(worldShader);

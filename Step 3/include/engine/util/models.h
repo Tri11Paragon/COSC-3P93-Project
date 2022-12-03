@@ -18,14 +18,12 @@ namespace Raytracing {
             Vec4 vertex1, vertex2, vertex3;
             Vec4 normal1, normal2, normal3;
             Vec4 uv1, uv2, uv3;
-            bool hasNormals = false;
             AABB aabb;
             
-            Triangle(const Vec4& v1, const Vec4& v2, const Vec4& v3,
-                     const Vec4& uv1, const Vec4& uv2, const Vec4& uv3,
-                     const Vec4& n1, const Vec4& n2, const Vec4& n3): vertex1(v1), vertex2(v2), vertex3(v3),
-                                                                      uv1(uv1), uv2(uv2), uv3(uv3),
-                                                                      hasNormals(true), normal1(n1), normal2(n2), normal3(n3) {}
+            Triangle(
+                    const Vec4& v1, const Vec4& v2, const Vec4& v3, const Vec4& uv1, const Vec4& uv2, const Vec4& uv3, const Vec4& n1, const Vec4& n2,
+                    const Vec4& n3
+            ): vertex1(v1), vertex2(v2), vertex3(v3), uv1(uv1), uv2(uv2), uv3(uv3), normal1(n1), normal2(n2), normal3(n3) {}
     };
     
     // face type for model loading
@@ -34,7 +32,7 @@ namespace Raytracing {
         int uv1, uv2, uv3;
         int n1, n2, n3;
     };
-
+    
     struct ModelData {
         // storing all this data is memory inefficient
         // since normals and vertices are only vec3s
@@ -49,10 +47,10 @@ namespace Raytracing {
     struct TriangulatedModel {
         std::vector<std::shared_ptr<Triangle>> triangles;
         AABB aabb;
-    
+        
         explicit TriangulatedModel(const ModelData& data);
     };
-
+    
     class OBJLoader {
         private:
         public:

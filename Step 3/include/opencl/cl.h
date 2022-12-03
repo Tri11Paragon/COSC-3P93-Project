@@ -12,11 +12,6 @@
 #include <engine/image/image.h>
 #include <config.h>
 
-#ifdef COMPILE_GUI
-
-#endif
-
-
 #include <engine/util/std.h>
 
 namespace Raytracing {
@@ -111,7 +106,7 @@ namespace Raytracing {
              * globalWorkSize and localWorkSize must be an array of workDim size which specify the work size for each kernel
              * For example a work dim of 2 allows for two separate work sizes to be set per dimension.
              * An image is two dimensional and so global work size would be {width of image, height of image}
-             * and local work size would be {8, 8} for a total of 64 (again recommended). Alternatively specify CL_D2_64_LOCAL_SIZE
+             * and local work size would be size_t localWork = {8, 8} for a total of 64 (again recommended).
              * The resulting execution causes get_global_id(0) to run [0, width) times and get_global_id(1) to run [0, height) times
              * @param kernel kernel function name to call
              * @param globalWorkSize the total number of times to execute the kernel function code. Corresponds to the result of get_global_id(dim)

@@ -146,6 +146,7 @@ namespace Raytracing {
         
         return {true, Ray{hitData.hitPoint, newRay}, getColor(hitData.u, hitData.v)};
     }
+    
     Vec4 TexturedMaterial::getColor(PRECISION_TYPE u, PRECISION_TYPE v) const {
         // if we are unable to load the image return the debug color.
         if (!data)
@@ -169,6 +170,7 @@ namespace Raytracing {
         
         return {pixelData[0] * colorFactor, pixelData[1] * colorFactor, pixelData[2] * colorFactor};
     }
+    
     TexturedMaterial::TexturedMaterial(const std::string& file): Material({}) {
         // we are going to have to ignore transparency for now. TODO:?
         data = stbi_load(file.c_str(), &width, &height, &channels, 0);
@@ -177,13 +179,16 @@ namespace Raytracing {
         else
             ilog << "Loaded image " << file << " with " << width << " " << height << " " << channels << "!\n";
     }
+    
     TexturedMaterial::~TexturedMaterial() {
         stbi_image_free(data);
     }
+    
     ScatterResults LightMaterial::scatter(const Ray& ray, const HitData& hitData) const {
         // do not scatter. The light emits.
         return {false, ray, baseColor};
     }
+    
     Vec4 LightMaterial::emission(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& hitPoint) const {
         return baseColor;
     }
@@ -246,20 +251,9 @@ namespace Raytracing {
             auto areaVert2 = areaVert2Vec.magnitude() * fullArea;
             auto areaVert3 = areaVert3Vec.magnitude() * fullArea;
             
-            // normal = theTriangle.findClosestNormal(rayIntersectionPoint - position);
-            if (theTriangle.hasNormals) {
-                // returning the closest normal is extra computation when n1 would likely be fine.
-                normal = theTriangle.normal1;
-                // the above point still stands, but since we have to compute the berry centric factors anyway
-                // we can use them in the same way to use from for UVs to get the correct normal.
-                // but since the three normals should always be facing the same way anyway, so we really don't need to do this.
-                // I'm keeping this here in case that fact changes.
-                //normal = theTriangle.normal1 * areaVert1 + theTriangle.normal2 * areaVert2 + theTriangle.normal3 * areaVert3;
-            } else {
-                // standard points to normal algorithm but using already computed edges
-                normal = Vec4{edge1.y() * edge2.z(), edge1.z() * edge2.x(), edge1.x() * edge2.y()} -
-                         Vec4{edge1.z() * edge2.y(), edge1.x() * edge2.z(), edge1.y() * edge2.x()};
-            }
+            // since we are calculating UV coords, the hard interpolation part is already done.
+            // so use said calculation to determine the overall normal based on the 3 individual vertexes
+            normal = theTriangle.normal1 * areaVert1 + theTriangle.normal2 * areaVert2 + theTriangle.normal3 * areaVert3;
             
             // that area is how much each UV factors into the final UV coord
             // since the z and w component isn't used it's best to do this individually. (Where's that TODO on lower order vectors!!!)
