@@ -11,6 +11,7 @@
 
 #ifdef USE_MPI
     #include <mpi/mpi.h>
+    #include <engine/mpi.h>
 #else
     #ifdef USE_OPENMP
         #include <omp.h>
@@ -162,6 +163,7 @@ namespace Raytracing {
 
 
     void Raycaster::runSTDThread(int threads){
+        setupQueue(partitionScreen(threads));
         ilog << "Running std::thread\n";
         for (int i = 0; i < threads; i++) {
             executors.push_back(std::make_unique<std::thread>([this, i, threads]() -> void {
@@ -195,6 +197,7 @@ namespace Raytracing {
     }
 
     void Raycaster::runOpenMP(int threads){
+        setupQueue(partitionScreen(threads));
         #ifdef USE_OPENMP
         ilog << "Running OpenMP\n";
         #pragma omp parallel num_threads(threads+1) default(none) shared(threads)
@@ -239,35 +242,48 @@ namespace Raytracing {
             system_threads;
         #endif
     }
-    void Raycaster::runMPI(int threads){
+    void Raycaster::runMPI(std::queue<RaycasterImageBounds> bounds){
         ilog << "Running MPI\n";
+        dlog << "We have " << bounds.size() << " bounds currently pending!\n";
+        while (!bounds.empty()) {
+            auto region = bounds.front();
+            for (int kx = 0; kx <= region.width; kx++) {
+                for (int ky = 0; ky < region.height; ky++) {
+                    runRaycastingAlgorithm(region, kx, ky);
+                }
+            }
+            bounds.pop();
+        }
+        #ifdef USE_MPI
+        dlog << "Finished running MPI on " << currentProcessID << "\n";
+        #endif
     }
 
-    void Raycaster::run(bool multithreaded, int threads) {
-        if (threads == 0)
-            threads = (int)system_threads;
-        // calculate the max divisions we can have per side, then expand by a factor of 4.
-        // the reason to do this is that some of them will finish far quciker than others. The now free threads can keep working.
-        // to do it without a queue like this leads to most threads finishing and a single thread being the critical path which isn't optimally efficient.
-        int divs = int(std::log(threads) / std::log(2)) * 4;
-        
+    std::vector<RaycasterImageBounds> Raycaster::partitionScreen(int threads) {
         // if we are running single threaded, disable everything special
         // the reason we run single threaded in a seperate thread is because the GUI requires its own set of updating commands
         // which cannot be blocked by the raytracer, otherwise it would become unresponsive.
-        if (!multithreaded){
+        int divs = 1;
+        if (threads < 0 || threads == 1){
             threads = 1;
             divs = 1;
+        } else {
+            if (threads == 0)
+                threads = (int) system_threads;
+            // calculate the max divisions we can have per side, then expand by a factor of 4.
+            // the reason to do this is that some of them will finish far quciker than others. The now free threads can keep working.
+            // to do it without a queue like this leads to most threads finishing and a single thread being the critical path which isn't optimally efficient.
+            divs = int(std::log(threads) / std::log(2)) * 4;
         }
 
-        ilog << "Starting multithreaded raytracer with " << threads << " threads!\n";
+        ilog << "Generating multithreaded raytracer with " << threads << " threads and " << divs << " divisions! \n";
 
-        delete(unprocessedQuads);
-        unprocessedQuads = new std::queue<RaycasterImageBounds>();
-        
-        // we need to subdivide the image for the threads, since this is really quick it's fine to due sequentially 
+        std::vector<RaycasterImageBounds> bounds;
+
+        // we need to subdivide the image for the threads, since this is really quick it's fine to due sequentially
         for (int dx = 0; dx < divs; dx++) {
             for (int dy = 0; dy < divs; dy++) {
-                unprocessedQuads->push({
+                bounds.push_back({
                                                image.getWidth() / divs,
                                                image.getHeight() / divs,
                                                (image.getWidth() / divs) * dx,
@@ -275,16 +291,14 @@ namespace Raytracing {
                                        });
             }
         }
-        
-        #ifdef USE_MPI
-            runMPI(threads);
-        #else
-            #ifdef USE_OPENMP
-                runOpenMP(threads);
-            #else
-                runSTDThread(threads);
-            #endif
-        #endif
+        return bounds;
     }
-    
+
+    void Raycaster::setupQueue(const std::vector<RaycasterImageBounds>& bounds) {
+        delete(unprocessedQuads);
+        unprocessedQuads = new std::queue<RaycasterImageBounds>();
+        for (auto& b : bounds)
+            unprocessedQuads->push(b);
+    }
+
 }

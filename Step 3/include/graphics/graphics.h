@@ -50,10 +50,10 @@ namespace Raytracing {
             GLFWwindow* window;
             int m_displayWidth, m_displayHeight;
             bool isCloseRequested = false;
-            long lastFrameTime;
-            PRECISION_TYPE delta;
-            PRECISION_TYPE frameTimeMs,frameTimeS;
-            PRECISION_TYPE fps;
+            long lastFrameTime{};
+            PRECISION_TYPE delta{};
+            PRECISION_TYPE frameTimeMs{},frameTimeS{};
+            PRECISION_TYPE fps{};
         public:
             XWindow(int width, int height);
             // runs X11 event processing and some GL commands used for window drawing

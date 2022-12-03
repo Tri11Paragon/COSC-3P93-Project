@@ -1,14 +1,46 @@
 cmake_minimum_required(VERSION 3.22)
 project(Step_3)
 
+# I am using GCC-12
 set(CMAKE_CXX_STANDARD 20)
 
+# You can ignore this as I am not using it for this project anymore
 option(EnableDebugMenu "Enable the debug utils" OFF)
+# Enable the GUI via GLFW. This requires libglfw3 and libglfw3-dev installed on your system. (X11 version is here but isn't support. Use at own risk.
+# Why?
+# I started with X11 because I really didn't want to bring GLFW in. When attempting to set the icon I found it extremely difficult
+# I only managed to set the window icon but not the task bar icon and the window icon wasn't loading correct.
+# plus debug mode was running at 5 fps which I initially blamed on XOrg (it wasn't X).
+# also GLFW has better support as it deals with the quirks of XOrg / the X11 protocol for me.
+# GUI isn't a requirement for ANY feature.
 option(COMPILE_GUI "Enable compilation of the GUI + utils" OFF)
+# Leave this unless you're an extremist who loves living on the edge.
 option(USE_GLFW "Will try to use GLFW instead of X11. If libglfw3 and libglfw3-dev are not installed it will default to X11" ON)
-option(USE_OPENMP "Will try to use OpenMP over std::thread. Requires OpenMP on your system." ON)
-option(USE_MPI "Will try to use OpenMPI over OpenMP or std::thread. Requires OpenMPI on your system." ON)
-option(COMPILE_OPENCL "Enable compilation of the OpenCL GPU Compute." OFF)
+# Requires you to have OpenMP installed on your system. The engine will work without this.
+option(USE_OPENMP "Will try to use OpenMP. Requires OpenMP on your system." ON)
+# Requires you have OpenMPI installed. The engine will work without this.
+option(USE_MPI "Will try to use OpenMPI. Requires OpenMPI on your system." ON)
+# Requires you to have an OpenCL IDC loader installed and working, should support CL2.0+ and you should also have any relevant dev libs/headers installed.
+# Nvidia GPUs should work but I've only tested this on my 6700xt using a driver which was released a year before my card was even announced.
+# Thanks AMD for only supporting ubuntu :/ Us debian users left in the dust >;(
+# Why OpenCL? Let's go over the GPGPU options
+# OpenGL Compute Shaders - Nice option but requires GUI and I don't require much more than what is provided by GLSL
+# Vulkan Compute Shaders - Better option but requires GUI and I don't know Vulkan (yet)
+# CUDA - Really good for devs with lots of great tools but is platform locked to nvidia. I have a 6700xt and run linux. Neither of these things play well with nvidia.
+# OpenACC - No clue what this is
+# ROCM - AMD's answer to CUDA. See above about AMD's ability to support things. (Pretty sure windows is completely out of the question here)
+# OpenCL - Basically deprecated and treated as a joke. Tooling on AMD sucks so much especially on Linux. But it's the only "well" supported headless GPGPU option on this list.
+option(COMPILE_OPENCL "Enable compilation of the OpenCL GPU Compute module." OFF)
+
+
+
+#
+# DO NOT TOUCH ANYTHING BELOW THIS LINE
+# ====================================================================================================================
+#
+
+
+
 
 # used to debug memory related issues
 if ((CMAKE_BUILD_TYPE MATCHES Debug))

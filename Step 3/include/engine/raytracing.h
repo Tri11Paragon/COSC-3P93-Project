@@ -163,9 +163,7 @@ namespace Raytracing {
             Vec4 raycasti(const Ray& ray, int depth);
             Vec4 raycast(const Ray& ray);
             void runRaycastingAlgorithm(RaycasterImageBounds imageBounds, int loopX, int loopY);
-            void runSTDThread(int threads);
-            void runOpenMP(int threads);
-            void runMPI(int threads);
+            void setupQueue(const std::vector<RaycasterImageBounds>& bounds);
         public:
             inline void updateRayInfo(int maxBounce, int perPixel){
                 raysPerPixel = perPixel;
@@ -175,6 +173,7 @@ namespace Raytracing {
                 raysPerPixel = 50;
                 maxBounceDepth = 50;
             }
+            std::vector<RaycasterImageBounds> partitionScreen(int threads = -1);
             inline static Vec4 randomUnitVector() {
                 // there are two methods to generating a random unit sphere
                 // one which is fast and approximate:
@@ -193,7 +192,9 @@ namespace Raytracing {
             Raycaster(Camera& c, Image& i, World& world, const Parser& p): camera(c), image(i), world(world) {
                 world.generateBVH();
             }
-            void run(bool multithreaded, int threads = 0);
+            void runSTDThread(int threads = -1);
+            void runOpenMP(int threads = -1);
+            void runMPI(std::queue<RaycasterImageBounds> bounds);
             [[nodiscard]] inline bool areThreadsStillRunning() const {return finishedThreads == executors.size();}
             inline void join(){
                 for (auto& p : executors)

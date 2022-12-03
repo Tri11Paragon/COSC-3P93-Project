@@ -19,13 +19,18 @@ namespace Raytracing {
             unsigned long _width;
             unsigned long _height;
             Vec4 *pixelData;
+            bool m_modified = false;
         public:
             Image(unsigned long width, unsigned long height);
             Image(const Image &image);
             Image(const Image&& image) = delete;
 
+            std::vector<double> toArray();
+            void fromArray(double* array, int size, int id);
+
             inline void setPixelColor(unsigned long x, unsigned long y, const Vec4 &color) {
-                pixelData[(x * height) + y] = color;
+                m_modified = true;
+                pixelData[(x * height) + y] = Vec4{color.r(), color.g(), color.b(), 1.0};
             }
 
             [[nodiscard]] inline Vec4 getPixelColor(unsigned long x, unsigned long y) const {
@@ -46,8 +51,8 @@ namespace Raytracing {
             }
 
             [[nodiscard]] inline int getWidth() const { return int(width); }
-
             [[nodiscard]] inline int getHeight() const { return int(height); }
+            [[nodiscard]] inline bool modified() const { return m_modified; }
 
             ~Image();
     };

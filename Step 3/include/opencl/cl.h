@@ -71,8 +71,8 @@ namespace Raytracing {
             cl_device_id m_deviceID{};
             cl_uint m_numOfDevices{};
             
-            cl_uint m_computeUnits;
-            cl_uint m_deviceClockFreq;
+            cl_uint m_computeUnits{};
+            cl_uint m_deviceClockFreq{};
             
             cl_context m_context;
             

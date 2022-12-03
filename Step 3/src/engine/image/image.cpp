@@ -11,11 +11,15 @@
 #include "engine/image/stb_image.h"
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "engine/image/stb_image_resize.h"
+#include <config.h>
 
 namespace Raytracing {
 
     Image::Image(unsigned long width, unsigned long height) : width(width), height(height), _width(width-1), _height(height-1) {
         pixelData = new Vec4[(width + 1) * (height + 1)];
+        for (int i = 0; i < (width + 1) * (height + 1); i++){
+            pixelData[i] = Vec4{0,0,0,0};
+        }
     }
 
     Image::Image(const Image& image) : width(image.width), height(image.height), _width(image._width), _height(image._height) {
@@ -31,7 +35,32 @@ namespace Raytracing {
         delete[](pixelData);
     }
 
+    std::vector<double> Image::toArray() {
+        std::vector<double> doublin;
+        for (int i = 0; i < (width + 1) * (height + 1); i++) {
+            auto vec = pixelData[i];
+            doublin.push_back(vec.x());
+            doublin.push_back(vec.y());
+            doublin.push_back(vec.z());
+            doublin.push_back(vec.w());
+        }
+        return doublin;
+    }
+
+    void Image::fromArray(double *array, int size, int id) {
+        for (int i = 0; i < size; i+=4){
+            // this is the one case where we can use the alpha value.
+            // Data which has been set in the image has an alpha of 1 while the rest has 0
+            if (array[i+3] == 0)
+                continue;
+            // if it was set and if the processes are properly isolated there should be no issue with overriding the pixel
+            pixelData[i/4] = Vec4{array[i], array[i+1], array[i+2], array[i+3]};
+        }
+    }
+
     void ImageOutput::write(const std::string& file, const std::string& formatExtension) {
+        if (!image.modified())
+            return;
         auto lowerExtension = Raytracing::String::toLowerCase(formatExtension);
         auto fullFile = file + "." + lowerExtension;
 

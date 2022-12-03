@@ -491,7 +491,14 @@ namespace Raytracing {
                 RTSignal->haltRaytracing = false;
                 ilog << "Running raycaster!\n";
                 // we don't actually have to check for --single since it's implied to be default true.
-                m_raycaster.run(m_parser.hasOption("--multi"), std::max(std::stoi(m_parser.getOptionValue("-t")), std::stoi(m_parser.getOptionValue("--threads"))));
+                int threads = std::stoi(m_parser.getOptionValue("--threads"));
+                if (m_parser.hasOption("--mpi")) {
+                    //m_raycaster.runMPI(raycaster.partitionScreen());
+                } else if(m_parser.hasOption("--openmp")){
+                    m_raycaster.runOpenMP(threads);
+                } else {
+                    m_raycaster.runSTDThread(threads);
+                }
             }
             if (ImGui::Checkbox("Pause", &RTSignal->pauseRaytracing)){}
             if (ImGui::Button("Stop") && started){

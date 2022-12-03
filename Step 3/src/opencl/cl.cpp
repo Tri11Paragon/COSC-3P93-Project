@@ -40,7 +40,12 @@ namespace Raytracing {
     
         printDeviceInfo(m_deviceID);
         
-        m_context = clCreateContext(NULL, 1, &m_deviceID, NULL, NULL, &m_CL_ERR);
+        cl_context_properties proper[3] = {
+                CL_CONTEXT_PLATFORM, (cl_context_properties) m_platformIDs[platformID],
+                0
+        };
+        
+        m_context = clCreateContext(proper, 1, &m_deviceID, NULL, NULL, &m_CL_ERR);
     
         if (m_CL_ERR != CL_SUCCESS)
             elog << "OpenCL Error Creating Context! " << m_CL_ERR << "\n";

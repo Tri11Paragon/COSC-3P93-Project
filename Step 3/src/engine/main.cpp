@@ -80,6 +80,11 @@ int main(int argc, char** args) {
     parser.addOption("--resources", "Resources Directory\n"
                                     "\tSets the directory where the resources are stored.\n"
                                     "\tThis can be relative.Must have trailing '/' \n", "../resources/");
+    parser.addOption("--mpi", "Use OpenMPI\n"
+                                    "\tTells the raycaster to use OpenMPI to run the raycaster algorithm\n");
+    parser.addOption("--openmp", "Use OpenMP\n"
+                              "\tTells the raycaster to use OpenMP to run the raycaster algorithm\n");
+
     // disabled because don't currently have a way to parse vectors. TODO
     //parser.addOption("--position", "Camera Position\n\tSets the position used to render the scene with the camera.\n", "{0, 0, 0}");
     
@@ -108,8 +113,7 @@ int main(int argc, char** args) {
     parser.printAllInInfo();
     
     #ifdef USE_MPI
-        Raytracing::MPI::init();
-        if (currentProcessID == 0) {
+        Raytracing::MPI::init(argc, args);
     #endif
     
     #ifdef COMPILE_GUI
@@ -123,8 +127,6 @@ int main(int argc, char** args) {
     OpenCL::init();
     
     #endif
-    
-    
     
     Raytracing::Image image(1440, 720);
     //Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
@@ -182,9 +184,10 @@ int main(int argc, char** args) {
         program.createKernel("drawImage");
         program.createImage("mainImage", image.getWidth(), image.getHeight());
         program.setKernelArgument("drawImage", "mainImage", 0);
+        program.setKernelArgument("drawImage", "mainImage", 1);
         
         size_t works[2] {(size_t) image.getWidth(), (size_t) image.getHeight()};
-        size_t localWorks[2] {64, 64};
+        size_t localWorks[2] {8, 8};
         
         unsigned char bytes[image.getWidth() * image.getHeight() * 4];
         for (int i = 0; i < image.getWidth() * image.getHeight() * 4; i++)
@@ -195,7 +198,7 @@ int main(int argc, char** args) {
         while (!window->shouldWindowClose()) {
             window->beginUpdate();
             renderer.draw();
-            program.runKernel("drawImage", works, NULL, 2);
+            program.runKernel("drawImage", works, localWorks, 2);
             program.readImage("mainImage", image.getWidth(), image.getHeight(), bytes);
             const PRECISION_TYPE colorFactor = 1.0 / 255.0;
             for (int i = 0; i < image.getWidth(); i++){
@@ -216,43 +219,78 @@ int main(int argc, char** args) {
         flog << "Program not compiled with GUI support! Unable to open GUI\n";
         #endif
     } else {
-        Raytracing::Raycaster raycaster{camera, image, world, parser};
-        // run the raycaster the standard way
-        ilog << "Running raycaster!\n";
+        Raytracing::Raycaster rayCaster{camera, image, world, parser};
+        ilog << "Running RayCaster (NO_GUI)!\n";
         // we don't actually have to check for --single since it's implied to be default true.
-        raycaster.run(parser.hasOption("--multi"), std::max(std::stoi(parser.getOptionValue("-t")), std::stoi(parser.getOptionValue("--threads"))));
-        raycaster.join();
+        int threads = std::stoi(parser.getOptionValue("--threads"));
+        if (parser.hasOption("--mpi")) {
+            // We need to make sure that if the user requests that MPI be run while not having MPI compiled, they get a helpful error warning.
+            #ifdef USE_MPI
+            rayCaster.runMPI(Raytracing::MPI::getCurrentImageRegionAssociation(rayCaster));
+            #else
+            flog << "Unable to run with MPI, CMake not set to compile MPI!\n";
+            return 33;
+            #endif
+        } else if(parser.hasOption("--openmp")){
+            rayCaster.runOpenMP(threads);
+        } else {
+            rayCaster.runSTDThread(threads);
+        }
+        rayCaster.join();
     }
     
     profiler::print("Raytracer Results");
-    
-    Raytracing::ImageOutput imageOutput(image);
-    
-    auto t = std::time(nullptr);
-    auto now = std::localtime(&t);
-    std::stringstream timeString;
-    timeString << (1900 + now->tm_year);
-    timeString << "-";
-    timeString << (1 + now->tm_mon);
-    timeString << "-";
-    timeString << now->tm_mday;
-    timeString << " ";
-    timeString << now->tm_hour;
-    timeString << ":";
-    timeString << now->tm_min;
-    timeString << ":";
-    timeString << now->tm_sec;
-    ilog << "Writing Image!\n";
-    imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
-    
+
+#ifdef USE_MPI
+    // Wait for all processes to finish before trying to send data
+    MPI_Barrier(MPI_COMM_WORLD);
+    // don't send data to ourselves
+    if (currentProcessID != 0) {
+        auto imageArray = image.toArray();
+        MPI_Send(imageArray.data(), (int)imageArray.size(), MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+    } else {
+        auto doubleSize = (image.getWidth() + 1) * (image.getHeight() + 1) * 4;
+        auto* buffer = new double[doubleSize];
+        for (int i = 1; i < numberOfProcesses; i++){
+            // get the data from all sending processes
+            MPI_Recv(buffer, doubleSize, MPI_DOUBLE, i, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            // copy that memory into the image
+            image.fromArray(buffer, doubleSize, i);
+        }
+#endif
+        // write the image to the file
+        Raytracing::ImageOutput imageOutput(image);
+
+        auto t = std::time(nullptr);
+        auto now = std::localtime(&t);
+        std::stringstream timeString;
+        timeString << (1900 + now->tm_year);
+        timeString << "-";
+        timeString << (1 + now->tm_mon);
+        timeString << "-";
+        timeString << now->tm_mday;
+        timeString << " ";
+        timeString << now->tm_hour;
+        timeString << ":";
+        timeString << now->tm_min;
+        timeString << ":";
+        timeString << now->tm_sec;
+        ilog << "Writing Image!\n";
+        imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
+#ifdef USE_MPI
+    }
+    // wait for all processes to finish sending and receiving before we exit all of them.
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
+
     delete (RTSignal);
     #ifdef COMPILE_GUI
     deleteQuad();
     #endif
     #ifdef USE_MPI
-    }
     MPI_Finalize();
     #endif
-    
+
+    tlog << "Goodbye!\n";
     return 0;
 }

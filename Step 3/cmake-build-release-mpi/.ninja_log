@@ -1,0 +1,15 @@
+# ninja log v5
+1	1684	1669909311716080706	CMakeFiles/Step_3.dir/src/engine/mpi.cpp.o	d712015aad71719d
+1	1486	1669909311520075133	CMakeFiles/Step_3.dir/src/engine/world.cpp.o	343876ec37f882cb
+2	1467	1669735766640763971	CMakeFiles/Step_3.dir/src/engine/util/debug.cpp.o	f69182af210484ad
+3	7309	1670041668905586672	CMakeFiles/Step_3.dir/src/engine/image/image.cpp.o	b64d25ecb70d7d83
+1	1342	1669735766516760578	CMakeFiles/Step_3.dir/src/engine/globals.cpp.o	a9fb2b6be92e9c9e
+1	959	1669735766132750066	CMakeFiles/Step_3.dir/src/engine/math/colliders.cpp.o	3923d34a7f6967f8
+2	2060	1669735767236780286	CMakeFiles/Step_3.dir/src/engine/util/models.cpp.o	dfee7b63a008eca9
+7309	7385	1670041668981588803	Step_3	730bc7b796be74d6
+3	2084	1670041663681440209	CMakeFiles/Step_3.dir/src/engine/raytracing.cpp.o	58af84f236b6e217
+1	2104	1669735767280781490	CMakeFiles/Step_3.dir/src/engine/math/bvh.cpp.o	966368d44f0d99a7
+3	3165	1670041664761470488	CMakeFiles/Step_3.dir/src/engine/main.cpp.o	315fa68a49b7ffc4
+959	2684	1669735767860797367	CMakeFiles/Step_3.dir/src/opencl/cl.cpp.o	7e15a029d7ca916c
+2	2038	1669735767212779629	CMakeFiles/Step_3.dir/src/engine/util/parser.cpp.o	a8f47b5a2bce1b2a
+2	2041	1669735767216779738	CMakeFiles/Step_3.dir/src/engine/util/loaders.cpp.o	971186349d935f91

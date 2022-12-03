@@ -209,7 +209,7 @@ CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 //Enable compilation of the GUI + utils
 COMPILE_GUI:BOOL=ON
 
-//Enable compilation of the OpenCL GPU Compute.
+//Enable compilation of the OpenCL GPU Compute module.
 COMPILE_OPENCL:BOOL=ON
 
 //Enable the debug utils
@@ -258,12 +258,10 @@ Step_3_SOURCE_DIR:STATIC=/home/brett/Documents/Brock/CS 3P93/Project/Step 3
 // are not installed it will default to X11
 USE_GLFW:BOOL=ON
 
-//Will try to use OpenMPI over OpenMP or std::thread. Requires
-// OpenMPI on your system.
+//Will try to use OpenMPI. Requires OpenMPI on your system.
 USE_MPI:BOOL=OFF
 
-//Will try to use OpenMP over std::thread. Requires OpenMP on your
-// system.
+//Will try to use OpenMP. Requires OpenMP on your system.
 USE_OPENMP:BOOL=OFF
 
 //The directory containing a CMake configuration file for glfw3.

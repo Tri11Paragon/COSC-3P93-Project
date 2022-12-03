@@ -5,10 +5,12 @@
 #ifndef STEP_3_MPI_H
 #define STEP_3_MPI_H
 
-#include<config.h>
+#include <config.h>
 
 #ifdef USE_MPI
 #include <mpi.h>
+#include <queue>
+#include <engine/raytracing.h>
 
 namespace Raytracing {
 
@@ -17,7 +19,8 @@ namespace Raytracing {
 
     class MPI {
     public:
-        static void init();
+        static void init(int argc, char** argv);
+        static std::queue<RaycasterImageBounds> getCurrentImageRegionAssociation(Raycaster& raycaster);
     };
 }
 #endif
