@@ -42,8 +42,8 @@ namespace Raytracing {
     
     void drawQuad();
     void deleteQuad();
-    
-    #ifdef USE_GLFW
+
+#ifdef USE_GLFW
     
     class XWindow {
         private:
@@ -52,7 +52,7 @@ namespace Raytracing {
             bool isCloseRequested = false;
             long lastFrameTime{};
             PRECISION_TYPE delta{};
-            PRECISION_TYPE frameTimeMs{},frameTimeS{};
+            PRECISION_TYPE frameTimeMs{}, frameTimeS{};
             PRECISION_TYPE fps{};
         public:
             XWindow(int width, int height);
@@ -62,21 +62,21 @@ namespace Raytracing {
             
             [[nodiscard]] inline bool shouldWindowClose() const { return isCloseRequested; }
             
-            [[nodiscard]] inline PRECISION_TYPE getFrameTimeMillis() const {return frameTimeMs;}
-            [[nodiscard]] inline PRECISION_TYPE getFrameTimeSeconds() const {return frameTimeS;}
-            [[nodiscard]] inline PRECISION_TYPE getFPS() const {return fps;}
+            [[nodiscard]] inline PRECISION_TYPE getFrameTimeMillis() const { return frameTimeMs; }
+            [[nodiscard]] inline PRECISION_TYPE getFrameTimeSeconds() const { return frameTimeS; }
+            [[nodiscard]] inline PRECISION_TYPE getFPS() const { return fps; }
             
             void setMouseGrabbed(bool grabbed);
             bool isMouseGrabbed();
-            [[nodiscard]] inline int displayWidth() const {return m_displayWidth;}
-            [[nodiscard]] inline int displayHeight() const {return m_displayHeight;}
-            [[nodiscard]] inline GLFWwindow* getWindow() const {return window;}
+            [[nodiscard]] inline int displayWidth() const { return m_displayWidth; }
+            [[nodiscard]] inline int displayHeight() const { return m_displayHeight; }
+            [[nodiscard]] inline GLFWwindow* getWindow() const { return window; }
             
             void closeWindow();
             ~XWindow();
     };
-    
-    #else
+
+#else
     class XWindow {
         private:
             // X11 display itself
@@ -125,7 +125,7 @@ namespace Raytracing {
             void closeWindow();
             ~XWindow();
     };
-    #endif
+#endif
     
     /**
      * The display renderer class handles all the major rendering events outside of window functions
@@ -138,7 +138,7 @@ namespace Raytracing {
             World& m_world;
             Shader& m_imageShader;
             Shader& m_worldShader;
-            Raycaster& m_raycaster;
+            RayCaster& m_raycaster;
             Parser& m_parser;
             Camera& m_camera;
         public:
@@ -147,7 +147,7 @@ namespace Raytracing {
                             World& world,
                             Shader& mImageShader,
                             Shader& mWorldShader,
-                            Raycaster& mRaycaster,
+                            RayCaster& mRaycaster,
                             Parser& mParser,
                             Camera& mCamera)
                     : m_window(mWindow), m_mainImage(mMainImage), m_imageShader(mImageShader), m_worldShader(mWorldShader), m_raycaster(mRaycaster),

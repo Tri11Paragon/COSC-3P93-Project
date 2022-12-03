@@ -9,24 +9,24 @@
 #include <csignal>
 
 #ifdef USE_MPI
-    
-    #include <engine/mpi.h>
+
+#include <engine/mpi.h>
 
 #endif
 //#include <sys/time.h>
 //#include <sys/resource.h>
 
 #ifdef COMPILE_GUI
-    
-    #include <graphics/graphics.h>
-    #include <graphics/gl/gl.h>
-    #include <graphics/gl/shader.h>
+
+#include <graphics/graphics.h>
+#include <graphics/gl/gl.h>
+#include <graphics/gl/shader.h>
 
 #endif
 
 #ifdef COMPILE_OPENCL
-    
-    #include <opencl/cl.h>
+
+#include <opencl/cl.h>
 
 #endif
 
@@ -81,10 +81,10 @@ int main(int argc, char** args) {
                                     "\tSets the directory where the resources are stored.\n"
                                     "\tThis can be relative.Must have trailing '/' \n", "../resources/");
     parser.addOption("--mpi", "Use OpenMPI\n"
-                                    "\tTells the raycaster to use OpenMPI to run the raycaster algorithm\n");
+                              "\tTells the raycaster to use OpenMPI to run the raycaster algorithm\n");
     parser.addOption("--openmp", "Use OpenMP\n"
-                              "\tTells the raycaster to use OpenMP to run the raycaster algorithm\n");
-
+                                 "\tTells the raycaster to use OpenMP to run the raycaster algorithm\n");
+    
     // disabled because don't currently have a way to parse vectors. TODO
     //parser.addOption("--position", "Camera Position\n\tSets the position used to render the scene with the camera.\n", "{0, 0, 0}");
     
@@ -111,22 +111,22 @@ int main(int argc, char** args) {
     tlog << "Parsing complete! Starting raytracer with options:" << std::endl;
     // not perfect (contains duplicates) but good enough.
     parser.printAllInInfo();
-    
-    #ifdef USE_MPI
-        Raytracing::MPI::init(argc, args);
-    #endif
-    
-    #ifdef COMPILE_GUI
-        XWindow* window;
-        if (parser.hasOption("--gui") || parser.hasOption("-g"))
-            window = new XWindow(1440, 720);
-        Shader worldShader("../resources/shaders/world.vs", "../resources/shaders/world.fs");
-    #endif
-    
-    #ifdef COMPILE_OPENCL
+
+#ifdef USE_MPI
+    Raytracing::MPI::init(argc, args);
+#endif
+
+#ifdef COMPILE_GUI
+    XWindow* window;
+    if (parser.hasOption("--gui") || parser.hasOption("-g"))
+        window = new XWindow(1440, 720);
+    Shader worldShader("../resources/shaders/world.vs", "../resources/shaders/world.fs");
+#endif
+
+#ifdef COMPILE_OPENCL
     OpenCL::init();
-    
-    #endif
+
+#endif
     
     Raytracing::Image image(1440, 720);
     //Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
@@ -135,13 +135,13 @@ int main(int argc, char** args) {
     //camera.setPosition({0, 0, 1});
     camera.setPosition({6, 5, 6});
     camera.lookAt({0, 0, 0});
-    
-    
-    #ifdef COMPILE_GUI
+
+
+#ifdef COMPILE_GUI
     WorldConfig worldConfig{worldShader};
-    #else
+#else
     WorldConfig worldConfig;
-    #endif
+#endif
     worldConfig.useBVH = true;
     
     Raytracing::World world{worldConfig};
@@ -175,10 +175,10 @@ int main(int argc, char** args) {
     //world.add(new Raytracing::ModelObject({0, 0, 0}, debugCube, world.getMaterial("cat")));
     
     if (parser.hasOption("--gui") || parser.hasOption("-g")) {
-        #ifdef COMPILE_GUI
-        Raytracing::Raycaster raycaster{camera, image, world, parser};
+#ifdef COMPILE_GUI
+        Raytracing::RayCaster rayCaster{camera, image, world, parser};
         Texture mainImage(&image);
-    
+        
         CLProgram program(parser.getOptionValue("--resources") + "opencl/image.cl");
         OpenCL::createCLProgram(program);
         program.createKernel("drawImage");
@@ -186,52 +186,42 @@ int main(int argc, char** args) {
         program.setKernelArgument("drawImage", "mainImage", 0);
         program.setKernelArgument("drawImage", "mainImage", 1);
         
-        size_t works[2] {(size_t) image.getWidth(), (size_t) image.getHeight()};
-        size_t localWorks[2] {8, 8};
+        size_t works[2]{(size_t) image.getWidth(), (size_t) image.getHeight()};
+        size_t localWorks[2]{8, 8};
         
-        unsigned char bytes[image.getWidth() * image.getHeight() * 4];
-        for (int i = 0; i < image.getWidth() * image.getHeight() * 4; i++)
-            bytes[i] = 0;
         
         Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
-        Raytracing::DisplayRenderer renderer{*window, mainImage, world, shader, worldShader, raycaster, parser, camera};
+        Raytracing::DisplayRenderer renderer{*window, mainImage, world, shader, worldShader, rayCaster, parser, camera};
         while (!window->shouldWindowClose()) {
             window->beginUpdate();
             renderer.draw();
             program.runKernel("drawImage", works, localWorks, 2);
-            program.readImage("mainImage", image.getWidth(), image.getHeight(), bytes);
-            const PRECISION_TYPE colorFactor = 1.0 / 255.0;
-            for (int i = 0; i < image.getWidth(); i++){
-                for (int j = 0; j < image.getHeight(); j++){
-                    const auto pixelData = bytes + (j * 4 * image.getWidth() + i * 4);
-                    //tlog << (int)pixelData[0] << " " << (int)pixelData[1] << " " << (int)pixelData[2] << "\n";
-                    image.setPixelColor(i, j, {pixelData[0] * colorFactor, pixelData[1] * colorFactor, pixelData[2] * colorFactor});
-                }
-            }
+            program.readImage("mainImage", image);
+            
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             world.drawBVH(worldShader);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             window->endUpdate();
         }
         RTSignal->haltExecution = true;
-        raycaster.join();
-        #else
+        rayCaster.join();
+#else
         flog << "Program not compiled with GUI support! Unable to open GUI\n";
-        #endif
+#endif
     } else {
-        Raytracing::Raycaster rayCaster{camera, image, world, parser};
+        Raytracing::RayCaster rayCaster{camera, image, world, parser};
         ilog << "Running RayCaster (NO_GUI)!\n";
         // we don't actually have to check for --single since it's implied to be default true.
         int threads = std::stoi(parser.getOptionValue("--threads"));
         if (parser.hasOption("--mpi")) {
             // We need to make sure that if the user requests that MPI be run while not having MPI compiled, they get a helpful error warning.
-            #ifdef USE_MPI
+#ifdef USE_MPI
             rayCaster.runMPI(Raytracing::MPI::getCurrentImageRegionAssociation(rayCaster));
-            #else
+#else
             flog << "Unable to run with MPI, CMake not set to compile MPI!\n";
             return 33;
-            #endif
-        } else if(parser.hasOption("--openmp")){
+#endif
+        } else if (parser.hasOption("--openmp")) {
             rayCaster.runOpenMP(threads);
         } else {
             rayCaster.runSTDThread(threads);
@@ -258,39 +248,39 @@ int main(int argc, char** args) {
             image.fromArray(buffer, doubleSize, i);
         }
 #endif
-        // write the image to the file
-        Raytracing::ImageOutput imageOutput(image);
-
-        auto t = std::time(nullptr);
-        auto now = std::localtime(&t);
-        std::stringstream timeString;
-        timeString << (1900 + now->tm_year);
-        timeString << "-";
-        timeString << (1 + now->tm_mon);
-        timeString << "-";
-        timeString << now->tm_mday;
-        timeString << " ";
-        timeString << now->tm_hour;
-        timeString << ":";
-        timeString << now->tm_min;
-        timeString << ":";
-        timeString << now->tm_sec;
-        ilog << "Writing Image!\n";
-        imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
+    // write the image to the file
+    Raytracing::ImageOutput imageOutput(image);
+    
+    auto t = std::time(nullptr);
+    auto now = std::localtime(&t);
+    std::stringstream timeString;
+    timeString << (1900 + now->tm_year);
+    timeString << "-";
+    timeString << (1 + now->tm_mon);
+    timeString << "-";
+    timeString << now->tm_mday;
+    timeString << " ";
+    timeString << now->tm_hour;
+    timeString << ":";
+    timeString << now->tm_min;
+    timeString << ":";
+    timeString << now->tm_sec;
+    ilog << "Writing Image!\n";
+    imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
 #ifdef USE_MPI
     }
     // wait for all processes to finish sending and receiving before we exit all of them.
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
-
+    
     delete (RTSignal);
-    #ifdef COMPILE_GUI
+#ifdef COMPILE_GUI
     deleteQuad();
-    #endif
-    #ifdef USE_MPI
+#endif
+#ifdef USE_MPI
     MPI_Finalize();
-    #endif
-
+#endif
+    
     tlog << "Goodbye!\n";
     return 0;
 }

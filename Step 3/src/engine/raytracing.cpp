@@ -44,21 +44,21 @@ namespace Raytracing {
     void Camera::setRotation(const PRECISION_TYPE yaw, const PRECISION_TYPE pitch) {
         // TODO:
     }
-    Mat4x4 Camera::view(PRECISION_TYPE yaw, PRECISION_TYPE pitch)  {
+    Mat4x4 Camera::view(PRECISION_TYPE yaw, PRECISION_TYPE pitch) {
         Mat4x4 view;
-    
+        
         pitch = degreeeToRadian(pitch);
         yaw = degreeeToRadian(yaw);
-    
+        
         PRECISION_TYPE cosPitch = std::cos(pitch);
         PRECISION_TYPE cosYaw = std::cos(yaw);
         PRECISION_TYPE sinPitch = std::sin(pitch);
         PRECISION_TYPE sinYaw = std::sin(yaw);
-    
+        
         auto x = Vec4{cosYaw, 0, -sinYaw}; // forward
         auto y = Vec4{sinYaw * sinPitch, cosPitch, cosYaw * sinPitch}; // right
         auto z = Vec4{sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw}; // up
-    
+        
         // we can actually take those x, y, z vectors and use them to compute the raytracer camera settings
         viewportHeight = 2 * tanFovHalf;
         viewportWidth = aspectRatio * viewportHeight;
@@ -71,23 +71,23 @@ namespace Raytracing {
         view.m01(float(x.y()));
         view.m02(float(x.z()));
         view.m03(float(x.w()));
-    
+        
         view.m10(float(y.x()));
         view.m11(float(y.y()));
         view.m12(float(y.z()));
         view.m13(float(y.w()));
-    
+        
         view.m20(float(z.x()));
         view.m21(float(z.y()));
         view.m22(float(z.z()));
         view.m23(float(z.w()));
-    
+        
         // view matrix are inverted, dot product to simulate translate matrix multiplication
         view.m03(-float(Vec4::dot(x, position)));
         view.m13(-float(Vec4::dot(y, position)));
         view.m23(-float(Vec4::dot(z, position)));
         view.m33(1);
-    
+        
         return view;
     }
     
@@ -97,14 +97,14 @@ namespace Raytracing {
         Vec4 color;
     };
     
-    Vec4 Raycaster::raycasti(const Ray& ray, int depth){
+    Vec4 RayCaster::raycasti(const Ray& ray, int depth) {
         return {};
     }
     
-    Vec4 Raycaster::raycast(const Ray& ray) {
+    Vec4 RayCaster::raycast(const Ray& ray) {
         Ray localRay = ray;
-        Vec4 color {1.0, 1.0, 1.0};
-        for (int CURRENT_BOUNCE = 0; CURRENT_BOUNCE < maxBounceDepth; CURRENT_BOUNCE++){
+        Vec4 color{1.0, 1.0, 1.0};
+        for (int CURRENT_BOUNCE = 0; CURRENT_BOUNCE < maxBounceDepth; CURRENT_BOUNCE++) {
             if (RTSignal->haltExecution || RTSignal->haltRaytracing)
                 return color;
             while (RTSignal->pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
@@ -138,8 +138,8 @@ namespace Raytracing {
         
         return color;
     }
-
-    void Raycaster::runRaycastingAlgorithm(RaycasterImageBounds imageBounds, int loopX, int loopY) {
+    
+    void RayCaster::runRaycastingAlgorithm(RaycasterImageBounds imageBounds, int loopX, int loopY) {
         try {
             int x = imageBounds.x + loopX;
             int y = imageBounds.y + loopY;
@@ -160,9 +160,9 @@ namespace Raytracing {
             flog << error.what() << "\n";
         }
     }
-
-
-    void Raycaster::runSTDThread(int threads){
+    
+    
+    void RayCaster::runSTDThread(int threads) {
         setupQueue(partitionScreen(threads));
         ilog << "Running std::thread\n";
         for (int i = 0; i < threads; i++) {
@@ -170,7 +170,7 @@ namespace Raytracing {
                 // run through all the quadrants
                 std::stringstream str;
                 str << "Threading of #";
-                str << (i+1);
+                str << (i + 1);
                 profiler::start("Raytracer Results", str.str());
                 while (unprocessedQuads != nullptr) {
                     RaycasterImageBounds imageBoundingData{};
@@ -195,12 +195,12 @@ namespace Raytracing {
             }));
         }
     }
-
-    void Raycaster::runOpenMP(int threads){
+    
+    void RayCaster::runOpenMP(int threads) {
         setupQueue(partitionScreen(threads));
-        #ifdef USE_OPENMP
+#ifdef USE_OPENMP
         ilog << "Running OpenMP\n";
-        #pragma omp parallel num_threads(threads+1) default(none) shared(threads)
+    #pragma omp parallel num_threads(threads+1) default(none) shared(threads)
         {
             int threadID = omp_get_thread_num();
             // an attempt at making the omp command non-blocking.
@@ -214,7 +214,7 @@ namespace Raytracing {
                 bool running = true;
                 while (running) {
                     RaycasterImageBounds imageBoundingData{};
-                    #pragma omp critical
+#pragma omp critical
                     {
                         if (unprocessedQuads->empty())
                             running = false;
@@ -231,18 +231,18 @@ namespace Raytracing {
                         }
                     }
                 }
-                #pragma omp critical
+#pragma omp critical
                 finishedThreads++;
                 profiler::end("Raytracer Results", str.str());
             }
         }
         tlog << "OpenMP finished!\n";
-        #else
-            flog << "Not compiled with OpenMP! Unable to run raytracing.\n";
-            system_threads;
-        #endif
+#else
+        flog << "Not compiled with OpenMP! Unable to run raytracing.\n";
+        system_threads;
+#endif
     }
-    void Raycaster::runMPI(std::queue<RaycasterImageBounds> bounds){
+    void RayCaster::runMPI(std::queue<RaycasterImageBounds> bounds) {
         ilog << "Running MPI\n";
         dlog << "We have " << bounds.size() << " bounds currently pending!\n";
         while (!bounds.empty()) {
@@ -254,17 +254,17 @@ namespace Raytracing {
             }
             bounds.pop();
         }
-        #ifdef USE_MPI
+#ifdef USE_MPI
         dlog << "Finished running MPI on " << currentProcessID << "\n";
-        #endif
+#endif
     }
-
-    std::vector<RaycasterImageBounds> Raycaster::partitionScreen(int threads) {
+    
+    std::vector<RaycasterImageBounds> RayCaster::partitionScreen(int threads) {
         // if we are running single threaded, disable everything special
         // the reason we run single threaded in a seperate thread is because the GUI requires its own set of updating commands
         // which cannot be blocked by the raytracer, otherwise it would become unresponsive.
         int divs = 1;
-        if (threads < 0 || threads == 1){
+        if (threads < 0 || threads == 1) {
             threads = 1;
             divs = 1;
         } else {
@@ -275,30 +275,30 @@ namespace Raytracing {
             // to do it without a queue like this leads to most threads finishing and a single thread being the critical path which isn't optimally efficient.
             divs = int(std::log(threads) / std::log(2)) * 4;
         }
-
+        
         ilog << "Generating multithreaded raytracer with " << threads << " threads and " << divs << " divisions! \n";
-
+        
         std::vector<RaycasterImageBounds> bounds;
-
+        
         // we need to subdivide the image for the threads, since this is really quick it's fine to due sequentially
         for (int dx = 0; dx < divs; dx++) {
             for (int dy = 0; dy < divs; dy++) {
                 bounds.push_back({
-                                               image.getWidth() / divs,
-                                               image.getHeight() / divs,
-                                               (image.getWidth() / divs) * dx,
-                                               (image.getHeight() / divs) * dy
-                                       });
+                                         image.getWidth() / divs,
+                                         image.getHeight() / divs,
+                                         (image.getWidth() / divs) * dx,
+                                         (image.getHeight() / divs) * dy
+                                 });
             }
         }
         return bounds;
     }
-
-    void Raycaster::setupQueue(const std::vector<RaycasterImageBounds>& bounds) {
-        delete(unprocessedQuads);
+    
+    void RayCaster::setupQueue(const std::vector<RaycasterImageBounds>& bounds) {
+        delete (unprocessedQuads);
         unprocessedQuads = new std::queue<RaycasterImageBounds>();
-        for (auto& b : bounds)
+        for (auto& b: bounds)
             unprocessedQuads->push(b);
     }
-
+    
 }

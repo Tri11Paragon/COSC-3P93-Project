@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="GPL_3_LOCAL" pattern="file[Step 2]:*/&amp;&amp;!file[Step 2]:.idea//*&amp;&amp;!file[Step 2]:Old//*&amp;&amp;!file[Step 2]:Old 2//*&amp;&amp;!file[Step 2]:resources//*&amp;&amp;!file:cmake_make_command.sh&amp;&amp;!file:CMakeLists.txt&amp;&amp;!file:Dev Log Week of 2022-10-23.odt&amp;&amp;!file:st3-rd-debug.cap&amp;&amp;!file:st3-rd-release.cap&amp;&amp;!file:Submission.zip" />
+</component>

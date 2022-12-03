@@ -7,14 +7,17 @@
 #include <config.h>
 
 #ifdef COMPILE_GUI
-    #define GLFW_EXPOSE_NATIVE_X11
-    #define GLFW_EXPOSE_NATIVE_GLX
-    #include <GLFW/glfw3.h>
-    #include <GLFW/glfw3native.h>
+#define GLFW_EXPOSE_NATIVE_X11
+#define GLFW_EXPOSE_NATIVE_GLX
+
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+
 #endif
 
 #include <cstddef>
 #include <utility>
+#include "engine/math/vectors.h"
 
 namespace Raytracing {
     
@@ -23,21 +26,23 @@ namespace Raytracing {
     void OpenCL::init() {
         openCl = std::make_shared<OpenCL>(0, 0);
     }
-    OpenCL::OpenCL(int platformID, int deviceID): m_activePlatform(platformID) {
+    
+    OpenCL::OpenCL(int platformID, int deviceID):
+            m_activePlatform(platformID) {
         m_CL_ERR = CL_SUCCESS;
         m_numPlatforms = 0;
-        m_CL_ERR = clGetPlatformIDs(0, NULL, &m_numPlatforms );
-    
+        m_CL_ERR = clGetPlatformIDs(0, NULL, &m_numPlatforms);
+        
         if (m_CL_ERR == CL_SUCCESS)
             dlog << "We found " << m_numPlatforms << " OpenCL Platforms.\n";
         else
             elog << "OpenCL Error! " << m_CL_ERR << "\n";
-    
+        
         m_platformIDs = new cl_platform_id[m_numPlatforms];
         
         m_CL_ERR = clGetPlatformIDs(m_numPlatforms, m_platformIDs, &m_numOfPlatformIDs);
         m_CL_ERR = clGetDeviceIDs(m_platformIDs[platformID], CL_DEVICE_TYPE_GPU, 1, &m_deviceID, &m_numOfDevices);
-    
+        
         printDeviceInfo(m_deviceID);
         
         cl_context_properties proper[3] = {
@@ -46,7 +51,7 @@ namespace Raytracing {
         };
         
         m_context = clCreateContext(proper, 1, &m_deviceID, NULL, NULL, &m_CL_ERR);
-    
+        
         if (m_CL_ERR != CL_SUCCESS)
             elog << "OpenCL Error Creating Context! " << m_CL_ERR << "\n";
         
@@ -78,27 +83,31 @@ namespace Raytracing {
         clGetDeviceInfo(device, CL_DEVICE_VERSION, sizeof(dv), &dv, NULL);
         
         dlog << "Opening OpenCL Device!\n";
-        dlog << "Device CL String " << dv.opencl_space << dv.major << dv.dot << dv.minor << dv.space << dv.vendor<< "\n";
+        dlog << "Device CL String " << dv.opencl_space << dv.major << dv.dot << dv.minor << dv.space << dv.vendor << "\n";
         dlog << "Device Address Bits: " << deviceAddressBits << "\n";
         dlog << "Device is currently " << (deviceAvailable ? "available" : "unavailable") << "\n";
-        dlog << "Device has " << cacheSize/1024 << "kb of cache with a cache line width of " << cacheLineSize << " bytes\n";
+        dlog << "Device has " << cacheSize / 1024 << "kb of cache with a cache line width of " << cacheLineSize << " bytes\n";
         dlog << "Device " << (textureSupport ? "has" : "doesn't have") << " texture support\n";
         dlog << "Device has " << maxWorkgroups << " max workgroup size.\n";
         dlog << "Device has " << m_computeUnits << " compute units running at a max clock frequency " << m_deviceClockFreq << "\n";
         if (!textureSupport)
             elog << "Warning! The OpenCL device lacks texture support!\n";
     }
+    
     void OpenCL::createCLProgram(CLProgram& program) {
         program.loadCLShader(openCl->m_context, openCl->m_deviceID);
     }
+    
     OpenCL::~OpenCL() {
         delete[](m_platformIDs);
         clReleaseDevice(m_deviceID);
         clReleaseContext(m_context);
     }
+    
     cl_uint OpenCL::activeDeviceComputeUnits() {
         return openCl->m_computeUnits;
     }
+    
     cl_uint OpenCL::activeDeviceFrequency() {
         return openCl->m_deviceClockFreq;
     }
@@ -107,6 +116,7 @@ namespace Raytracing {
     CLProgram::CLProgram(const std::string& file) {
         m_source = ShaderLoader::loadShaderFile(file);
     }
+    
     void CLProgram::loadCLShader(cl_context context, cl_device_id deviceID) {
         this->m_context = context;
         this->m_deviceID = deviceID;
@@ -118,49 +128,41 @@ namespace Raytracing {
         
         if (m_CL_ERR != CL_SUCCESS)
             elog << "Unable to create CL program!\n";
-    
+        
         m_CL_ERR = clBuildProgram(m_program, 1, &deviceID, NULL, NULL, NULL);
         if (m_CL_ERR != CL_SUCCESS) {
             elog << "Unable to build CL program!\n";
             size_t len;
-    
+            
             clGetProgramBuildInfo(m_program, m_deviceID, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
             char buffer[len];
-    
+            
             clGetProgramBuildInfo(m_program, m_deviceID, CL_PROGRAM_BUILD_LOG, len, buffer, NULL);
             
             elog << buffer << "\n";
             
         }
     }
-    /**
-     * Buffers are the quintessential datastructures in OpenCL. They are basically regions of memory allocated to a program.
-     * @param bufferName the name of the buffer used to store internally
-     * @param flags read write flags for the buffer. One of CL_MEM_READ_ONLY | CL_MEM_WRITE_ONLY | CL_MEM_READ_WRITE
-     * @param bytes the number of bytes to be allocated.
-     */
+    
+    
     void CLProgram::createBuffer(const std::string& bufferName, cl_mem_flags flags, size_t bytes) {
         // create the buffer on the GPU
         cl_mem buff = clCreateBuffer(m_context, flags, bytes, NULL, &m_CL_ERR);
         // then store it in our buffer map for easy access.
         buffers.insert({bufferName, buff});
     }
-    /**
-     * Creates a buffer on the GPU using the data pointed to by the supplied pointer. This copy happens as soon as this is called.
-     * @param bufferName the name of the buffer used to store internally
-     * @param flags One of CL_MEM_READ_ONLY | CL_MEM_WRITE_ONLY | CL_MEM_READ_WRITE
-     * @param bytes the number of bytes to be allocated. Must be less than equal to the number of bytes at ptr
-     * @param ptr the pointer to copy to the GPU.
-     */
+    
+    
     void CLProgram::createBuffer(const std::string& bufferName, cl_mem_flags flags, size_t bytes, void* ptr) {
         // create the buffer on the GPU
         cl_mem buff = clCreateBuffer(m_context, CL_MEM_COPY_HOST_PTR | flags, bytes, ptr, &m_CL_ERR);
         // then store it in our buffer map for easy access.
         buffers.insert({bufferName, buff});
     }
+    
     void CLProgram::createImage(const std::string& imageName, int width, int height) {
         // create the texture on the GPU
-        cl_image_format format {CL_RGBA, CL_UNORM_INT8};
+        cl_image_format format{CL_RGBA, CL_UNORM_INT8};
         cl_image_desc imageDesc;
         imageDesc.image_type = CL_MEM_OBJECT_IMAGE2D;
         imageDesc.image_width = width;
@@ -171,10 +173,10 @@ namespace Raytracing {
         imageDesc.num_samples = 0;
         imageDesc.buffer = NULL;
         cl_mem tex = clCreateImage(m_context, CL_MEM_READ_WRITE, &format, &imageDesc, NULL, &m_CL_ERR);
-        if (m_CL_ERR != CL_SUCCESS){
+        if (m_CL_ERR != CL_SUCCESS) {
             elog << "Unable to create image texture!\n";
             checkBasicErrors();
-            switch (m_CL_ERR){
+            switch (m_CL_ERR) {
                 case CL_INVALID_VALUE:
                     elog << "\tFlags are not valid!\n";
                     // this is straight from the docs
@@ -208,63 +210,37 @@ namespace Raytracing {
         // then store it in our buffer map for easy access.
         buffers.insert({imageName, tex});
     }
-    /**
-     * Kernels are the entry points in OpenCL. You can have multiple of them in a single program.
-     * @param kernelName both the name of the kernel function in the source and the reference to the kernel object used in other functions in this class.
-     */
+    
+    
     void CLProgram::createKernel(const std::string& kernelName) {
         auto kernel = clCreateKernel(m_program, kernelName.c_str(), &m_CL_ERR);
         if (m_CL_ERR != CL_SUCCESS)
             elog << "Unable to create CL kernel " << kernelName << "!\n";
         kernels.insert({kernelName, kernel});
     }
-    /**
-     * Allows you to bind certain buffers to a specific index in the kernel's argument list.
-     * @param kernel kernel to bind to
-     * @param buffer buffer to bind to argIndex
-     * @param argIndex the index of the argument for this buffer.
-     */
+    
     void CLProgram::setKernelArgument(const std::string& kernel, const std::string& buffer, int argIndex) {
         m_CL_ERR = clSetKernelArg(kernels[kernel], argIndex, sizeof(cl_mem), (void*) &buffers[buffer]);
         if (m_CL_ERR != CL_SUCCESS)
             elog << "Unable to bind argument " << buffer << " to CL kernel " << kernel << "!\n";
     }
-    /**
-     * Enqueues a write command to the buffer specified by the buffer name,
-     * @param buffer the buffer to write to
-     * @param bytes the number of bytes to be copied
-     * @param ptr the pointer to copy from. Must have at least bytes available
-     * @param blocking should this function wait for the bytes to be uploaded to the GPU?
-     * @param offset offset in the buffer object to write to
-     */
+    
     void CLProgram::writeBuffer(const std::string& buffer, size_t bytes, void* ptr, cl_bool blocking, size_t offset) {
         m_CL_ERR = clEnqueueWriteBuffer(m_commandQueue, buffers[buffer], blocking, offset, bytes, ptr, 0, NULL, NULL);
         if (m_CL_ERR != CL_SUCCESS)
             elog << "Unable to enqueue write to " << buffer << " buffer!\n";
     }
-    /**
-     * Enqueues a read command from the buffered specified by the buffer name.
-     * Defaults to blocking but can be set to be non-blocking.
-     * @param buffer buffer to read from
-     * @param bytes the number of bytes to read. Make sure ptr has at least those bytes available.
-     * @param ptr the ptr to write the read bytes to.
-     * @param blocking should we wait for the read or do it async?
-     * @param offset offset in the buffer to read from.
-     */
+    
     void CLProgram::readBuffer(const std::string& buffer, size_t bytes, void* ptr, cl_bool blocking, size_t offset) {
         m_CL_ERR = clEnqueueReadBuffer(m_commandQueue, buffers[buffer], blocking, offset, bytes, ptr, 0, NULL, NULL);
         if (m_CL_ERR != CL_SUCCESS)
             elog << "Unable to enqueue read from " << buffer << " buffer!\n";
     }
-    /**
-     * Issues all previously queued OpenCL commands in a command-queue to the device associated with the command-queue.
-     */
+    
     void CLProgram::flushCommands() {
         clFlush(m_commandQueue);
     }
-    /**
-     * Blocks until all previously queued OpenCL commands in a command-queue are issued to the associated device and have completed.
-     */
+    
     void CLProgram::finishCommands() {
         flushCommands();
         clFinish(m_commandQueue);
@@ -274,13 +250,14 @@ namespace Raytracing {
         m_CL_ERR = clEnqueueNDRangeKernel(m_commandQueue, kernels[kernel], 1, globalWorkOffset, &globalWorkSize, &localWorkSize, 0, NULL, NULL);
     }
     
-    void CLProgram::runKernel(const std::string& kernel, size_t* globalWorkSize, size_t* localWorkSize, cl_uint workDim, const size_t* globalWorkOffset) {
+    void
+    CLProgram::runKernel(const std::string& kernel, size_t* globalWorkSize, size_t* localWorkSize, cl_uint workDim, const size_t* globalWorkOffset) {
         m_CL_ERR = clEnqueueNDRangeKernel(m_commandQueue, kernels[kernel], workDim, globalWorkOffset, globalWorkSize, localWorkSize, 0, NULL, NULL);
     }
     
     void CLProgram::readImage(const std::string& imageName, size_t width, size_t height, void* ptr, cl_bool blocking, size_t x, size_t y) {
-        size_t origin[3] {x, y, 0};
-        size_t region[3] {width, height, 1};
+        size_t origin[3]{x, y, 0};
+        size_t region[3]{width, height, 1};
         m_CL_ERR = clEnqueueReadImage(m_commandQueue, buffers[imageName], blocking, origin, region, 0, 0, ptr, 0, NULL, NULL);
         if (m_CL_ERR != CL_SUCCESS) {
             elog << "Unable to enqueue read from " << imageName << " image:\n";
@@ -298,15 +275,16 @@ namespace Raytracing {
     
     CLProgram::~CLProgram() {
         finishCommands();
-        for (const auto& kernel : kernels)
+        for (const auto& kernel: kernels)
             clReleaseKernel(kernel.second);
         clReleaseProgram(m_program);
-        for (const auto& buffer : buffers)
+        for (const auto& buffer: buffers)
             clReleaseMemObject(buffer.second);
         clReleaseCommandQueue(m_commandQueue);
     }
+    
     void CLProgram::checkBasicErrors() const {
-        switch (m_CL_ERR){
+        switch (m_CL_ERR) {
             case CL_OUT_OF_HOST_MEMORY:
                 elog << "\tHost is out of memory!\n";
                 break;
@@ -328,6 +306,25 @@ namespace Raytracing {
             case CL_INVALID_HOST_PTR:
                 elog << "\tHost pointer is null OR flags are incorrectly set and pointer is NULL!\n";
                 break;
+        }
+    }
+    
+    void CLProgram::readImage(const std::string& imageName, Image& image) {
+        // Create an array for copying bytes from the GPU to the CPU with
+        unsigned char bytes[image.getWidth() * image.getHeight() * 4];
+        for (int i = 0; i < image.getWidth() * image.getHeight() * 4; i++)
+            bytes[i] = 0;
+        // Call to OpenCL to read the image from the GPU and send it to the location of our buffer
+        this->readImage(imageName, image.getWidth(), image.getHeight(), bytes);
+        // multiplication is much faster than division,
+        // so to speed up the function precalculate the color multiplier used to convert from RGBA8 format to floating point format used by the raytracer.
+        const PRECISION_TYPE colorFactor = 1.0 / 255.0;
+        // copy the data from the buffer into the image by calculating its byte offset based on its pixel position.
+        for (int i = 0; i < image.getWidth(); i++) {
+            for (int j = 0; j < image.getHeight(); j++) {
+                const auto pixelData = bytes + (j * 4 * image.getWidth() + i * 4);
+                image.setPixelColor(i, j, {pixelData[0] * colorFactor, pixelData[1] * colorFactor, pixelData[2] * colorFactor});
+            }
         }
     }
     

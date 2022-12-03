@@ -7,7 +7,7 @@
 #include "engine/image/stb_image.h"
 
 namespace Raytracing {
-
+    
     World::~World() {
         for (auto* p: objects)
             delete (p);
@@ -15,7 +15,7 @@ namespace Raytracing {
             delete (p.second);
         //delete(bvhObjects);
     }
-
+    
     HitData SphereObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
         PRECISION_TYPE radiusSquared = radius * radius;
         // move the ray to be with respects to the sphere
@@ -28,11 +28,11 @@ namespace Raytracing {
         // = 0: the ray has one root, we hit the edge of the sphere
         // < 0: ray isn't inside the sphere.
         PRECISION_TYPE discriminant = b * b - (a * c);
-
+        
         // < 0: ray isn't inside the sphere. Don't need to bother calculating the roots.
         if (discriminant < 0)
             return {false, Vec4(), Vec4(), 0};
-
+        
         // now we have to find the root which exists inside our range [min,max]
         auto root = (-b - std::sqrt(discriminant)) / a;
         // if the first root isn't in our range
@@ -48,7 +48,7 @@ namespace Raytracing {
         auto RayAtRoot = ray.along(root);
         // The normal of a sphere is just the point of the hit minus the center position
         auto normal = (RayAtRoot - position) / radius;
-
+        
         /*if (Raytracing::vec4::dot(ray.getDirection(), normal) > 0.0) {
             tlog << "ray inside sphere\n";
         } else
@@ -60,16 +60,16 @@ namespace Raytracing {
         // have to invert the v since we have to invert the v again later due to triangles
         return {true, RayAtRoot, normal, root, u, 1.0 - v};
     }
-
+    
     std::pair<HitData, Object*> World::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
         // actually speeds up rendering by about 110,000ms (total across 16 threads)
-        if (bvhObjects != nullptr && m_config.useBVH){
+        if (bvhObjects != nullptr && m_config.useBVH) {
             auto hResult = HitData{false, Vec4(), Vec4(), max};
             Object* objPtr = nullptr;
             
             auto intersected = bvhObjects->rayAnyHitIntersect(ray, min, max);
             
-            for (const auto& ptr : intersected) {
+            for (const auto& ptr: intersected) {
                 auto cResult = ptr.ptr->checkIfHit(ray, min, hResult.length);
                 if (cResult.hit) {
                     hResult = cResult;
@@ -106,21 +106,21 @@ namespace Raytracing {
             return {hResult, objPtr};
         }
     }
-
+    
     void World::generateBVH() {
         bvhObjects = std::make_unique<BVHTree>(objects);
     }
-
+    
     ScatterResults DiffuseMaterial::scatter(const Ray& ray, const HitData& hitData) const {
-        Vec4 newRay = hitData.normal + Raytracing::Raycaster::randomUnitVector().normalize();
-
+        Vec4 newRay = hitData.normal + Raytracing::RayCaster::randomUnitVector().normalize();
+        
         // rays that are close to zero are liable to floating point precision errors
         if (newRay.x() < EPSILON && newRay.y() < EPSILON && newRay.z() < EPSILON && newRay.w() < EPSILON)
             newRay = hitData.normal;
-
+        
         return {true, Ray{hitData.hitPoint, newRay}, getBaseColor()};
     }
-
+    
     ScatterResults MetalMaterial::scatter(const Ray& ray, const HitData& hitData) const {
         // create a ray reflection
         Vec4 newRay = reflect(ray.getDirection().normalize(), hitData.normal);
@@ -128,22 +128,22 @@ namespace Raytracing {
         bool shouldReflect = Vec4::dot(newRay, hitData.normal) > 0;
         return {shouldReflect, Ray{hitData.hitPoint, newRay}, getBaseColor()};
     }
-
+    
     ScatterResults BrushedMetalMaterial::scatter(const Ray& ray, const HitData& hitData) const {
         // create a ray reflection
         Vec4 newRay = reflect(ray.getDirection().normalize(), hitData.normal);
         // make sure our reflected ray is outside the sphere and doesn't point inwards
         bool shouldReflect = Vec4::dot(newRay, hitData.normal) > 0;
-        return {shouldReflect, Ray{hitData.hitPoint, newRay + Raycaster::randomUnitVector() * fuzzyness}, getBaseColor()};
+        return {shouldReflect, Ray{hitData.hitPoint, newRay + RayCaster::randomUnitVector() * fuzzyness}, getBaseColor()};
     }
     
     ScatterResults TexturedMaterial::scatter(const Ray& ray, const HitData& hitData) const {
-        Vec4 newRay = hitData.normal + Raytracing::Raycaster::randomUnitVector().normalize();
-    
+        Vec4 newRay = hitData.normal + Raytracing::RayCaster::randomUnitVector().normalize();
+        
         // rays that are close to zero are liable to floating point precision errors
         if (newRay.x() < EPSILON && newRay.y() < EPSILON && newRay.z() < EPSILON && newRay.w() < EPSILON)
             newRay = hitData.normal;
-    
+        
         return {true, Ray{hitData.hitPoint, newRay}, getColor(hitData.u, hitData.v)};
     }
     Vec4 TexturedMaterial::getColor(PRECISION_TYPE u, PRECISION_TYPE v) const {
@@ -155,11 +155,11 @@ namespace Raytracing {
         // fix that pesky issue of the v being rotated 90* compared to the image
         v = 1.0 - clamp(v, 0.0, 1.0);
         
-        auto imageX = (int)(width * u);
-        auto imageY = (int)(height * v);
-    
-        if (imageX >= width)  imageX = width-1;
-        if (imageY >= height) imageY = height-1;
+        auto imageX = (int) (width * u);
+        auto imageY = (int) (height * v);
+        
+        if (imageX >= width) imageX = width - 1;
+        if (imageY >= height) imageY = height - 1;
         
         // since stbi loads in RGB8 [0, 255] but the engine works on [0, 1] we need to scale the data down.
         // this is best done with a single division followed by multiple multiplication.
@@ -169,7 +169,7 @@ namespace Raytracing {
         
         return {pixelData[0] * colorFactor, pixelData[1] * colorFactor, pixelData[2] * colorFactor};
     }
-    TexturedMaterial::TexturedMaterial(const std::string& file) : Material({}) {
+    TexturedMaterial::TexturedMaterial(const std::string& file): Material({}) {
         // we are going to have to ignore transparency for now. TODO:?
         data = stbi_load(file.c_str(), &width, &height, &channels, 0);
         if (!data)
@@ -188,7 +188,7 @@ namespace Raytracing {
         return baseColor;
     }
     
-    PRECISION_TYPE sign(PRECISION_TYPE i){
+    PRECISION_TYPE sign(PRECISION_TYPE i) {
         return i >= 0 ? 1 : -1;
     }
     
@@ -200,25 +200,25 @@ namespace Raytracing {
         PRECISION_TYPE a, f, u, v;
         edge1 = (theTriangle.vertex2 + position) - (theTriangle.vertex1 + position);
         edge2 = (theTriangle.vertex3 + position) - (theTriangle.vertex1 + position);
-
+        
         h = Vec4::cross(ray.getDirection(), edge2);
         a = Vec4::dot(edge1, h);
-
+        
         if (a > -EPSILON && a < EPSILON)
             return {false, Vec4(), Vec4(), 0}; //parallel to triangle
-
+        
         f = 1.0 / a;
         s = ray.getStartingPoint() - (theTriangle.vertex1 + position);
         u = f * Vec4::dot(s, h);
-
+        
         if (u < 0.0 || u > 1.0)
             return {false, Vec4(), Vec4(), 0};
-
+        
         q = Vec4::cross(s, edge1);
         v = f * Vec4::dot(ray.getDirection(), q);
         if (v < 0.0 || u + v > 1.0)
             return {false, Vec4(), Vec4(), 0};
-
+        
         // At this stage we can compute t to find out where the intersection point is on the line.
         PRECISION_TYPE t = f * Vec4::dot(edge2, q);
         // keep t in reasonable bounds, ensuring we respect depth
@@ -226,7 +226,7 @@ namespace Raytracing {
             // ray intersects
             Vec4 rayIntersectionPoint = ray.along(t);
             Vec4 normal;
-    
+            
             // calculate triangle berry centric coords
             // first we need the vector that runs between the vertex and the intersection point for all three vertices
             // we must subtract the position of the triangle from the intersection point because this calc must happen in triangle space not world space.
@@ -234,7 +234,7 @@ namespace Raytracing {
             auto vertex1ToIntersect = theTriangle.vertex1 - (rayIntersectionPoint - position);
             auto vertex2ToIntersect = theTriangle.vertex2 - (rayIntersectionPoint - position);
             auto vertex3ToIntersect = theTriangle.vertex3 - (rayIntersectionPoint - position);
-    
+            
             // the magnitude of the cross product of two vectors is double the area formed by the triangle of their intersection.
             auto fullAreaVec = Vec4::cross(theTriangle.vertex1 - theTriangle.vertex2, theTriangle.vertex1 - theTriangle.vertex3);
             auto areaVert1Vec = Vec4::cross(vertex2ToIntersect, vertex3ToIntersect);
@@ -271,7 +271,7 @@ namespace Raytracing {
         
         return {false, Vec4(), Vec4(), 0};
     }
-
+    
     HitData ModelObject::checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const {
         auto hResult = HitData{false, Vec4(), Vec4(), max};
         
@@ -280,7 +280,7 @@ namespace Raytracing {
         // must check through all the triangles in the object
         // respecting depth along the way
         // but reducing the max it can reach my the last longest vector length.
-        for (const auto& t : triangles) {
+        for (const auto& t: triangles) {
             auto cResult = checkIfTriangleGotHit(*t, position, ray, min, hResult.length);
             if (cResult.hit)
                 hResult = cResult;
