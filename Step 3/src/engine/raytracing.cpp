@@ -25,7 +25,7 @@ namespace Raytracing {
     Ray Camera::projectRay(PRECISION_TYPE x, PRECISION_TYPE y) {
         // transform the x and y to points from image coords to be inside the camera's viewport.
         double transformedX = (x / (image.getWidth() - 1));
-        auto transformedY = (y / (image.getHeight() - 1));
+        double transformedY = (y / (image.getHeight() - 1));
         // then generate a ray which extends out from the camera position in the direction with respects to its position on the image
         return {position, imageOrigin + transformedX * horizontalAxis + transformedY * verticalAxis - position};
     }
@@ -44,6 +44,7 @@ namespace Raytracing {
     void Camera::setRotation(const PRECISION_TYPE yaw, const PRECISION_TYPE pitch) {
         // TODO:
     }
+    
     Mat4x4 Camera::view(PRECISION_TYPE yaw, PRECISION_TYPE pitch) {
         Mat4x4 view;
         
@@ -166,33 +167,36 @@ namespace Raytracing {
         setupQueue(partitionScreen(threads));
         ilog << "Running std::thread\n";
         for (int i = 0; i < threads; i++) {
-            executors.push_back(std::make_unique<std::thread>([this, i, threads]() -> void {
-                // run through all the quadrants
-                std::stringstream str;
-                str << "Threading of #";
-                str << (i + 1);
-                profiler::start("Raytracer Results", str.str());
-                while (unprocessedQuads != nullptr) {
-                    RaycasterImageBounds imageBoundingData{};
-                    // get the function for the quadrant
-                    queueSync.lock();
-                    if (unprocessedQuads->empty()) {
-                        queueSync.unlock();
-                        break;
-                    }
-                    imageBoundingData = unprocessedQuads->front();
-                    unprocessedQuads->pop();
-                    queueSync.unlock();
-                    // the run it
-                    for (int kx = 0; kx <= imageBoundingData.width; kx++) {
-                        for (int ky = 0; ky < imageBoundingData.height; ky++) {
-                            runRaycastingAlgorithm(imageBoundingData, kx, ky);
-                        }
-                    }
-                }
-                finishedThreads++;
-                profiler::end("Raytracer Results", str.str());
-            }));
+            executors.push_back(
+                    std::make_unique<std::thread>(
+                            [this, i, threads]() -> void {
+                                // run through all the quadrants
+                                std::stringstream str;
+                                str << "Threading of #";
+                                str << (i + 1);
+                                profiler::start("Raytracer Results", str.str());
+                                while (unprocessedQuads != nullptr) {
+                                    RaycasterImageBounds imageBoundingData{};
+                                    // get the function for the quadrant
+                                    queueSync.lock();
+                                    if (unprocessedQuads->empty()) {
+                                        queueSync.unlock();
+                                        break;
+                                    }
+                                    imageBoundingData = unprocessedQuads->front();
+                                    unprocessedQuads->pop();
+                                    queueSync.unlock();
+                                    // the run it
+                                    for (int kx = 0; kx <= imageBoundingData.width; kx++) {
+                                        for (int ky = 0; ky < imageBoundingData.height; ky++) {
+                                            runRaycastingAlgorithm(imageBoundingData, kx, ky);
+                                        }
+                                    }
+                                }
+                                finishedThreads++;
+                                profiler::end("Raytracer Results", str.str());
+                            }
+                    ));
         }
     }
     
@@ -242,6 +246,7 @@ namespace Raytracing {
         system_threads;
 #endif
     }
+    
     void RayCaster::runMPI(std::queue<RaycasterImageBounds> bounds) {
         ilog << "Running MPI\n";
         dlog << "We have " << bounds.size() << " bounds currently pending!\n";
@@ -283,12 +288,14 @@ namespace Raytracing {
         // we need to subdivide the image for the threads, since this is really quick it's fine to due sequentially
         for (int dx = 0; dx < divs; dx++) {
             for (int dy = 0; dy < divs; dy++) {
-                bounds.push_back({
-                                         image.getWidth() / divs,
-                                         image.getHeight() / divs,
-                                         (image.getWidth() / divs) * dx,
-                                         (image.getHeight() / divs) * dy
-                                 });
+                bounds.push_back(
+                        {
+                                image.getWidth() / divs,
+                                image.getHeight() / divs,
+                                (image.getWidth() / divs) * dx,
+                                (image.getHeight() / divs) * dy
+                        }
+                );
             }
         }
         return bounds;

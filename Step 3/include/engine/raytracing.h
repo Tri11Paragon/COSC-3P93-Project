@@ -95,6 +95,7 @@ namespace Raytracing {
                 //glm::mat4 projectG = glm::perspective(glm::radians(90.0f), (float)aspectRatio, 0.1f, (float)1000);
                 //return Mat4x4{projectG};
             }
+            
             [[nodiscard]] Mat4x4 view(const Vec4& lookAtPos) const {
                 Mat4x4 view;
                 
@@ -125,9 +126,16 @@ namespace Raytracing {
                 
                 return view;
             }
+            
             Mat4x4 view(PRECISION_TYPE yaw, PRECISION_TYPE pitch);
             
             [[nodiscard]] inline Vec4 getPosition() const { return position; };
+            
+            [[nodiscard]] inline Vec4 getImageOrigin() const { return imageOrigin; }
+            
+            [[nodiscard]] inline Vec4 getHorizontalAxis() const { return horizontalAxis; }
+            
+            [[nodiscard]] inline Vec4 getVerticalAxis() const { return verticalAxis; }
             
             // the camera's position must be set with setPosition(Vec4);
             // uses an internal up vector, assumed to be {0, 1, 0}
@@ -161,19 +169,26 @@ namespace Raytracing {
             std::queue<RaycasterImageBounds>* unprocessedQuads = nullptr;
             
             Vec4 raycasti(const Ray& ray, int depth);
+            
             Vec4 raycast(const Ray& ray);
+            
             void runRaycastingAlgorithm(RaycasterImageBounds imageBounds, int loopX, int loopY);
+            
             void setupQueue(const std::vector<RaycasterImageBounds>& bounds);
+        
         public:
             inline void updateRayInfo(int maxBounce, int perPixel) {
                 raysPerPixel = perPixel;
                 maxBounceDepth = maxBounce;
             }
+            
             inline void resetRayInfo() {
                 raysPerPixel = 50;
                 maxBounceDepth = 50;
             }
+            
             std::vector<RaycasterImageBounds> partitionScreen(int threads = -1);
+            
             inline static Vec4 randomUnitVector() {
                 // there are two methods to generating a random unit sphere
                 // one which is fast and approximate:
@@ -189,17 +204,24 @@ namespace Raytracing {
                 // the second creates better results but is 18% slower (better defined shadows)
                 // likely due to not over generating unit vectors biased towards the corners
             }
+            
             RayCaster(Camera& c, Image& i, World& world, const Parser& p): camera(c), image(i), world(world) {
                 world.generateBVH();
             }
+            
             void runSTDThread(int threads = -1);
+            
             void runOpenMP(int threads = -1);
+            
             void runMPI(std::queue<RaycasterImageBounds> bounds);
+            
             [[nodiscard]] inline bool areThreadsStillRunning() const { return finishedThreads == executors.size(); }
+            
             inline void join() {
                 for (auto& p: executors)
                     p->join();
             }
+            
             void deleteThreads() {
                 for (auto& p: executors) {
                     // wait for all threads to exit before trying to delete them.
@@ -211,6 +233,7 @@ namespace Raytracing {
                 // since executors contains the only reference to the unique_ptr it will be deleted automatically
                 executors.clear();
             }
+            
             ~RayCaster() {
                 deleteThreads();
                 delete (unprocessedQuads);

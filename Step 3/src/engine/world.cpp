@@ -200,7 +200,6 @@ namespace Raytracing {
     static HitData checkIfTriangleGotHit(const Triangle& theTriangle, const Vec4& position, const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) {
         // Möller–Trumbore intersection algorithm
         // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
-        // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
         Vec4 edge1, edge2, h, s, q;
         PRECISION_TYPE a, f, u, v;
         edge1 = (theTriangle.vertex2 + position) - (theTriangle.vertex1 + position);

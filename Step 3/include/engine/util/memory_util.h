@@ -16,33 +16,34 @@ namespace Raytracing {
         private:
         public:
             /**
-             * returns the bytes from the double ordered based on if ENDIAN_FLIP is defined or not
+             * returns the bytes from the type T ordered based on if ENDIAN_FLIP is defined or not
              */
-            inline static std::vector<unsigned char> getDoubleBytes(double d) {
+            template<typename T>
+            inline static std::vector<unsigned char> getBytes(T t) {
                 std::vector<unsigned char> bytes;
-                auto* doubleAsBytes = reinterpret_cast<unsigned char*>(&d);
+                auto* asBytes = reinterpret_cast<unsigned char*>(&t);
 #ifdef ENDIAN_FLIP
-                for (int i = 0; i < sizeof(double); i++)
-                    bytes.push_back(doubleAsBytes[i]);
+                for (int i = 0; i < sizeof(T); i++)
+                    bytes.push_back(asBytes[i]);
 #else
-                for (int i = 0; i < sizeof(double); i++)
-                    bytes.push_back(doubleAsBytes[sizeof(double) - i]);
+                for (int i = 0; i < sizeof(T); i++)
+                    bytes.push_back(asBytes[sizeof(T) - i]);
 #endif
                 return bytes;
             }
             
             /**
-             * Note: this is used for the GPU and it is assumed that you are using double precision values.
-             * Anything else is undefined. (Should be fine though since upcasting is fine)
+             * Note: this is used for the GPU
+             * Converts the vector to single floating point format.
              * @param array array to write into
              * @param offset offset of where to start writing into. Will update this value as it moves through the vector
              * @param vec the vector to write
              */
             inline static void writeVectorBytes(unsigned char* array, size_t& offset, const Vec4& vec) {
-                auto x = getDoubleBytes(vec.x());
-                auto y = getDoubleBytes(vec.y());
-                auto z = getDoubleBytes(vec.z());
-                auto w = getDoubleBytes(vec.w());
+                auto x = getBytes((float) vec.x());
+                auto y = getBytes((float) vec.y());
+                auto z = getBytes((float) vec.z());
+                auto w = getBytes((float) vec.w());
                 // write the bytes as a packed vector.
                 for (auto b: x)
                     array[offset++] = b;
@@ -51,6 +52,19 @@ namespace Raytracing {
                 for (auto b: z)
                     array[offset++] = b;
                 for (auto b: w)
+                    array[offset++] = b;
+            }
+            
+            /**
+             * Note: this is used for the GPU.
+             * @param array array to write into
+             * @param offset offset of where to start writing into. Will update this value as it moves through the vector
+             * @param integer the int to write
+             */
+            template<typename T>
+            inline static void writeBytes(unsigned char* array, size_t& offset, const T t) {
+                auto x = getBytes(t);
+                for (auto b: x)
                     array[offset++] = b;
             }
     };

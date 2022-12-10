@@ -157,8 +157,7 @@ int main(int argc, char** args) {
 
 #endif
     
-    Raytracing::Image image(1440, 720);
-    //Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
+    Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
     
     Raytracing::Camera camera(std::stoi(parser.getOptionValue("--fov")), image);
     //camera.setPosition({0, 0, 1});
@@ -209,7 +208,7 @@ int main(int argc, char** args) {
         Texture mainImage(&image);
         
         
-        OpenClRaytracer openClRaytracer{parser.getOptionValue("--resources") + "opencl/raytracer.cl", image, world};
+        OpenClRaytracer openClRaytracer{parser.getOptionValue("--resources") + "opencl/raytracer.cl", image, camera, world};
         openClRaytracer.run();
         
         Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");

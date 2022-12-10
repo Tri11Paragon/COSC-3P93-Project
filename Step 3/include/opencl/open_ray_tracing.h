@@ -19,6 +19,7 @@
 #ifdef COMPILE_OPENCL
 
 #include <opencl/cl.h>
+#include "engine/raytracing.h"
 
 namespace Raytracing {
     
@@ -27,12 +28,16 @@ namespace Raytracing {
             CLProgram* program;
             Image& image;
             size_t localWorks[2]{8, 8};
+            size_t maxTriangleSize = 0;
+            size_t objectCount = 0;
         public:
-            OpenClRaytracer(const std::string& programLocation, Image& image, World& world);
+            OpenClRaytracer(const std::string& programLocation, Image& image, Camera& camera, World& world);
             
             ~OpenClRaytracer();
             
-            void storeObjects(const std::vector<Object*>& objects, size_t totalWorldBytes);
+            void storeObjects(unsigned char* buffer, size_t totalWorldBytes);
+            
+            unsigned char* createObjectBuffer(const std::vector<Object*>& objects, size_t totalWorldBytes);
             
             void run();
     };
