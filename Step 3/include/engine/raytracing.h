@@ -44,8 +44,9 @@ namespace Raytracing {
             Vec4 up{0, 1, 0};
         
         public:
-            Camera(PRECISION_TYPE fov, const Image& image): image(image),
-                                                            aspectRatio(double(image.getWidth()) / double(image.getHeight())) {
+            Camera(PRECISION_TYPE fov, const Image& image):
+                    image(image),
+                    aspectRatio(double(image.getWidth()) / double(image.getHeight())) {
                 // scale the viewport height based on the camera's FOV
                 tanFovHalf = tan(degreeeToRadian(fov) / 2);
                 viewportHeight = (2.0 * tanFovHalf);
@@ -72,8 +73,6 @@ namespace Raytracing {
             
             void setPosition(const Vec4& pos) { this->position = pos; }
             
-            void setRotation(PRECISION_TYPE yaw, PRECISION_TYPE pitch);
-            
             // the follow utility functions are actually taking forever to get right
             // I can't tell if my projection calculation is off or the view calc?
             // got to install GLM to test which function works and which does. Maybe they are both bad. or Maybe it's my matrix impl
@@ -94,37 +93,6 @@ namespace Raytracing {
                 // use GLM to debug issues with ^
                 //glm::mat4 projectG = glm::perspective(glm::radians(90.0f), (float)aspectRatio, 0.1f, (float)1000);
                 //return Mat4x4{projectG};
-            }
-            
-            [[nodiscard]] Mat4x4 view(const Vec4& lookAtPos) const {
-                Mat4x4 view;
-                
-                auto w = (position - lookAtPos).normalize(); // forward
-                auto u = (Vec4::cross(up, w)).normalize(); // right
-                auto v = Vec4::cross(w, u); // up
-                
-                view.m00(float(w.x()));
-                view.m01(float(w.y()));
-                view.m02(float(w.z()));
-                view.m03(float(w.w()));
-                
-                view.m10(float(u.x()));
-                view.m11(float(u.y()));
-                view.m12(float(u.z()));
-                view.m13(float(u.w()));
-                
-                view.m20(float(v.x()));
-                view.m21(float(v.y()));
-                view.m22(float(v.z()));
-                view.m23(float(v.w()));
-                
-                // view matrix are inverted, dot product to simulate translate matrix multiplication
-                view.m30(-float(Vec4::dot(u, position)));
-                view.m31(-float(Vec4::dot(v, position)));
-                view.m32(-float(Vec4::dot(w, position)));
-                view.m33(1);
-                
-                return view;
             }
             
             Mat4x4 view(PRECISION_TYPE yaw, PRECISION_TYPE pitch);
@@ -205,7 +173,8 @@ namespace Raytracing {
                 // likely due to not over generating unit vectors biased towards the corners
             }
             
-            RayCaster(Camera& c, Image& i, World& world, const Parser& p): camera(c), image(i), world(world) {
+            RayCaster(Camera& c, Image& i, World& world, const Parser& p):
+                    camera(c), image(i), world(world) {
                 world.generateBVH();
             }
             

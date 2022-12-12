@@ -52,12 +52,15 @@ namespace Raytracing {
                     throw std::runtime_error("");
                 }
                 try {
-                    // filter out the > | " at the end of the include statement.
-                    std::string file = statement1.empty() ? statement2[1].substr(0, statement2[1].size() - 1) : statement1[1].substr(
-                            0,
-                            statement1[1].size() -
-                            1
-                    );
+                    // filter out the > or " at the end of the include statement.
+                    std::string file;
+                    if (statement1.size() <= 1) {
+                        // since " is one character, we don't need to substring since split already handles it.
+                        file = statement2[1];
+                    } else {
+                        tlog << statement1[1];
+                        file = statement1[1].substr(0, statement1[1].size() - 1);
+                    }
                     
                     tlog << "Recusing into " << (pathOnly + "/" + file) << "\n";
                     
@@ -105,6 +108,7 @@ namespace Raytracing {
             stringStream << "\n";
         }
         
+        //tlog << stringStream.str();
         return stringStream.str();
     }
     

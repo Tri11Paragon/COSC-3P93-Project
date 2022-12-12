@@ -3,6 +3,8 @@
  * Copyright (c) 2022 Brett Terpstra. All Rights Reserved.
  */
 #include <opencl/open_ray_tracing.h>
+
+#include <cstddef>
 #include "engine/util/loaders.h"
 
 namespace Raytracing {
@@ -13,7 +15,7 @@ namespace Raytracing {
     constexpr size_t vecBytes = sizeof(float) * 4;
     
     OpenClRaytracer::OpenClRaytracer(const std::string& programLocation, Image& image, Camera& camera, World& world):
-            image(image) {
+            image(image), camera(camera) {
         auto objectsInWorld = world.getObjectsInWorld();
         objectCount = 0;
         // pre-calculate the space needed for objects, since every object must statically store these number of triangles, even if not used.
@@ -31,7 +33,7 @@ namespace Raytracing {
         // 3 vectors per object, 1 size type per object, maxTriangleSize triangles.
         size_t totalWorldBytes =
                 (vecBytes * 3) * objectCount + sizeof(unsigned long) * objectCount + triangleNumOfBytes * maxTriangleSize * objectCount;
-        auto objectBuffer = createObjectBuffer(objectsInWorld, totalWorldBytes);
+        //auto objectBuffer = createObjectBuffer(objectsInWorld, totalWorldBytes);
         
         ShaderLoader::define("maxTriangleCount", std::to_string(maxTriangleSize));
         ShaderLoader::define("objectCount", std::to_string(objectCount));
@@ -40,30 +42,26 @@ namespace Raytracing {
         
         // load up information about the camera. Since these don't generally chance at runtime we can load them up at compile time
         // however this means that changes made in debug mode do not transfer.
-        auto origin = camera.getImageOrigin();
-        ShaderLoader::define(
-                "imageOrigin",
-                "(float4)(" + std::to_string(origin.x()) + ", " + std::to_string(origin.y()) + ", " + std::to_string(origin.z()) + ", " +
-                std::to_string(origin.w()) + ")"
-        );
-        auto horiz = camera.getHorizontalAxis();
-        ShaderLoader::define(
-                "horizontalAxis",
-                "(float4)(" + std::to_string(horiz.x()) + ", " + std::to_string(horiz.y()) + ", " + std::to_string(horiz.z()) + ", " +
-                std::to_string(horiz.w()) + ")"
-        );
-        auto vert = camera.getHorizontalAxis();
-        ShaderLoader::define(
-                "verticalAxis",
-                "(float4)(" + std::to_string(vert.x()) + ", " + std::to_string(vert.y()) + ", " + std::to_string(vert.z()) + ", " +
-                std::to_string(vert.w()) + ")"
-        );
-        auto pos = camera.getPosition();
-        ShaderLoader::define(
-                "cameraPosition",
-                "(float4)(" + std::to_string(pos.x()) + ", " + std::to_string(pos.y()) + ", " + std::to_string(pos.z()) + ", " +
-                std::to_string(pos.w()) + ")"
-        );
+//        auto origin = camera.getImageOrigin();
+//        ShaderLoader::define(
+//                "imageOrigin",
+//                "(float3)(" + std::to_string(origin.x()) + ", " + std::to_string(origin.y()) + ", " + std::to_string(origin.z()) + ")"
+//        );
+//        auto horiz = camera.getHorizontalAxis();
+//        ShaderLoader::define(
+//                "horizontalAxis",
+//                "(float3)(" + std::to_string(horiz.x()) + ", " + std::to_string(horiz.y()) + ", " + std::to_string(horiz.z()) + ")"
+//        );
+//        auto vert = camera.getVerticalAxis();
+//        ShaderLoader::define(
+//                "verticalAxis",
+//                "(float3)(" + std::to_string(vert.x()) + ", " + std::to_string(vert.y()) + ", " + std::to_string(vert.z()) + ")"
+//        );
+//        auto pos = camera.getPosition();
+//        ShaderLoader::define(
+//                "cameraPosition",
+//                "(float3)(" + std::to_string(pos.x()) + ", " + std::to_string(pos.y()) + ", " + std::to_string(pos.z()) + ")"
+//        );
         
         program = new CLProgram(programLocation);
         OpenCL::createCLProgram(*program);
@@ -72,19 +70,13 @@ namespace Raytracing {
         program->createImage("outputImage", image.getWidth(), image.getHeight());
         
         program->createBuffer("objects", CL_MEM_READ_WRITE, totalWorldBytes);
-        program->createBuffer("randoms", CL_MEM_READ_ONLY, image.getWidth() * vecBytes);
-        // the raytracing algorithm needs a good supply of random numbers. This creates it for us on the CPU as to prevent needing to generate on GPU.
-        auto randomsBufferBytes = new unsigned char[image.getWidth() * vecBytes];
-        size_t currentPos = 0;
-        for (int i = 0; i < image.getWidth(); i++) {
-            MemoryConvert::writeVectorBytes(randomsBufferBytes, currentPos, Raytracing::RayCaster::randomUnitVector().normalize());
-        }
-        program->writeBuffer("randoms", image.getWidth() * vecBytes, randomsBufferBytes);
-        storeObjects(objectBuffer, totalWorldBytes);
+        program->createBuffer("cameraData", CL_MEM_READ_WRITE, sizeof(float) * 3 * 4);
+        //storeObjects(objectBuffer, totalWorldBytes);
         
         program->setKernelArgument("raycast", "outputImage", 0);
         program->setKernelArgument("raycast", "objects", 1);
-        program->setKernelArgument("raycast", "randoms", 2);
+        program->setKernelArgument("raycast", "cameraData", 2);
+        updateCameraInformation();
     }
     
     OpenClRaytracer::~OpenClRaytracer() {
@@ -166,5 +158,14 @@ namespace Raytracing {
 //            MemoryConvert::writeVectorBytes(buffer, currentIndex, model->getPosition());
 //        }
         return buffer;
+    }
+    void OpenClRaytracer::updateCameraInformation() {
+        unsigned char buffer[sizeof(float) * 3 * 4];
+        size_t currentIndex = 0;
+        MemoryConvert::writeVectorBytes(buffer, currentIndex, camera.getPosition());
+        MemoryConvert::writeVectorBytes(buffer, currentIndex, camera.getVerticalAxis());
+        MemoryConvert::writeVectorBytes(buffer, currentIndex, camera.getHorizontalAxis());
+        MemoryConvert::writeVectorBytes(buffer, currentIndex, camera.getImageOrigin());
+        program->writeBuffer("cameraData", sizeof(float) * 3 * 4, buffer);
     }
 }

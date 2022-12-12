@@ -13,3 +13,13 @@
 959	2684	1669735767860797367	CMakeFiles/Step_3.dir/src/opencl/cl.cpp.o	7e15a029d7ca916c
 2	2038	1669735767212779629	CMakeFiles/Step_3.dir/src/engine/util/parser.cpp.o	a8f47b5a2bce1b2a
 2	2041	1669735767216779738	CMakeFiles/Step_3.dir/src/engine/util/loaders.cpp.o	971186349d935f91
+1	961	1670775820121593228	CMakeFiles/Step_3.dir/src/engine/globals.cpp.o	ac7c6dc8b9dc3fd1
+2	1307	1670775820469601648	CMakeFiles/Step_3.dir/src/engine/math/colliders.cpp.o	8a7658a9bb94b79
+2	1551	1670775820713607554	CMakeFiles/Step_3.dir/src/engine/util/debug.cpp.o	aec80b8424e96bfd
+2	1789	1670775820949613264	CMakeFiles/Step_3.dir/src/engine/math/bvh.cpp.o	73e310373b3e9e3d
+2	1790	1670775820949613264	CMakeFiles/Step_3.dir/src/engine/util/models.cpp.o	781ccf05f86a9476
+3	1867	1670775821029615201	CMakeFiles/Step_3.dir/src/engine/util/parser.cpp.o	49df7154b35ebe07
+3	2034	1670775821197619266	CMakeFiles/Step_3.dir/src/engine/world.cpp.o	e08a39ed946f4838
+2	2167	1670775821329622462	CMakeFiles/Step_3.dir/src/engine/util/loaders.cpp.o	f94d15a8dacd0fa7
+961	2807	1670775821969637949	CMakeFiles/Step_3.dir/src/opencl/cl.cpp.o	c1eccdb992e8345f
+2	7810	1670775826969758951	CMakeFiles/Step_3.dir/src/engine/image/image.cpp.o	1ef1b77523471449

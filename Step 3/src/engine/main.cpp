@@ -206,17 +206,27 @@ int main(int argc, char** args) {
 #ifdef COMPILE_GUI
         Raytracing::RayCaster rayCaster{camera, image, world, parser};
         Texture mainImage(&image);
-        
-        
-        OpenClRaytracer openClRaytracer{parser.getOptionValue("--resources") + "opencl/raytracer.cl", image, camera, world};
-        openClRaytracer.run();
+    
+    #ifdef COMPILE_OPENCL
+        OpenClRaytracer openClRaytracer{parser.getOptionValue("--resources") + "opencl/sphereray.cl", image, camera, world};
+        int frameCounter = 0;
+    #endif
         
         Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
         Raytracing::DisplayRenderer renderer{*window, mainImage, world, shader, worldShader, rayCaster, parser, camera};
         while (!window->shouldWindowClose()) {
             window->beginUpdate();
             renderer.draw();
+
+#ifdef COMPILE_OPENCL
             
+            openClRaytracer.updateCameraInformation();
+            //frameCounter++;
+            //if (frameCounter % 5 == 0) {
+            openClRaytracer.run();
+            //    frameCounter = 0;
+            //}
+#endif
             
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             world.drawBVH(worldShader);

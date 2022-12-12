@@ -27,6 +27,7 @@ namespace Raytracing {
         private:
             CLProgram* program;
             Image& image;
+            Camera& camera;
             size_t localWorks[2]{8, 8};
             size_t maxTriangleSize = 0;
             size_t objectCount = 0;
@@ -36,6 +37,7 @@ namespace Raytracing {
             ~OpenClRaytracer();
             
             void storeObjects(unsigned char* buffer, size_t totalWorldBytes);
+            void updateCameraInformation();
             
             unsigned char* createObjectBuffer(const std::vector<Object*>& objects, size_t totalWorldBytes);
             

@@ -150,8 +150,10 @@ namespace Raytracing {
                             RayCaster& mRaycaster,
                             Parser& mParser,
                             Camera& mCamera)
-                    : m_window(mWindow), m_mainImage(mMainImage), m_imageShader(mImageShader), m_worldShader(mWorldShader), m_raycaster(mRaycaster),
-                      m_parser(mParser), m_camera(mCamera), m_world(world) {}
+                    :
+                    m_window(mWindow), m_mainImage(mMainImage), m_imageShader(mImageShader), m_worldShader(mWorldShader), m_raycaster(mRaycaster),
+                    m_parser(mParser), m_camera(mCamera), m_world(world) {}
+            std::pair<Mat4x4, Mat4x4> getCameraMatrices();
             void draw();
     };
 }

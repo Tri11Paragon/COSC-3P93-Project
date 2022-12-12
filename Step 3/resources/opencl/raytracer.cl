@@ -37,8 +37,8 @@ struct Ray {
     float4 inverseDirection;
 };
 
-float4 along(struct Ray ray, float length) { 
-    return ray.start + length * ray.direction; 
+float4 along(struct Ray* ray, float length) { 
+    return ray->start + length * ray->direction; 
 }
 
 float magnitude(float4 vec){
@@ -64,7 +64,7 @@ struct ScatterResults {
 };
 
 // as close to a 1 to 1 copy from the cpu ray tracer
-bool checkForTriangleIntersection(struct HitData* data, struct Triangle theTriangle, float4 position, struct Ray ray, float min, float max) {
+bool checkForTriangleIntersection(struct HitData* data, struct Triangle theTriangle, float4 position, struct Ray* ray, float min, float max) {
     const float EPSILON = 0.0000001f;
 
     float4 edge1, edge2, s, h, q;
@@ -72,7 +72,7 @@ bool checkForTriangleIntersection(struct HitData* data, struct Triangle theTrian
     edge1 = (theTriangle.vertex2 + position) - (theTriangle.vertex1 + position);
     edge2 = (theTriangle.vertex3 + position) - (theTriangle.vertex1 + position);
 
-    h = cross(ray.direction, edge2);
+    h = cross(ray->direction, edge2);
     a = dot(edge1, h);
 
     if (a > -EPSILON && a < EPSILON) {
@@ -80,7 +80,7 @@ bool checkForTriangleIntersection(struct HitData* data, struct Triangle theTrian
     }
 
     f = 1.0f / a;
-    s = ray.start - (theTriangle.vertex1 + position);
+    s = ray->start - (theTriangle.vertex1 + position);
     u = f * dot(s, h);
 
     if (u < 0.0f || u > 1.0f) {
@@ -88,7 +88,7 @@ bool checkForTriangleIntersection(struct HitData* data, struct Triangle theTrian
     }
 
     q = cross(s, edge1);
-    v = f * dot(ray.direction, q);
+    v = f * dot(ray->direction, q);
     if (v < 0.0f || u + v > 1.0f) {
         return false;
     }
@@ -155,19 +155,18 @@ float4 getVector(__global unsigned char* buffer, unsigned long* currentByte){
      return val;
 }
 
-struct Ray projectRay(float x, float y){
+struct Ray* projectRay(struct Ray* ray, float x, float y){
     float transformedX = (x / (imageWidth - 1));
     float transformedY = (y / (imageHeight - 1));
 
-    struct Ray ray;
-    ray.start = cameraPosition;
-    ray.direction = imageOrigin + transformedX * horizontalAxis + transformedY * verticalAxis - cameraPosition;
-    ray.inverseDirection = 1.0f / ray.direction;
+    ray->start = cameraPosition;
+    ray->direction = imageOrigin + transformedX * horizontalAxis + transformedY * verticalAxis - cameraPosition;
+    ray->inverseDirection = 1.0f / ray->direction;
 
     return ray;
 }
 
-bool checkForWorldIntersection(struct HitData* data, __global struct Object* objects, struct Ray ray, float min, float max){
+bool checkForWorldIntersection(struct HitData* data, __global struct Object* objects, struct Ray* ray, float min, float max){
     data->length = max;
     bool hit = false;
     // brute-force check on all the objects in the world.
@@ -182,7 +181,7 @@ bool checkForWorldIntersection(struct HitData* data, __global struct Object* obj
     return hit;
 }
 
-bool scatter(struct ScatterResults* results, __global unsigned char* randoms, struct Ray ray, struct HitData data){
+bool scatter(struct ScatterResults* results, __global unsigned char* randoms, struct Ray* ray, struct HitData data){
     const float EPSILON = 0.0000001f;
     int x = get_global_id(0);
     unsigned long cb = x * sizeof(float4);
@@ -201,8 +200,7 @@ bool scatter(struct ScatterResults* results, __global unsigned char* randoms, st
     return true;
 }
 
-float4 raycastI(__global unsigned char* randoms, __global struct Object* objects, struct Ray ray){
-    struct Ray localRay = ray;
+float4 raycastI(__global unsigned char* randoms, __global struct Object* objects, struct Ray* ray){
     float4 color = (float4)(1.0f, 1.0f, 1.0f, 1.0f);
     for (int i = 0; i < MAX_DEPTH; i++){
         struct HitData hit;
@@ -236,9 +234,12 @@ __kernel void raycast(__write_only image2d_t outputImage, __global struct Object
     float4 randomVector = getVector(randoms, &cb);
     int y = get_global_id(1);
 
+    struct Ray casterRay;
+    projectRay(&casterRay, x + randomVector.x, y + randomVector.z);
+
     float4 color = (float4)(0.0);
     //for (int i = 0; i < MAX_PER_PIXEL; i++){
-        color = color + raycastI(randoms, objects, projectRay(x + randomVector.x, y + randomVector.z));
+        color = color + raycastI(randoms, objects, &casterRay);
     //}
     float scaleFactor = 1.0 / MAX_PER_PIXEL;
     write_imagef(outputImage, (int2)(x, y), (float4)(sqrt(color.x * scaleFactor), sqrt(color.y * scaleFactor), sqrt(color.z * scaleFactor), 1.0f));

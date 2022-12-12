@@ -10,8 +10,10 @@
 #include <config.h>
 
 #ifdef USE_MPI
+    
     #include <mpi/mpi.h>
     #include <engine/mpi.h>
+
 #else
     #ifdef USE_OPENMP
         #include <omp.h>
@@ -39,10 +41,6 @@ namespace Raytracing {
         horizontalAxis = viewportWidth * u;
         verticalAxis = viewportHeight * v;
         imageOrigin = position - horizontalAxis / 2 - verticalAxis / 2 - w;
-    }
-    
-    void Camera::setRotation(const PRECISION_TYPE yaw, const PRECISION_TYPE pitch) {
-        // TODO:
     }
     
     Mat4x4 Camera::view(PRECISION_TYPE yaw, PRECISION_TYPE pitch) {
@@ -204,7 +202,7 @@ namespace Raytracing {
         setupQueue(partitionScreen(threads));
 #ifdef USE_OPENMP
         ilog << "Running OpenMP\n";
-    #pragma omp parallel num_threads(threads+1) default(none) shared(threads)
+#pragma omp parallel num_threads(threads+1) default(none) shared(threads)
         {
             int threadID = omp_get_thread_num();
             // an attempt at making the omp command non-blocking.
@@ -248,6 +246,7 @@ namespace Raytracing {
     }
     
     void RayCaster::runMPI(std::queue<RaycasterImageBounds> bounds) {
+#ifdef USE_MPI
         ilog << "Running MPI\n";
         dlog << "We have " << bounds.size() << " bounds currently pending!\n";
         while (!bounds.empty()) {
@@ -259,8 +258,9 @@ namespace Raytracing {
             }
             bounds.pop();
         }
-#ifdef USE_MPI
         dlog << "Finished running MPI on " << currentProcessID << "\n";
+#else
+        flog << "Not compiled with MPI!\n";
 #endif
     }
     

@@ -43,7 +43,8 @@ namespace Raytracing {
                 auto x = getBytes((float) vec.x());
                 auto y = getBytes((float) vec.y());
                 auto z = getBytes((float) vec.z());
-                auto w = getBytes((float) vec.w());
+                // we don't really use the w vector but this is a TODO
+                //auto w = getBytes((float) vec.w());
                 // write the bytes as a packed vector.
                 for (auto b: x)
                     array[offset++] = b;
@@ -51,8 +52,8 @@ namespace Raytracing {
                     array[offset++] = b;
                 for (auto b: z)
                     array[offset++] = b;
-                for (auto b: w)
-                    array[offset++] = b;
+                //for (auto b: w)
+                //    array[offset++] = b;
             }
             
             /**
