@@ -9,9 +9,9 @@
 namespace Raytracing {
     
     World::~World() {
-        for (auto* p: objects)
+        for (auto* p : objects)
             delete (p);
-        for (const auto& p: materials)
+        for (const auto& p : materials)
             delete (p.second);
         //delete(bvhObjects);
     }
@@ -69,7 +69,7 @@ namespace Raytracing {
             
             auto intersected = bvhObjects->rayAnyHitIntersect(ray, min, max);
             
-            for (const auto& ptr: intersected) {
+            for (const auto& ptr : intersected) {
                 auto cResult = ptr.ptr->checkIfHit(ray, min, hResult.length);
                 if (cResult.hit) {
                     hResult = cResult;
@@ -79,7 +79,7 @@ namespace Raytracing {
             // after we check the BVH, we have to check for other missing objects
             // since stuff like spheres currently don't have AABB and AABB isn't a requirement
             // for the object class (to be assigned)
-            for (auto* obj: bvhObjects->noAABBObjects) {
+            for (auto* obj : bvhObjects->noAABBObjects) {
                 // check up to the point of the last closest hit,
                 // will give the closest object's hit result
                 auto cResult = obj->checkIfHit(ray, min, hResult.length);
@@ -94,7 +94,7 @@ namespace Raytracing {
             // rejection algo without using a binary space partitioning data structure
             auto hResult = HitData{false, Vec4(), Vec4(), max};
             Object* objPtr = nullptr;
-            for (auto* obj: objects) {
+            for (auto* obj : objects) {
                 // check up to the point of the last closest hit,
                 // will give the closest object's hit result
                 auto cResult = obj->checkIfHit(ray, min, hResult.length);
@@ -144,7 +144,7 @@ namespace Raytracing {
         if (newRay.x() < EPSILON && newRay.y() < EPSILON && newRay.z() < EPSILON && newRay.w() < EPSILON)
             newRay = hitData.normal;
         
-        return {true, Ray{hitData.hitPoint, newRay}, getColor(hitData.u, hitData.v)};
+        return {true, Ray{hitData.hitPoint, newRay}, getColor(hitData.u * scale, hitData.v * scale)};
     }
     
     Vec4 TexturedMaterial::getColor(PRECISION_TYPE u, PRECISION_TYPE v) const {
@@ -152,9 +152,11 @@ namespace Raytracing {
         if (!data)
             return Vec4{0.2, 1, 0} * Vec4{u, v, 1.0};
         
-        u = clamp(u, 0.0, 1.0);
+        //u = clamp(u, 0.0, 1.0);
+        u = fmod(u, 1.0);
+        v = fmod(v, 1.0);
         // fix that pesky issue of the v being rotated 90* compared to the image
-        v = 1.0 - clamp(v, 0.0, 1.0);
+        v = 1.0 - v;
         
         auto imageX = (int) (width * u);
         auto imageY = (int) (height * v);
@@ -175,7 +177,7 @@ namespace Raytracing {
         // we are going to have to ignore transparency for now. TODO:?
         data = stbi_load(file.c_str(), &width, &height, &channels, 0);
         if (!data)
-            flog << "Unable to load image file " << file << "!\n";
+            elog << "Unable to load image file " << file << "!\n";
         else
             ilog << "Loaded image " << file << " with " << width << " " << height << " " << channels << "!\n";
     }
@@ -184,13 +186,8 @@ namespace Raytracing {
         stbi_image_free(data);
     }
     
-    ScatterResults LightMaterial::scatter(const Ray& ray, const HitData& hitData) const {
-        // do not scatter. The light emits.
-        return {false, ray, baseColor};
-    }
-    
-    Vec4 LightMaterial::emission(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& hitPoint) const {
-        return baseColor;
+    TexturedMaterial::TexturedMaterial(const std::string& file, float scale): TexturedMaterial(file) {
+        this->scale = scale;
     }
     
     PRECISION_TYPE sign(PRECISION_TYPE i) {
@@ -273,7 +270,7 @@ namespace Raytracing {
         // must check through all the triangles in the object
         // respecting depth along the way
         // but reducing the max it can reach my the last longest vector length.
-        for (const auto& t: triangles) {
+        for (const auto& t : triangles) {
             auto cResult = checkIfTriangleGotHit(*t, position, ray, min, hResult.length);
             if (cResult.hit)
                 hResult = cResult;

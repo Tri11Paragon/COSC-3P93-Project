@@ -58,10 +58,9 @@ int main(int argc, char** args) {
                        "\tYou can set the max threads using -t or --threads\n"
     );
     parser.addOption(
-            {{"-t"},
-             {"--threads"}}, "Max Usable Threads\n"
-                             "\tSet the max threads the ray tracer will attempt to use.\n"
-                             "\tDefaults to all cores of your cpu.\n", "0"
+            "--threads", "Max Usable Threads\n"
+                         "\tSet the max threads the ray tracer will attempt to use.\n"
+                         "\tDefaults to all cores of your cpu.\n", "0"
     );
     // not implemented yet
     parser.addOption(
@@ -161,7 +160,7 @@ int main(int argc, char** args) {
     
     Raytracing::Camera camera(std::stoi(parser.getOptionValue("--fov")), image);
     //camera.setPosition({0, 0, 1});
-    camera.setPosition({6, 5, 6});
+    camera.setPosition({20, 12, 20});
     camera.lookAt({0, 0, 0});
 
 
@@ -175,31 +174,86 @@ int main(int argc, char** args) {
     Raytracing::World world{worldConfig};
     
     // assumes you are running it from a subdirectory, "build" or "cmake-build-release", etc.
-    Raytracing::ModelData spider = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "spider.obj");
-    Raytracing::ModelData house = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "house.obj");
-    Raytracing::ModelData plane = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "plane.obj");
-    Raytracing::ModelData debugCube = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "skybox.obj");
+    // this can be changed of course using the --resources option.
+    Raytracing::ModelData spider = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/spider.obj");
+    Raytracing::ModelData house = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/house.obj");
+    Raytracing::ModelData plane = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/plane.obj");
+    Raytracing::ModelData debugCube = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/debugcube.obj");
+    Raytracing::ModelData floor = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/floor.obj");
+    Raytracing::ModelData deathSphere = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/deathsphere.obj");
     
     world.add("greenDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 1.0, 0, 1}});
     world.add("redDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{1.0, 0, 0, 1}});
     world.add("blueDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 0, 1.0, 1}});
-    world.add("light", new Raytracing::LightMaterial{Raytracing::Vec4{10.0, 10.0, 10.0}});
     
     world.add("greenMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 1.0, 0.4, 1}});
-    world.add("redMetal", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{1.0, 0.4, 0.4, 1}, 0.6f});
-    world.add("blueMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 0.4, 1.0, 1}});
-    world.add("magic", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "760213.png"});
-    world.add("thinkers", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "1616466348379.png"});
-    world.add("sponge", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "029a_-_Survival_of_the_Idiots_349.jpg"});
-    world.add("cat", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "livingmylifeinstereodoesntseemthatbad.PNG"});
+    world.add("blueMirror", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{0.2, 0.2, 0.8, 1}, 0.0f});
+    world.add("imperfectMirror", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{0.8, 0.8, 0.8, 1}, 0.4f});
     
-    world.add(new Raytracing::SphereObject({0, -100.5, -1, 0}, 100, world.getMaterial("greenDiffuse")));
+    std::vector<std::string> textures = {
+            "029a_-_Survival_of_the_Idiots_349.jpg",
+            "760213.png",
+            "1531688878833.png",
+            "1540046285552.jpg",
+            "1540093100131.jpg",
+            "1542926123924.png",
+            "1544568744585.jpg",
+            "1544568782473.jpg",
+            "1616466348379.png",
+            "livingmylifeinstereodoesntseemthatbad.PNG"
+    };
+    for (const std::string& texture : textures) {
+        world.add(texture, new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "images/" + texture});
+    }
+    world.add("grass", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "images/d5fcf6258bd25b58773de035dce4663d.jpg", 4.0f});
     
-    world.add(new Raytracing::ModelObject({0, 1, 0}, spider, world.getMaterial("redDiffuse")));
-    world.add(new Raytracing::ModelObject({-5, 0.5, 0}, plane, world.getMaterial("greenMetal")));
-    world.add(new Raytracing::ModelObject({5, 1, 0}, house, world.getMaterial("redDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 0, -5}, house, world.getMaterial("blueDiffuse")));
-    world.add(new Raytracing::ModelObject({0, 0, 5}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({0, 0, 0}, floor, world.getMaterial("grass")));
+    // odds and ends
+    world.add(new Raytracing::ModelObject({-40, 0, -40}, deathSphere, world.getMaterial("imperfectMirror")));
+    
+    world.add(new Raytracing::ModelObject({0, 2, 0}, spider, world.getMaterial("redDiffuse")));
+    world.add(new Raytracing::ModelObject({-5, 5, 0}, plane, world.getMaterial("greenMetal")));
+    
+    world.add(new Raytracing::ModelObject({0, 1, -5}, house, world.getMaterial("blueDiffuse")));
+    world.add(new Raytracing::ModelObject({0, 1, 5}, house, world.getMaterial("blueDiffuse")));
+    
+    Random chance(0.0, 1.0);
+    Random textureIndexSelect(0, textures.size() - 1);
+    // generate a bunch of unique spheres and cubes around the scene.
+    for (int i = -49; i < 50; i += 3) {
+        for (int j = -49; j < 50; j += 3) {
+            auto i2 = i * i;
+            auto j2 = j * j;
+            // do not add objects near the center scene
+            if (i2 + j2 < 125)
+                continue;
+            if (chance.getDouble() <= 0.25) {
+                auto pos = Vec4{i + chance.getDouble(), 0, j + chance.getDouble()};
+                if (i % 2 == 0) {
+                    // cubes are 1 off the ground
+                    pos = Vec4{pos.x(), 1, pos.z()};
+                    if (chance.getDouble() <= 0.8) {
+                        auto& texture = textures[textureIndexSelect.getLong()];
+                        world.add(new Raytracing::ModelObject{pos, debugCube, world.getMaterial(texture)});
+                    } else {
+                        world.add(new Raytracing::ModelObject{pos, debugCube, world.getMaterial("redDiffuse")});
+                    }
+                } else {
+                    auto radius = (chance.getDouble() + 0.15f) * 2.0f;
+                    // while spheres have a variable radius
+                    pos = Vec4{pos.x(), radius, pos.z()};
+                    if (chance.getDouble() <= 0.65) {
+                        auto& texture = textures[textureIndexSelect.getLong()];
+                        world.add(new Raytracing::SphereObject{pos, radius, world.getMaterial(texture)});
+                    } else {
+                        world.add(new Raytracing::SphereObject{pos, chance.getDouble() * 2.5f, world.getMaterial("blueMirror")});
+                    }
+                }
+            }
+        }
+    }
+    
+    
     //world.add(new Raytracing::ModelObject({0, 0, 0}, debugCube, world.getMaterial("cat")));
     
     if (parser.hasOption("--gui") || parser.hasOption("-g")) {
@@ -209,28 +263,20 @@ int main(int argc, char** args) {
     
     #ifdef COMPILE_OPENCL
         OpenClRaytracer openClRaytracer{parser.getOptionValue("--resources") + "opencl/sphereray.cl", image, camera, world};
-        int frameCounter = 0;
     #endif
         
         Shader shader("../resources/shaders/basic.vs", "../resources/shaders/basic.fs");
         Raytracing::DisplayRenderer renderer{*window, mainImage, world, shader, worldShader, rayCaster, parser, camera};
+        // Main Render Loop
         while (!window->shouldWindowClose()) {
             window->beginUpdate();
             renderer.draw();
-
 #ifdef COMPILE_OPENCL
-            
-            openClRaytracer.updateCameraInformation();
-            //frameCounter++;
-            //if (frameCounter % 5 == 0) {
-            openClRaytracer.run();
-            //    frameCounter = 0;
-            //}
+            if (parser.hasOption("--gpu") || parser.hasOption("-c")) {
+                openClRaytracer.updateCameraInformation();
+                openClRaytracer.run();
+            }
 #endif
-            
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            world.drawBVH(worldShader);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             window->endUpdate();
         }
         RTSignal->haltExecution = true;
@@ -254,6 +300,7 @@ int main(int argc, char** args) {
         } else if (parser.hasOption("--openmp")) {
             rayCaster.runOpenMP(threads);
         } else {
+            // we run a std::thread as the default, since it works the best and has no dependencies beyond the standard library.
             rayCaster.runSTDThread(threads);
         }
         rayCaster.join();
@@ -280,23 +327,8 @@ int main(int argc, char** args) {
 #endif
     // write the image to the file
     Raytracing::ImageOutput imageOutput(image);
-    
-    auto t = std::time(nullptr);
-    auto now = std::localtime(&t);
-    std::stringstream timeString;
-    timeString << (1900 + now->tm_year);
-    timeString << "-";
-    timeString << (1 + now->tm_mon);
-    timeString << "-";
-    timeString << now->tm_mday;
-    timeString << " ";
-    timeString << now->tm_hour;
-    timeString << ":";
-    timeString << now->tm_min;
-    timeString << ":";
-    timeString << now->tm_sec;
     ilog << "Writing Image!\n";
-    imageOutput.write(parser.getOptionValue("--output") + timeString.str(), parser.getOptionValue("--format"));
+    imageOutput.write(parser.getOptionValue("--output") + String::getTimeString(), parser.getOptionValue("--format"));
 #ifdef USE_MPI
     }
     // wait for all processes to finish sending and receiving before we exit all of them.

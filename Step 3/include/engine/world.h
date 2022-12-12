@@ -30,7 +30,8 @@ namespace Raytracing {
         private:
             PRECISION_TYPE radius;
         public:
-            SphereObject(const Vec4& position, PRECISION_TYPE radius, Material* material): radius(radius), Object(material, position) {}
+            SphereObject(const Vec4& position, PRECISION_TYPE radius, Material* material):
+                    radius(radius), Object(material, position) {}
             
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
     };
@@ -40,13 +41,14 @@ namespace Raytracing {
             std::vector<std::shared_ptr<Triangle>> triangles;
             std::unique_ptr<TriangleBVHTree> triangleBVH;
         public:
-            ModelObject(const Vec4& position, ModelData& data, Material* material): Object(material, position) {
+            ModelObject(const Vec4& position, ModelData& data, Material* material):
+                    Object(material, position) {
                 // since all of this occurs before the main ray tracing algorithm it's fine to do sequentially
                 TriangulatedModel model{data};
                 this->triangles = model.triangles;
                 this->aabb = std::move(model.aabb);
                 std::vector<TriangleBVHObject> triangulatedObjects;
-                for (const auto& tri: triangles) {
+                for (const auto& tri : triangles) {
                     TriangleBVHObject triangleObject;
                     triangleObject.tri = tri;
                     triangleObject.aabb = tri->aabb;
@@ -69,7 +71,8 @@ namespace Raytracing {
     class DiffuseMaterial : public Material {
         private:
         public:
-            explicit DiffuseMaterial(const Vec4& scatterColor): Material(scatterColor) {}
+            explicit DiffuseMaterial(const Vec4& scatterColor):
+                    Material(scatterColor) {}
             
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
     };
@@ -81,7 +84,8 @@ namespace Raytracing {
             }
         
         public:
-            explicit MetalMaterial(const Vec4& metalColor): Material(metalColor) {}
+            explicit MetalMaterial(const Vec4& metalColor):
+                    Material(metalColor) {}
             
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
     };
@@ -90,27 +94,22 @@ namespace Raytracing {
         private:
             PRECISION_TYPE fuzzyness;
         public:
-            explicit BrushedMetalMaterial(const Vec4& metalColor, PRECISION_TYPE fuzzyness): MetalMaterial(metalColor), fuzzyness(fuzzyness) {}
+            explicit BrushedMetalMaterial(const Vec4& metalColor, PRECISION_TYPE fuzzyness):
+                    MetalMaterial(metalColor), fuzzyness(fuzzyness) {}
             
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
         
     };
     
-    class LightMaterial : public Material {
-        public:
-            explicit LightMaterial(const Vec4& lightColor): Material(lightColor) {}
-            
-            [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
-            
-            [[nodiscard]] virtual Vec4 emission(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& hitPoint) const override;
-    };
-    
     class TexturedMaterial : public Material {
         protected:
             int width{}, height{}, channels{};
+            float scale = 1;
             unsigned char* data;
         public:
             explicit TexturedMaterial(const std::string& file);
+            
+            explicit TexturedMaterial(const std::string& file, float scale);
             
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const override;
             
@@ -125,7 +124,8 @@ namespace Raytracing {
 #ifdef COMPILE_GUI
         Shader& worldShader;
         
-        explicit WorldConfig(Shader& shader): worldShader(shader) {}
+        explicit WorldConfig(Shader& shader):
+                worldShader(shader) {}
 
 #endif
     };
@@ -138,7 +138,8 @@ namespace Raytracing {
             std::unordered_map<std::string, Material*> materials;
             WorldConfig m_config;
         public:
-            explicit World(WorldConfig config): m_config(config) {};
+            explicit World(WorldConfig config):
+                    m_config(config) {};
             
             World(const World& world) = delete;
             
@@ -147,13 +148,6 @@ namespace Raytracing {
             // Called by the raytracer class after all objects have been added to the world
             // this allows us to generate a statically unchanging BVH for easy rendering
             void generateBVH();
-
-#ifdef COMPILE_GUI
-            
-            // currently disabled. TODO: BVH renderer class
-            void drawBVH(Shader& worldShader) {}
-
-#endif
             
             inline void add(Object* object) {
                 objects.push_back(object);

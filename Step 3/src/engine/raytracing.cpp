@@ -163,6 +163,7 @@ namespace Raytracing {
     
     void RayCaster::runSTDThread(int threads) {
         setupQueue(partitionScreen(threads));
+        updateThreadValue(threads);
         ilog << "Running std::thread\n";
         for (int i = 0; i < threads; i++) {
             executors.push_back(
@@ -200,6 +201,7 @@ namespace Raytracing {
     
     void RayCaster::runOpenMP(int threads) {
         setupQueue(partitionScreen(threads));
+        updateThreadValue(threads);
 #ifdef USE_OPENMP
         ilog << "Running OpenMP\n";
 #pragma omp parallel num_threads(threads+1) default(none) shared(threads)
@@ -304,7 +306,7 @@ namespace Raytracing {
     void RayCaster::setupQueue(const std::vector<RaycasterImageBounds>& bounds) {
         delete (unprocessedQuads);
         unprocessedQuads = new std::queue<RaycasterImageBounds>();
-        for (auto& b: bounds)
+        for (auto& b : bounds)
             unprocessedQuads->push(b);
     }
     

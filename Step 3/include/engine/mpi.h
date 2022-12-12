@@ -8,19 +8,20 @@
 #include <config.h>
 
 #ifdef USE_MPI
+
 #include <mpi.h>
 #include <queue>
 #include <engine/raytracing.h>
 
 namespace Raytracing {
-
+    
     extern int numberOfProcesses;
     extern int currentProcessID;
-
+    
     class MPI {
-    public:
-        static void init(int argc, char** argv);
-        static std::queue<RaycasterImageBounds> getCurrentImageRegionAssociation(Raycaster& raycaster);
+        public:
+            static void init(int argc, char** argv);
+            static std::queue<RaycasterImageBounds> getCurrentImageRegionAssociation(RayCaster& raycaster);
     };
 }
 #endif

@@ -55,12 +55,15 @@ static inline double degreeeToRadian(double deg) {
     return deg * PI / 180.0;
 }
 
+constexpr unsigned long GLOBAL_SEED = 691l * 691l * 691l;
+
 namespace Raytracing {
     struct Signals {
-        bool haltExecution {false};
-        bool pauseRaytracing {false};
-        bool haltRaytracing {false};
+        bool haltExecution{false};
+        bool pauseRaytracing{false};
+        bool haltRaytracing{false};
     };
+    
     class AlignedAllocator {
         private:
         public:
@@ -80,17 +83,30 @@ namespace Raytracing {
             std::uniform_int_distribution<long> longDistr{0, 1};
             std::uniform_int_distribution<unsigned long> ulongDistr{0, 1};
         public:
-            Random(): gen(std::mt19937(long(rd.entropy() * 691 * 691))) {}
-            Random(double min, double max): gen(std::mt19937(long(rd.entropy() * 691 * 691))), doubleDistr{min, max} {}
-            Random(long min, long max): gen(std::mt19937(long(rd.entropy() * 691 * 691))), longDistr{min, max} {}
-            Random(unsigned long min, unsigned long max): gen(std::mt19937(long(rd.entropy() * 691 * 691))), ulongDistr{min, max} {}
+            Random():
+                    gen(std::mt19937(GLOBAL_SEED)) {}
+            
+            Random(double min, double max):
+                    gen(std::mt19937(GLOBAL_SEED)), doubleDistr{min, max}, longDistr{(long) min, (long) max},
+                    ulongDistr{(unsigned long) min, (unsigned long) max} {}
+            
+            Random(long min, long max):
+                    gen(std::mt19937(GLOBAL_SEED)), doubleDistr{(double) min, (double) max}, longDistr{(long) min, (long) max},
+                    ulongDistr{(unsigned long) min, (unsigned long) max} {}
+            
+            Random(unsigned long min, unsigned long max):
+                    gen(std::mt19937(GLOBAL_SEED)), doubleDistr{(double) min, (double) max}, longDistr{(long) min, (long) max},
+                    ulongDistr{(unsigned long) min, (unsigned long) max} {}
+            
             double getDouble() {
                 return doubleDistr(gen);
             }
-            long getLong(){
+            
+            long getLong() {
                 return longDistr(gen);
             }
-            unsigned long getULong(){
+            
+            unsigned long getULong() {
                 return ulongDistr(gen);
             }
     };
@@ -99,18 +115,42 @@ namespace Raytracing {
         public:
             static inline std::string toLowerCase(const std::string& s) {
                 std::stringstream str;
-                std::for_each(s.begin(), s.end(), [&str](unsigned char ch) {
-                    str << (char) std::tolower(ch);
-                });
+                std::for_each(
+                        s.begin(), s.end(), [&str](unsigned char ch) {
+                            str << (char) std::tolower(ch);
+                        }
+                );
                 return str.str();
             }
+            
             static inline std::string toUpperCase(const std::string& s) {
                 std::stringstream str;
-                std::for_each(s.begin(), s.end(), [&str](unsigned char ch) {
-                    str << (char) std::toupper(ch);
-                });
+                std::for_each(
+                        s.begin(), s.end(), [&str](unsigned char ch) {
+                            str << (char) std::toupper(ch);
+                        }
+                );
                 return str.str();
             }
+            
+            static inline std::string getTimeString() {
+                auto t = std::time(nullptr);
+                auto now = std::localtime(&t);
+                std::stringstream timeString;
+                timeString << (1900 + now->tm_year);
+                timeString << "-";
+                timeString << (1 + now->tm_mon);
+                timeString << "-";
+                timeString << now->tm_mday;
+                timeString << " ";
+                timeString << now->tm_hour;
+                timeString << ":";
+                timeString << now->tm_min;
+                timeString << ":";
+                timeString << now->tm_sec;
+                return timeString.str();
+            }
+            
             // taken from https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
             // extended to return a vector
             static inline std::vector<std::string> split(std::string s, const std::string& delim) {
@@ -124,21 +164,28 @@ namespace Raytracing {
                 tokens.push_back(s);
                 return tokens;
             }
+            
             // taken from https://stackoverflow.com/questions/216823/how-to-trim-an-stdstring
             // would've preferred to use boost lib but instructions said to avoid external libs
             // trim from start (in place)
             static inline std::string& ltrim(std::string& s) {
-                s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-                    return !std::isspace(ch);
-                }));
+                s.erase(
+                        s.begin(), std::find_if(
+                                s.begin(), s.end(), [](unsigned char ch) {
+                                    return !std::isspace(ch);
+                                }
+                        ));
                 return s;
             }
             
             // trim from end (in place)
             static inline std::string& rtrim(std::string& s) {
-                s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
-                    return !std::isspace(ch);
-                }).base(), s.end());
+                s.erase(
+                        std::find_if(
+                                s.rbegin(), s.rend(), [](unsigned char ch) {
+                                    return !std::isspace(ch);
+                                }
+                        ).base(), s.end());
                 return s;
             }
             

@@ -38,7 +38,9 @@ struct Vec {
 };
 
 float3 randomVector(unsigned long seed){
-    return ((float3)(pcg6432_float(seed), pcg6432_float(seed), pcg6432_float(seed)) * 2) - 1;
+    pcg6432_state state;
+    pcg6432_seed(&state, seed);
+    return ((float3)(pcg6432_float(state), pcg6432_float(state), pcg6432_float(state)) * 2) - 1;
 }
 
 float3 along(struct Ray ray, float length) { 
@@ -113,11 +115,9 @@ bool checkIfHit(struct HitData* data, struct Ray ray, float3 position, float rad
 bool scatter(struct Ray* ray, struct HitData data, int currentDepth){
     const float EPSILON = 0.0000001f;
     int x = get_global_id(0);
-    int y = get_global_id(0);
-    pcg6432_state state;
+    int y = get_global_id(1);
     unsigned long seed = x * y * currentDepth;
-    pcg6432_seed(&state, seed);
-    float3 newRay = data.normal + normalize(randomVector(state));
+    float3 newRay = data.normal + normalize(randomVector(seed));
 
     // rays that are close to zero are liable to floating point precision errors
     if (newRay.x < EPSILON && newRay.y < EPSILON && newRay.z < EPSILON)
@@ -158,9 +158,6 @@ float4 raycastI(struct Ray ray){
     };
     struct Ray localRay = ray;
     float4 localColor = (float4)(1.0f);
-
-    int x = get_global_id(0);
-    int y = get_global_id(1);    
     
     for (int _ = 0; _ < MAX_DEPTH; _++){
         struct HitData hit;

@@ -14,29 +14,32 @@ namespace Raytracing {
     std::vector<std::pair<std::string, std::function<void()>>> tabs;
     
     void DebugUI::render(const std::function<void()>& generalTab) {
-        if (ImGui::Begin("Debug Menu", nullptr, ImGuiWindowFlags_AlwaysAutoResize)){
-            if (ImGui::BeginTabBar("debugTabs")){
+        if (ImGui::Begin("Debug Menu", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::BeginTabBar("debugTabs")) {
                 // Always have the general tab for starting / stopping the ray tracer
                 if (ImGui::BeginTabItem("General")) {
-                    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                                ImGui::GetIO().Framerate);
+                    ImGui::Text(
+                            "Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                            ImGui::GetIO().Framerate
+                    );
                     generalTab();
                     ImGui::EndTabItem();
                 }
-    
+                
                 // add any extra tabs after
-                for (const auto& tab: tabs) {
+                for (const auto& tab : tabs) {
                     if (ImGui::BeginTabItem(tab.first.c_str())) {
                         tab.second();
                         ImGui::EndTabItem();
                     }
                 }
-    
+                
                 ImGui::EndTabBar();
             }
         }
         ImGui::End();
     }
+    
     void DebugUI::registerTab(const std::string& name, const std::function<void()>& tabFunc) {
         tabs.emplace_back(name, tabFunc);
     }
@@ -47,17 +50,24 @@ namespace Raytracing {
         for (const auto& obj : objects)
             obj->render();
     }
+    
     void DebugMenus::add(const std::shared_ptr<DebugObject>& object) {
         objects.push_back(object);
     }
+    
     void DebugMenus::remove(DebugObject* object) {
-        objects.erase(std::remove_if(objects.begin(), objects.end(), [&](const auto& item) -> bool {
-            return item.get() == object;
-        }), objects.end());
+        objects.erase(
+                std::remove_if(
+                        objects.begin(), objects.end(), [&](const auto& item) -> bool {
+                            return item.get() == object;
+                        }
+                ), objects.end());
     }
+    
     DebugBVH::DebugBVH(BVHTree* bvhTree, Shader& shader): m_bvhTree(bvhTree), m_shader(shader) {
         DebugMenus::add(std::shared_ptr<DebugObject>(this));
     }
+    
     DebugBVH::DebugBVH(TriangleBVHTree* bvhTree, Shader& shader): m_triangleBVHTree(bvhTree), m_shader(shader) {
         DebugMenus::add(std::shared_ptr<DebugObject>(this));
     }
@@ -81,17 +91,18 @@ namespace Raytracing {
                 std::stringstream strs;
                 strs << node->aabb;
                 ImGui::Text("%s", strs.str().c_str());
-                for (const auto& item: node->objs) {
+                for (const auto& item : node->objs) {
                     auto pos = item.ptr->getPosition();
                     std::stringstream stm;
                     stm << item.aabb;
-                    ImGui::Text("%s,\n\t%s", (std::to_string(pos.x()) + " " + std::to_string(pos.y()) + " " + std::to_string(pos.z())).c_str(),
-                                stm.str().c_str());
+                    ImGui::Text(
+                            "%s,\n\t%s", (std::to_string(pos.x()) + " " + std::to_string(pos.y()) + " " + std::to_string(pos.z())).c_str(),
+                            stm.str().c_str());
                 }
                 ImGui::EndListBox();
             }
-
-            for (const auto& obj: node->objs) {
+            
+            for (const auto& obj : node->objs) {
                 auto transform = getTransform(obj.aabb);
                 worldShader.setMatrix("transform", transform);
                 aabbVAO->draw(worldShader);
@@ -99,7 +110,7 @@ namespace Raytracing {
             auto transform = getTransform(node->aabb);
             worldShader.setMatrix("transform", transform);
             aabbVAO->draw(worldShader);
-
+            
             /*auto splitAABBs = aabb.splitByLongestAxis();
             transform = getTransform(splitAABBs.second);
             worldShader.setMatrix("transform", transform);
@@ -108,7 +119,7 @@ namespace Raytracing {
             worldShader.setMatrix("transform", transform);
             aabbVAO->draw(worldShader);*/
         }
-        if (node->hit){
+        if (node->hit) {
             if (node->hit == 1)
                 worldShader.setVec3("color", {0.0, 0.0, 1.0});
             else if (node->hit == 2)
@@ -120,6 +131,7 @@ namespace Raytracing {
             aabbVAO->draw(worldShader);
         }
     }
+    
     void gui(BVHNode* node) {
         
         int c1 = -1;
@@ -133,7 +145,8 @@ namespace Raytracing {
             t = " LEAF";
         else
             t = " L: " + std::to_string(c1) + " R: " + std::to_string(c2);
-        if (ImGui::Selectable(("S: " + std::to_string(node->objs.size()) + " I: " + std::to_string(node->index) + t).c_str(), selected == node->index))
+        if (ImGui::Selectable(("S: " + std::to_string(node->objs.size()) + " I: " + std::to_string(node->index) + t).c_str(), selected == node->index
+        ))
             selected = node->index;
     }
     
@@ -144,6 +157,7 @@ namespace Raytracing {
         if (node->right != nullptr)
             drawNodesRecur(worldShader, node->right);
     }
+    
     void guiNodesRecur(BVHNode* node) {
         gui(node);
         if (node->left != nullptr)
@@ -160,17 +174,18 @@ namespace Raytracing {
                 std::stringstream strs;
                 strs << node->aabb;
                 ImGui::Text("%s", strs.str().c_str());
-                for (const auto& item: node->objs) {
+                for (const auto& item : node->objs) {
                     auto pos = item.position;
                     std::stringstream stm;
                     stm << item.aabb;
-                    ImGui::Text("%s,\n\t%s", (std::to_string(pos.x()) + " " + std::to_string(pos.y()) + " " + std::to_string(pos.z())).c_str(),
-                                stm.str().c_str());
+                    ImGui::Text(
+                            "%s,\n\t%s", (std::to_string(pos.x()) + " " + std::to_string(pos.y()) + " " + std::to_string(pos.z())).c_str(),
+                            stm.str().c_str());
                 }
                 ImGui::EndListBox();
             }
             
-            for (const auto& obj: node->objs) {
+            for (const auto& obj : node->objs) {
                 auto transform = getTransform(obj.aabb);
                 worldShader.setMatrix("transform", transform);
                 aabbVAO->draw(worldShader);
@@ -187,7 +202,7 @@ namespace Raytracing {
             worldShader.setMatrix("transform", transform);
             aabbVAO->draw(worldShader);*/
         }
-        if (node->hit){
+        if (node->hit) {
             if (node->hit == 1)
                 worldShader.setVec3("color", {0.0, 0.0, 1.0});
             else if (node->hit == 2)
@@ -199,6 +214,7 @@ namespace Raytracing {
             aabbVAO->draw(worldShader);
         }
     }
+    
     void gui(TriangleBVHNode* node) {
         
         int c1 = -1;
@@ -212,7 +228,8 @@ namespace Raytracing {
             t = " LEAF";
         else
             t = " L: " + std::to_string(c1) + " R: " + std::to_string(c2);
-        if (ImGui::Selectable(("S: " + std::to_string(node->objs.size()) + " I: " + std::to_string(node->index) + t).c_str(), selected == node->index))
+        if (ImGui::Selectable(("S: " + std::to_string(node->objs.size()) + " I: " + std::to_string(node->index) + t).c_str(), selected == node->index
+        ))
             selected = node->index;
     }
     
@@ -223,6 +240,7 @@ namespace Raytracing {
         if (node->right != nullptr)
             drawNodesRecur(worldShader, node->right);
     }
+    
     void guiNodesRecur(TriangleBVHNode* node) {
         gui(node);
         if (node->left != nullptr)
@@ -240,17 +258,20 @@ namespace Raytracing {
             m_shader.setVec3("color", {1.0, 1.0, 1.0});
             {
                 ImGui::BeginChild("left pane", ImVec2(180, 0), true);
-                guiNodesRecur(m_bvhTree->getRoot());
+                //guiNodesRecur(m_bvhTree->getRoot());
                 ImGui::EndChild();
             }
             ImGui::SameLine();
             {
                 ImGui::BeginGroup();
-                ImGui::BeginChild("item view",
-                                  ImVec2(0, -ImGui::GetFrameHeightWithSpacing()),
-                                  true,
-                                  ImGuiWindowFlags_AlwaysAutoResize); // Leave room for 1 line below us
-                drawNodesRecur(m_shader, m_bvhTree->getRoot());
+                ImGui::BeginChild(
+                        "item view",
+                        ImVec2(0, -ImGui::GetFrameHeightWithSpacing()),
+                        true,
+                        ImGuiWindowFlags_AlwaysAutoResize
+                ); // Leave room for 1 line below us
+                tlog << m_bvhTree << "\n";
+                //drawNodesRecur(m_shader, m_bvhTree->getRoot());
                 ImGui::EndChild();
                 ImGui::EndGroup();
             }
@@ -270,10 +291,12 @@ namespace Raytracing {
             ImGui::SameLine();
             {
                 ImGui::BeginGroup();
-                ImGui::BeginChild("item view",
-                                  ImVec2(0, -ImGui::GetFrameHeightWithSpacing()),
-                                  true,
-                                  ImGuiWindowFlags_AlwaysAutoResize); // Leave room for 1 line below us
+                ImGui::BeginChild(
+                        "item view",
+                        ImVec2(0, -ImGui::GetFrameHeightWithSpacing()),
+                        true,
+                        ImGuiWindowFlags_AlwaysAutoResize
+                ); // Leave room for 1 line below us
                 drawNodesRecur(m_shader, m_triangleBVHTree->getRoot());
                 ImGui::EndChild();
                 ImGui::EndGroup();
@@ -283,6 +306,7 @@ namespace Raytracing {
         }
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
+    
     DebugBVH::~DebugBVH() {
         DebugMenus::remove(this);
     }

@@ -13,7 +13,7 @@
 #define COMPILER_DEBUG_ENABLED_BOOL false
 
 /* #undef COMPILE_GUI */
-#define COMPILE_OPENCL
+/* #undef COMPILE_OPENCL */
 #define USE_GLFW
 /* #undef USE_OPENMP */
 #define USE_MPI

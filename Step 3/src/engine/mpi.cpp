@@ -6,7 +6,7 @@
 
 #ifdef USE_MPI
 namespace Raytracing {
-    void MPI::init(int argc, char** argv){
+    void MPI::init(int argc, char** argv) {
         MPI_Init(NULL, NULL);
         MPI_Comm_size(MPI_COMM_WORLD, &numberOfProcesses);
         MPI_Comm_rank(MPI_COMM_WORLD, &currentProcessID);
@@ -16,19 +16,19 @@ namespace Raytracing {
         dlog << "Starting processor " << processorName << " with an ID of " << currentProcessID << "\n";
         dlog << "Number of processes: " << numberOfProcesses << "\n";
     }
-
-    std::queue<RaycasterImageBounds> Raytracing::MPI::getCurrentImageRegionAssociation(Raycaster& raycaster) {
+    
+    std::queue<RaycasterImageBounds> Raytracing::MPI::getCurrentImageRegionAssociation(RayCaster& raycaster) {
         std::queue<RaycasterImageBounds> bounders{};
-
+        
         auto bounds = raycaster.partitionScreen(numberOfProcesses);
         auto regionSize = bounds.size() / numberOfProcesses;
         auto offset = regionSize * currentProcessID;
-
+        
         tlog << regionSize << " " << offset << " " << bounds.size() << "\n";
-
+        
         for (int i = 0; i < regionSize; i++)
             bounders.push(bounds[i + offset]);
-
+        
         return bounders;
     }
 }

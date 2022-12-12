@@ -14,7 +14,7 @@
 
 // I have tested this and when in release mode the O3 optimizations are capable of creating
 // far better auto-vectorized results. See the table below for more info.
-// but in debug mode using the AVX instructions is far better. As they say, never try to out optimize the compiler - you'll lose.
+// but in debug mode using the AVX instructions are far better. As they say, never try to out optimize the compiler - you'll lose.
 
 // in debug mode:
 // multiplication
@@ -65,8 +65,8 @@ namespace Raytracing {
     // since GPUs generally are far more optimized for floats
     // If using AVX or other SIMD instructions it should be double, only to fit into 256bits.
     // TODO would be to add support for 128bit AVX vectors.
-    
-    #ifdef USE_SIMD_CPU
+
+#ifdef USE_SIMD_CPU
     // don't change this. (working on a float version)
     typedef double PRECISION_TYPE;
     
@@ -244,8 +244,8 @@ namespace Raytracing {
     inline Vec4 operator/(PRECISION_TYPE c, const Vec4& v) {
         return Vec4{_mm256_div_pd(Vec4::getVecFromValue(c), v.avxData)};
     }
-    
-    #else
+
+#else
     // change this if you want
     typedef double PRECISION_TYPE;
     
@@ -280,8 +280,11 @@ namespace Raytracing {
             valueType value;
         public:
             Vec4(): value{0, 0, 0, 0} {}
+            
             Vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z): value{x, y, z, 0} {}
+            
             Vec4(PRECISION_TYPE x, PRECISION_TYPE y, PRECISION_TYPE z, PRECISION_TYPE w): value{x, y, z, w} {}
+            
             Vec4(const Vec4& vec): value{vec.x(), vec.y(), vec.z(), vec.w()} {}
             
             
@@ -413,8 +416,8 @@ namespace Raytracing {
     inline Vec4 operator/(PRECISION_TYPE c, const Vec4& v) {
         return {c / v.x(), c / v.y(), c / v.z(), c / v.w()};
     }
-    
-    #endif
+
+#endif
     
     // none of these can be vectorized with AVX instructions
     
@@ -469,17 +472,25 @@ namespace Raytracing {
                 float single[16];
                 float dim[4][4];
             };
-            dataType data {};
+            dataType data{};
+            
             friend Mat4x4 operator+(const Mat4x4& left, const Mat4x4& right);
+            
             friend Mat4x4 operator-(const Mat4x4& left, const Mat4x4& right);
+            
             friend Mat4x4 operator*(const Mat4x4& left, const Mat4x4& right);
+            
             friend Mat4x4 operator*(float c, const Mat4x4& v);
+            
             friend Mat4x4 operator*(const Mat4x4& v, float c);
+            
             friend Mat4x4 operator/(const Mat4x4& v, float c);
+            
             friend Mat4x4 operator/(float c, const Mat4x4& v);
+        
         public:
             Mat4x4() {
-                for (float & i : data.single) {
+                for (float& i : data.single) {
                     i = 0;
                 }
                 // set identity matrix default
@@ -488,6 +499,7 @@ namespace Raytracing {
                 m22(1);
                 m33(1);
             }
+            
             /*explicit Mat4x4(glm::mat4x4 mat) {
                 m00(mat[0][0]);
                 m01(mat[1][0]);
@@ -514,6 +526,7 @@ namespace Raytracing {
                     data.single[i] = mat.data.single[i];
                 }
             }
+            
             explicit Mat4x4(const float dat[16]) {
                 for (int i = 0; i < 16; i++) {
                     data.single[i] = dat[i];
@@ -526,7 +539,7 @@ namespace Raytracing {
                 m23(z);
                 return *this;
             }
-        
+            
             inline Mat4x4& translate(const Vec4& vec) {
                 m03(float(vec.x()));
                 m13(float(vec.y()));
@@ -540,7 +553,7 @@ namespace Raytracing {
                 m22(z);
                 return *this;
             }
-        
+            
             inline Mat4x4& scale(const Vec4& vec) {
                 m00(float(vec.x()));
                 m11(float(vec.y()));
@@ -553,23 +566,23 @@ namespace Raytracing {
             }
             
             Mat4x4& transpose() {
-                Mat4x4 copy {*this};
-    
+                Mat4x4 copy{*this};
+                
                 m00(copy.m00());
                 m01(copy.m10());
                 m02(copy.m20());
                 m03(copy.m30());
-    
+                
                 m10(copy.m01());
                 m11(copy.m11());
                 m12(copy.m21());
                 m13(copy.m31());
-    
+                
                 m20(copy.m02());
                 m21(copy.m12());
                 m22(copy.m22());
                 m23(copy.m32());
-    
+                
                 m30(copy.m03());
                 m31(copy.m13());
                 m32(copy.m23());
@@ -615,38 +628,71 @@ namespace Raytracing {
 //            inline float m33(float d) { return data.dim[3][3] = d; }
             
             [[nodiscard]] inline float m00() const { return data.dim[0][0]; }
+            
             [[nodiscard]] inline float m10() const { return data.dim[0][1]; }
+            
             [[nodiscard]] inline float m20() const { return data.dim[0][2]; }
+            
             [[nodiscard]] inline float m30() const { return data.dim[0][3]; }
+            
             [[nodiscard]] inline float m01() const { return data.dim[1][0]; }
+            
             [[nodiscard]] inline float m11() const { return data.dim[1][1]; }
+            
             [[nodiscard]] inline float m21() const { return data.dim[1][2]; }
+            
             [[nodiscard]] inline float m31() const { return data.dim[1][3]; }
+            
             [[nodiscard]] inline float m02() const { return data.dim[2][0]; }
+            
             [[nodiscard]] inline float m12() const { return data.dim[2][1]; }
+            
             [[nodiscard]] inline float m22() const { return data.dim[2][2]; }
+            
             [[nodiscard]] inline float m32() const { return data.dim[2][3]; }
+            
             [[nodiscard]] inline float m03() const { return data.dim[3][0]; }
+            
             [[nodiscard]] inline float m13() const { return data.dim[3][1]; }
+            
             [[nodiscard]] inline float m23() const { return data.dim[3][2]; }
+            
             [[nodiscard]] inline float m33() const { return data.dim[3][3]; }
+            
             [[nodiscard]] inline float m(int i, int j) const { return data.dim[i][j]; };
+            
             inline float m00(float d) { return data.dim[0][0] = d; }
+            
             inline float m10(float d) { return data.dim[0][1] = d; }
+            
             inline float m20(float d) { return data.dim[0][2] = d; }
+            
             inline float m30(float d) { return data.dim[0][3] = d; }
+            
             inline float m01(float d) { return data.dim[1][0] = d; }
+            
             inline float m11(float d) { return data.dim[1][1] = d; }
+            
             inline float m21(float d) { return data.dim[1][2] = d; }
+            
             inline float m31(float d) { return data.dim[1][3] = d; }
+            
             inline float m02(float d) { return data.dim[2][0] = d; }
+            
             inline float m12(float d) { return data.dim[2][1] = d; }
+            
             inline float m22(float d) { return data.dim[2][2] = d; }
+            
             inline float m32(float d) { return data.dim[2][3] = d; }
+            
             inline float m03(float d) { return data.dim[3][0] = d; }
+            
             inline float m13(float d) { return data.dim[3][1] = d; }
+            
             inline float m23(float d) { return data.dim[3][2] = d; }
+            
             inline float m33(float d) { return data.dim[3][3] = d; }
+            
             inline float m(int i, int j, float d) { return data.dim[i][j] = d; };
 //            inline float* operator [](int _i) {
 //                return data.dim[_i];
@@ -654,13 +700,13 @@ namespace Raytracing {
             
             [[nodiscard]] PRECISION_TYPE determinant() const {
                 return m00() * (m11() * m22() * m33() + m12() * m23() * m31() + m13() * m21() * m32()
-                                    - m31() * m22() * m13() - m32() * m23() * m11() - m33() * m21() * m12())
-                        - m10() * (m01() * m22() * m33() + m02() * m23() * m31() + m03() * m21() * m32()
-                                    - m31() * m32() * m03() - m32() * m23() * m01() - m33() * m21() * m02())
-                        + m20() * (m01() * m12() * m33() + m02() * m13() * m31() + m03() * m11() * m32()
-                                    - m31() * m12() * m03() - m32() * m13() * m01() - m33() * m11() * m02())
-                        - m30() * (m01() * m12() * m23() + m02() * m13() * m21() + m03() * m11() * m22()
-                                    - m21() * m12() * m03() - m22() * m13() * m01() - m23() * m11() * m02());
+                                - m31() * m22() * m13() - m32() * m23() * m11() - m33() * m21() * m12())
+                       - m10() * (m01() * m22() * m33() + m02() * m23() * m31() + m03() * m21() * m32()
+                                  - m31() * m32() * m03() - m32() * m23() * m01() - m33() * m21() * m02())
+                       + m20() * (m01() * m12() * m33() + m02() * m13() * m31() + m03() * m11() * m32()
+                                  - m31() * m12() * m03() - m32() * m13() * m01() - m33() * m11() * m02())
+                       - m30() * (m01() * m12() * m23() + m02() * m13() * m21() + m03() * m11() * m22()
+                                  - m21() * m12() * m03() - m22() * m13() * m01() - m23() * m11() * m02());
             }
     };
     
@@ -683,9 +729,9 @@ namespace Raytracing {
     // since matrices are made identity by default, we need to create the result collector matrix without identity
     // otherwise the diagonal will be 1 off and cause weird results (see black screen issue)
     constexpr float emptyMatrix[16] = {0, 0, 0, 0,
-                             0, 0, 0, 0,
-                             0, 0, 0, 0,
-                             0, 0, 0, 0};
+                                       0, 0, 0, 0,
+                                       0, 0, 0, 0,
+                                       0, 0, 0, 0};
     
     // multiples the left with the right
     inline Mat4x4 operator*(const Mat4x4& left, const Mat4x4& right) {
@@ -717,41 +763,41 @@ namespace Raytracing {
     // same as above but for right sided constants
     inline Mat4x4 operator*(const Mat4x4& v, float c) {
         Mat4x4 mat{};
-    
+        
         for (int i = 0; i < 16; i++) {
             mat.data.single[i] = v.data.single[i] * c;
         }
-    
+        
         return mat;
     }
     
     // divides the Mat4x4 by the constant c
     inline Mat4x4 operator/(const Mat4x4& v, float c) {
         Mat4x4 mat{};
-    
+        
         for (int i = 0; i < 16; i++) {
             mat.data.single[i] = v.data.single[i] / c;
         }
-    
+        
         return mat;
     }
     
     // divides each element in the Mat4x4 by over the constant
     inline Mat4x4 operator/(float c, const Mat4x4& v) {
         Mat4x4 mat{};
-    
+        
         for (int i = 0; i < 16; i++) {
             mat.data.single[i] = c / v.data.single[i];
         }
-    
+        
         return mat;
     }
     
     inline std::ostream& operator<<(std::ostream& out, const Mat4x4& v) {
         return out << "\rMatrix4x4{" << v.m00() << ", " << v.m01() << ", " << v.m02() << ", " << v.m03() << "} \n"\
-                   << "         {" << v.m10() << ", " << v.m11() << ", " << v.m12() << ", " << v.m13() << "} \n"\
-                   << "         {" << v.m20() << ", " << v.m21() << ", " << v.m22() << ", " << v.m23() << "} \n"\
-                   << "         {" << v.m30() << ", " << v.m31() << ", " << v.m32() << ", " << v.m33() << "} \n";
+ << "         {" << v.m10() << ", " << v.m11() << ", " << v.m12() << ", " << v.m13() << "} \n"\
+ << "         {" << v.m20() << ", " << v.m21() << ", " << v.m22() << ", " << v.m23() << "} \n"\
+ << "         {" << v.m30() << ", " << v.m31() << ", " << v.m32() << ", " << v.m33() << "} \n";
     }
     
 };

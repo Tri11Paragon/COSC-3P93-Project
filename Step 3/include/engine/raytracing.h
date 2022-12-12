@@ -157,6 +157,15 @@ namespace Raytracing {
             
             std::vector<RaycasterImageBounds> partitionScreen(int threads = -1);
             
+            inline void updateThreadValue(int& threads) const {
+                if (threads < 0 || threads == 1)
+                    threads = 1;
+                else {
+                    if (threads == 0)
+                        threads = (int) system_threads;
+                }
+            }
+            
             inline static Vec4 randomUnitVector() {
                 // there are two methods to generating a random unit sphere
                 // one which is fast and approximate:
@@ -187,12 +196,12 @@ namespace Raytracing {
             [[nodiscard]] inline bool areThreadsStillRunning() const { return finishedThreads == executors.size(); }
             
             inline void join() {
-                for (auto& p: executors)
+                for (auto& p : executors)
                     p->join();
             }
             
             void deleteThreads() {
-                for (auto& p: executors) {
+                for (auto& p : executors) {
                     // wait for all threads to exit before trying to delete them.
                     try {
                         if (p->joinable())
