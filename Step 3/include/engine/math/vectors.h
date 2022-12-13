@@ -275,8 +275,7 @@ namespace Raytracing {
                 wType v4;
             };
             // isn't much of a reason to do it this way
-            // it's unlikely that we'll need to use the w component
-            // but it helps better line up with the GPU and other SIMD type instructions, like what's above.
+            // it's unlikely that we'll need to use the w component but it helps better line up with the GPU and other SIMD type instructions, like what's above.
             valueType value;
         public:
             Vec4(): value{0, 0, 0, 0} {}
@@ -287,8 +286,6 @@ namespace Raytracing {
             
             Vec4(const Vec4& vec): value{vec.x(), vec.y(), vec.z(), vec.w()} {}
             
-            
-            // most of the modern c++ here is because clang tidy was annoying me
             [[nodiscard]] inline PRECISION_TYPE x() const { return value.v1.x; }
             
             [[nodiscard]] inline PRECISION_TYPE y() const { return value.v2.y; }
@@ -316,27 +313,35 @@ namespace Raytracing {
                 return x() * x() + y() * y() + z() * z() + w() * w();
             }
             
-            // returns the unit-vector.
+            /**
+             * returns the unit-vector.
+             */
             [[nodiscard]] inline Vec4 normalize() const {
                 PRECISION_TYPE mag = magnitude();
                 return {x() / mag, y() / mag, z() / mag, w() / mag};
             }
             
-            // add operator before the vec returns the magnitude
+            /**
+             * add operator before the vec returns the magnitude
+             */
             PRECISION_TYPE operator+() const {
                 return magnitude();
             }
             
-            // preforms the dot product of left * right
+            /**
+             * performs the dot product of left * right
+             */
             static inline PRECISION_TYPE dot(const Vec4& left, const Vec4& right) {
                 return left.x() * right.x()
                        + left.y() * right.y()
                        + left.z() * right.z();
             }
             
-            // preforms the cross product of left X right
-            // since a general solution to the cross product doesn't exist in 4d
-            // we are going to ignore the w.
+            /**
+             * performs the cross product of left X right
+             * since a general solution to the cross product doesn't exist in 4d
+             * we are going to ignore the w.
+             */
             static inline Vec4 cross(const Vec4& left, const Vec4& right) {
                 return {left.y() * right.z() - left.z() * right.y(),
                         left.z() * right.x() - left.x() * right.z(),
@@ -456,12 +461,6 @@ namespace Raytracing {
     inline std::ostream& operator<<(std::ostream& out, const Ray& v) {
         return out << "Ray{" << v.getStartingPoint() << " " << v.getDirection() << "} ";
     }
-
-#ifdef USE_SIMD_CPU
-
-#else
-
-#endif
     
     // only float supported because GPUs don't like doubles
     // well they do but there isn't much of a reason to use them since this is for opengl

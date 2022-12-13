@@ -20,7 +20,16 @@ namespace Raytracing {
     
     class MPI {
         public:
+            /**
+             * Create the OpenMPI instance
+             * @param argc argc provided as inputs to the main function
+             * @param argv argv provided as inputs to the main function
+             */
             static void init(int argc, char** argv);
+            
+            /**
+             * @return the queue of image bounds which this process needs to do work on
+             */
             static std::queue<RaycasterImageBounds> getCurrentImageRegionAssociation(RayCaster& raycaster);
     };
 }

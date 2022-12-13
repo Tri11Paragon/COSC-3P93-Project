@@ -84,12 +84,12 @@ int main(int argc, char** args) {
                         "\tSets the output format to BMP, PNG, or JPEG. \n", "PNG"
     );
     parser.addOption(
-            "-w", "Image Width\n"
-                  "\tSets the width of the output image.\n", "1440"
+            "--width", "Image Width\n"
+                       "\tSets the width of the output image.\n", "1440"
     );
     parser.addOption(
-            "-h", "Image Height\n"
-                  "\tSets the height of the output image.\n", "720"
+            "--height", "Image Height\n"
+                        "\tSets the height of the output image.\n", "720"
     );
     parser.addOption(
             "--fov", "Camera FOV\n"
@@ -156,12 +156,12 @@ int main(int argc, char** args) {
 
 #endif
     
-    Raytracing::Image image(std::stoi(parser.getOptionValue("-w")), std::stoi(parser.getOptionValue("-h")));
+    Raytracing::Image image(std::stoi(parser.getOptionValue("--width")), std::stoi(parser.getOptionValue("--height")));
     
     Raytracing::Camera camera(std::stoi(parser.getOptionValue("--fov")), image);
     //camera.setPosition({0, 0, 1});
-    camera.setPosition({20, 12, 20});
-    camera.lookAt({0, 0, 0});
+    camera.setPosition({15.5, 10, 22});
+    camera.lookAt({0, 4, 0});
 
 
 #ifdef COMPILE_GUI
@@ -178,7 +178,9 @@ int main(int argc, char** args) {
     Raytracing::ModelData spider = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/spider.obj");
     Raytracing::ModelData house = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/house.obj");
     Raytracing::ModelData plane = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/plane.obj");
+    Raytracing::ModelData planeflipped = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/planeflipped.obj");
     Raytracing::ModelData debugCube = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/debugcube.obj");
+    Raytracing::ModelData skyboxCube = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/cubeflipped.obj");
     Raytracing::ModelData floor = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/floor.obj");
     Raytracing::ModelData deathSphere = Raytracing::OBJLoader::loadModel(parser.getOptionValue("--resources") + "models/deathsphere.obj");
     
@@ -187,10 +189,13 @@ int main(int argc, char** args) {
     world.add("blueDiffuse", new Raytracing::DiffuseMaterial{Raytracing::Vec4{0, 0, 1.0, 1}});
     
     world.add("greenMetal", new Raytracing::MetalMaterial{Raytracing::Vec4{0.4, 1.0, 0.4, 1}});
-    world.add("blueMirror", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{0.2, 0.2, 0.8, 1}, 0.0f});
+    world.add("blueMirror", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{0.4, 0.4, 0.9, 1}, 0.01f});
     world.add("imperfectMirror", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{0.8, 0.8, 0.8, 1}, 0.4f});
+    world.add("perfectMirror", new Raytracing::BrushedMetalMaterial{Raytracing::Vec4{0.8, 0.8, 0.8, 1}, 0.0f});
     
+    // Textures in here will automatically be added to the world and used when generating the objects in the world.
     std::vector<std::string> textures = {
+            "029a_-_Survival_of_the_Idiots_349.jpg",
             "029a_-_Survival_of_the_Idiots_349.jpg",
             "760213.png",
             "1531688878833.png",
@@ -200,19 +205,28 @@ int main(int argc, char** args) {
             "1544568744585.jpg",
             "1544568782473.jpg",
             "1616466348379.png",
-            "livingmylifeinstereodoesntseemthatbad.PNG"
+            "livingmylifeinstereodoesntseemthatbad.PNG",
+            "1659204763642001.jpg",
+            "1659204763642001.jpg",
+            "zucc.png",
+            "zucc.png",
+            "brockboy.jpg",
+            "brockboy.jpg"
     };
     for (const std::string& texture : textures) {
         world.add(texture, new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "images/" + texture});
     }
-    world.add("grass", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "images/d5fcf6258bd25b58773de035dce4663d.jpg", 4.0f});
+    world.add("floor", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "images/brick_floor_diff_1k.png", 4.0f});
+    world.add("skybox", new Raytracing::TexturedMaterial{parser.getOptionValue("--resources") + "images/robson.jpeg", 2.0f});
     
-    world.add(new Raytracing::ModelObject({0, 0, 0}, floor, world.getMaterial("grass")));
+    world.add(new Raytracing::ModelObject({0, 0, 0}, floor, world.getMaterial("floor")));
+    world.add(new Raytracing::ModelObject({0, 0, 0}, skyboxCube, world.getMaterial("skybox")));
     // odds and ends
-    world.add(new Raytracing::ModelObject({-40, 0, -40}, deathSphere, world.getMaterial("imperfectMirror")));
+    world.add(new Raytracing::ModelObject({10, 4, -20}, deathSphere, world.getMaterial("imperfectMirror")));
     
     world.add(new Raytracing::ModelObject({0, 2, 0}, spider, world.getMaterial("redDiffuse")));
     world.add(new Raytracing::ModelObject({-5, 5, 0}, plane, world.getMaterial("greenMetal")));
+    world.add(new Raytracing::ModelObject({-5.001, 5, 0}, planeflipped, world.getMaterial("greenMetal")));
     
     world.add(new Raytracing::ModelObject({0, 1, -5}, house, world.getMaterial("blueDiffuse")));
     world.add(new Raytracing::ModelObject({0, 1, 5}, house, world.getMaterial("blueDiffuse")));
@@ -232,17 +246,13 @@ int main(int argc, char** args) {
                 if (i % 2 == 0) {
                     // cubes are 1 off the ground
                     pos = Vec4{pos.x(), 1, pos.z()};
-                    if (chance.getDouble() <= 0.8) {
-                        auto& texture = textures[textureIndexSelect.getLong()];
-                        world.add(new Raytracing::ModelObject{pos, debugCube, world.getMaterial(texture)});
-                    } else {
-                        world.add(new Raytracing::ModelObject{pos, debugCube, world.getMaterial("redDiffuse")});
-                    }
+                    auto& texture = textures[textureIndexSelect.getLong()];
+                    world.add(new Raytracing::ModelObject{pos, debugCube, world.getMaterial(texture)});
                 } else {
                     auto radius = (chance.getDouble() + 0.15f) * 2.0f;
                     // while spheres have a variable radius
                     pos = Vec4{pos.x(), radius, pos.z()};
-                    if (chance.getDouble() <= 0.65) {
+                    if (chance.getDouble() <= 0.75) {
                         auto& texture = textures[textureIndexSelect.getLong()];
                         world.add(new Raytracing::SphereObject{pos, radius, world.getMaterial(texture)});
                     } else {

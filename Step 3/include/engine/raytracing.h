@@ -167,19 +167,7 @@ namespace Raytracing {
             }
             
             inline static Vec4 randomUnitVector() {
-                // there are two methods to generating a random unit sphere
-                // one which is fast and approximate:
-                auto v = Vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble());
-                return v.normalize();
-                // and the one which generates an actual unit vector
-                /*while (true) {
-                    auto v = Vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble());
-                    if (v.lengthSquared() >= 1)
-                        continue;
-                    return v;
-                }*/
-                // the second creates better results but is 18% slower (better defined shadows)
-                // likely due to not over generating unit vectors biased towards the corners
+                return Vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble()).normalize();
             }
             
             RayCaster(Camera& c, Image& i, World& world, const Parser& p):

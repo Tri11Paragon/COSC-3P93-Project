@@ -127,8 +127,8 @@ namespace Raytracing {
                     break;
                 }
             } else {
-                // since we didn't hit, we hit the sky.
                 color = color * Vec4{0.5, 0.7, 1.0};
+                
                 //color = Vec4{};
                 // if we don't hit we cannot keep looping.
                 break;
@@ -275,6 +275,8 @@ namespace Raytracing {
             threads = 1;
             divs = 1;
         } else {
+            // check for the special case of threads being 0, which is used by the commandline parser to assert that the option wasn't used.
+            // in which case we will use the number of threads that the physical system has available
             if (threads == 0)
                 threads = (int) system_threads;
             // calculate the max divisions we can have per side, then expand by a factor of 4.

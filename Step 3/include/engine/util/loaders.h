@@ -12,7 +12,18 @@ namespace Raytracing {
     
     class ShaderLoader {
         public:
-            static void define(const std::string& key,  const std::string& replacement);
+            /**
+             * Creates a define which will be replaced as the shader is loaded.
+             * @param key name of the define to replace
+             * @param replacement the string which the define will be set to.
+             */
+            static void define(const std::string& key, const std::string& replacement);
+            
+            /**
+             * loads a line-terminated string from the file. Will preprocess defines and attempt to recursively load includes.
+             * @param path path to file to load
+             * @return a single string where each line is terminated with a \n
+             */
             static std::string loadShaderFile(const std::string& path);
     };
     

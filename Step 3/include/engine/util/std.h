@@ -113,6 +113,11 @@ namespace Raytracing {
     
     class String {
         public:
+            /**
+             * Converts the string into lower case
+             * @param s string to lower case
+             * @return a string copy that is all lower case
+             */
             static inline std::string toLowerCase(const std::string& s) {
                 std::stringstream str;
                 std::for_each(
@@ -123,6 +128,11 @@ namespace Raytracing {
                 return str.str();
             }
             
+            /**
+             * Converts the string into upper case
+             * @param s string to upper case
+             * @return a string copy that is all upper case
+             */
             static inline std::string toUpperCase(const std::string& s) {
                 std::stringstream str;
                 std::for_each(
@@ -133,6 +143,9 @@ namespace Raytracing {
                 return str.str();
             }
             
+            /**
+             * @return the standard string of time.now
+             */
             static inline std::string getTimeString() {
                 auto t = std::time(nullptr);
                 auto now = std::localtime(&t);
