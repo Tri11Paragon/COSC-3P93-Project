@@ -47,6 +47,8 @@ namespace Raytracing {
                 TriangulatedModel model{data};
                 this->triangles = model.triangles;
                 this->aabb = std::move(model.aabb);
+                // a required step to generate a BVH however we aren't using the triangle bvh due to issues with it
+                // so ignore this and sequential triangle BVH nonsense.
                 std::vector<TriangleBVHObject> triangulatedObjects;
                 for (const auto& tri : triangles) {
                     TriangleBVHObject triangleObject;
@@ -152,8 +154,10 @@ namespace Raytracing {
             inline void add(Object* object) {
                 objects.push_back(object);
 #ifdef COMPILE_GUI
-                if (object->getBVHTree().bvhTree != nullptr && !object->getBVHTree().isRegular)
-                    new DebugBVH{(TriangleBVHTree*) object->getBVHTree().bvhTree, m_config.worldShader};
+                // this will show up in the debug mode
+                // disabled because we aren't using object local BVHs
+                //if (object->getBVHTree().bvhTree != nullptr && !object->getBVHTree().isRegular)
+                //    new DebugBVH{(TriangleBVHTree*) object->getBVHTree().bvhTree, m_config.worldShader};
 #endif
             }
             
@@ -165,6 +169,13 @@ namespace Raytracing {
             
             [[nodiscard]] inline std::vector<Object*> getObjectsInWorld() { return objects; }
             
+            /**
+             * goes through the entire world using the BVH to determine if the ray has hit anything
+             * @param ray ray to check
+             * @param min min of the ray
+             * @param max max of the ray
+             * @return HitData about the closest object that was hit.
+             */
             [[nodiscard]] virtual std::pair<HitData, Object*> checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const;
             
             ~World();

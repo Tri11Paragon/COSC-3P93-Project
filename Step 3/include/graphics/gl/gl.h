@@ -40,45 +40,45 @@ class Shapes {
             std::vector<float> cubeVerticesRaw = {
                     -0.5f, -0.5f, -0.5f,
                     0.5f, -0.5f, -0.5f,
-                    0.5f,  0.5f, -0.5f,
-                    0.5f,  0.5f, -0.5f,
-                    -0.5f,  0.5f, -0.5f,
+                    0.5f, 0.5f, -0.5f,
+                    0.5f, 0.5f, -0.5f,
+                    -0.5f, 0.5f, -0.5f,
                     -0.5f, -0.5f, -0.5f,
                     
-                    -0.5f, -0.5f,  0.5f,
-                    0.5f, -0.5f,  0.5f,
-                    0.5f,  0.5f,  0.5f,
-                    0.5f,  0.5f,  0.5f,
-                    -0.5f,  0.5f,  0.5f,
-                    -0.5f, -0.5f,  0.5f,
+                    -0.5f, -0.5f, 0.5f,
+                    0.5f, -0.5f, 0.5f,
+                    0.5f, 0.5f, 0.5f,
+                    0.5f, 0.5f, 0.5f,
+                    -0.5f, 0.5f, 0.5f,
+                    -0.5f, -0.5f, 0.5f,
                     
-                    -0.5f,  0.5f,  0.5f,
-                    -0.5f,  0.5f, -0.5f,
+                    -0.5f, 0.5f, 0.5f,
+                    -0.5f, 0.5f, -0.5f,
                     -0.5f, -0.5f, -0.5f,
                     -0.5f, -0.5f, -0.5f,
-                    -0.5f, -0.5f,  0.5f,
-                    -0.5f,  0.5f,  0.5f,
+                    -0.5f, -0.5f, 0.5f,
+                    -0.5f, 0.5f, 0.5f,
                     
-                    0.5f,  0.5f,  0.5f,
-                    0.5f,  0.5f, -0.5f,
+                    0.5f, 0.5f, 0.5f,
+                    0.5f, 0.5f, -0.5f,
                     0.5f, -0.5f, -0.5f,
                     0.5f, -0.5f, -0.5f,
-                    0.5f, -0.5f,  0.5f,
-                    0.5f,  0.5f,  0.5f,
+                    0.5f, -0.5f, 0.5f,
+                    0.5f, 0.5f, 0.5f,
                     
                     -0.5f, -0.5f, -0.5f,
                     0.5f, -0.5f, -0.5f,
-                    0.5f, -0.5f,  0.5f,
-                    0.5f, -0.5f,  0.5f,
-                    -0.5f, -0.5f,  0.5f,
+                    0.5f, -0.5f, 0.5f,
+                    0.5f, -0.5f, 0.5f,
+                    -0.5f, -0.5f, 0.5f,
                     -0.5f, -0.5f, -0.5f,
                     
-                    -0.5f,  0.5f, -0.5f,
-                    0.5f,  0.5f, -0.5f,
-                    0.5f,  0.5f,  0.5f,
-                    0.5f,  0.5f,  0.5f,
-                    -0.5f,  0.5f,  0.5f,
-                    -0.5f,  0.5f, -0.5f,
+                    -0.5f, 0.5f, -0.5f,
+                    0.5f, 0.5f, -0.5f,
+                    0.5f, 0.5f, 0.5f,
+                    0.5f, 0.5f, 0.5f,
+                    -0.5f, 0.5f, 0.5f,
+                    -0.5f, 0.5f, -0.5f,
             };
             std::vector<float> cubeUVs = {
                     0.0f, 0.0f,
@@ -87,35 +87,35 @@ class Shapes {
                     1.0f, 1.0f,
                     0.0f, 1.0f,
                     0.0f, 0.0f,
-            
+                    
                     0.0f, 0.0f,
                     1.0f, 0.0f,
                     1.0f, 1.0f,
                     1.0f, 1.0f,
                     0.0f, 1.0f,
                     0.0f, 0.0f,
-            
+                    
                     1.0f, 0.0f,
                     1.0f, 1.0f,
                     0.0f, 1.0f,
                     0.0f, 1.0f,
                     0.0f, 0.0f,
                     1.0f, 0.0f,
-            
+                    
                     1.0f, 0.0f,
                     1.0f, 1.0f,
                     0.0f, 1.0f,
                     0.0f, 1.0f,
                     0.0f, 0.0f,
                     1.0f, 0.0f,
-            
+                    
                     0.0f, 1.0f,
                     1.0f, 1.0f,
                     1.0f, 0.0f,
                     1.0f, 0.0f,
                     0.0f, 0.0f,
                     0.0f, 1.0f,
-            
+                    
                     0.0f, 1.0f,
                     1.0f, 1.0f,
                     1.0f, 0.0f,
@@ -123,53 +123,54 @@ class Shapes {
                     0.0f, 0.0f,
                     0.0f, 1.0f
             };
+            
             static cubeVertexBuilder getCubeExtends(float xRadius, float yRadius, float zRadius) {
-                cubeVertexBuilder builder {};
+                cubeVertexBuilder builder{};
                 // Can we use the transformation matrix? Yes.
                 // Are we going to? No.
                 // Why? No good reason. Perhaps a TODO:?
                 builder.cubeVerticesRaw = {
                         -xRadius, -yRadius, -zRadius,
                         xRadius, -yRadius, -zRadius,
-                        xRadius,  yRadius, -zRadius,
-                        xRadius,  yRadius, -zRadius,
-                        -xRadius,  yRadius, -zRadius,
+                        xRadius, yRadius, -zRadius,
+                        xRadius, yRadius, -zRadius,
+                        -xRadius, yRadius, -zRadius,
                         -xRadius, -yRadius, -zRadius,
                         
-                        -xRadius, -yRadius,  zRadius,
-                        xRadius, -yRadius,  zRadius,
-                        xRadius,  yRadius,  zRadius,
-                        xRadius,  yRadius,  zRadius,
-                        -xRadius,  yRadius,  zRadius,
-                        -xRadius, -yRadius,  zRadius,
+                        -xRadius, -yRadius, zRadius,
+                        xRadius, -yRadius, zRadius,
+                        xRadius, yRadius, zRadius,
+                        xRadius, yRadius, zRadius,
+                        -xRadius, yRadius, zRadius,
+                        -xRadius, -yRadius, zRadius,
                         
-                        -xRadius,  yRadius,  zRadius,
-                        -xRadius,  yRadius, -zRadius,
+                        -xRadius, yRadius, zRadius,
+                        -xRadius, yRadius, -zRadius,
                         -xRadius, -yRadius, -zRadius,
                         -xRadius, -yRadius, -zRadius,
-                        -xRadius, -yRadius,  zRadius,
-                        -xRadius,  yRadius,  zRadius,
+                        -xRadius, -yRadius, zRadius,
+                        -xRadius, yRadius, zRadius,
                         
-                        xRadius,  yRadius,  zRadius,
-                        xRadius,  yRadius, -zRadius,
+                        xRadius, yRadius, zRadius,
+                        xRadius, yRadius, -zRadius,
                         xRadius, -yRadius, -zRadius,
                         xRadius, -yRadius, -zRadius,
-                        xRadius, -yRadius,  zRadius,
-                        xRadius,  yRadius,  zRadius,
+                        xRadius, -yRadius, zRadius,
+                        xRadius, yRadius, zRadius,
                         
                         -xRadius, -yRadius, -zRadius,
                         xRadius, -yRadius, -zRadius,
-                        xRadius, -yRadius,  zRadius,
-                        xRadius, -yRadius,  zRadius,
-                        -xRadius, -yRadius,  zRadius,
+                        xRadius, -yRadius, zRadius,
+                        xRadius, -yRadius, zRadius,
+                        -xRadius, -yRadius, zRadius,
                         -xRadius, -yRadius, -zRadius,
                         
-                        -xRadius,  yRadius, -zRadius,
-                        xRadius,  yRadius, -zRadius,
-                        xRadius,  yRadius,  zRadius,
-                        xRadius,  yRadius,  zRadius,
-                        -xRadius,  yRadius,  zRadius,
-                        -xRadius,  yRadius, -zRadius,
+                        -xRadius, yRadius, -zRadius,
+                        xRadius, yRadius, -zRadius,
+                        xRadius, yRadius, zRadius,
+                        xRadius, yRadius, zRadius,
+                        -xRadius, yRadius, zRadius,
+                        -xRadius, yRadius, -zRadius,
                 };
                 return builder;
             }
@@ -186,6 +187,7 @@ class Texture {
     protected:
         unsigned int textureID;
         int width, height, channels;
+        
         unsigned char* loadTexture(const std::string& path);
         
         Raytracing::Image* _image = nullptr;
@@ -195,13 +197,22 @@ class Texture {
         Texture(Texture&&) noexcept = delete; // Disable move constructor.
         Texture& operator=(Texture&&) noexcept = delete; // Disable Move Assignment
         Texture();
+        
         explicit Texture(const std::string& path);
+        
         explicit Texture(Raytracing::Image* image);
+        
         ~Texture();
+        
+        // updates the texture on the GPU using the image pointer stored in the texture class. Does nothing if not using image
         void updateImage();
+        
         void bind() const;
+        
         void unbind();
+        
         void enableGlTextures(int textureCount);
+        
         [[nodiscard]] inline unsigned int getTextureID() const { return textureID; }
 };
 
@@ -210,18 +221,24 @@ class VAO {
         unsigned int VaoID, instanceVBO;
         std::vector<unsigned int> VBOs;
         int drawCount = -1, currentTransforms = -1;
+        
         // vertex data
         unsigned int storeData(int attrNumber, int coordSize, int stride, long offset, int length, const float* data);
+        
         // element data (indices)
         unsigned int storeData(int length, const unsigned int* data);
+        
         // instance data
         unsigned int createInstanceVBO(int count, int bytePerInstance);
+        
         // used much in the same way that store data sets an attribute where the data is expected
         // except this sets based on the master instance vbo, telling the GPU where to use the data and when.
         void addInstancedAttribute(int attribute, int dataSize, int dataLengthBytes, int offset) const;
+        
         // disable bad constructors
         // we can't just make copies of GPU objects like we can on the CPU. It's stupidly expensive.
         VAO() = default;
+        
         VAO(const VAO& that); // Disable Copy Constructor
         VAO& operator=(const VAO& that); // Disable Copy Assignment
     public:
@@ -229,17 +246,25 @@ class VAO {
         VAO& operator=(VAO&&) noexcept = delete; // Disable Move Assignment
         
         explicit VAO(const std::vector<Raytracing::Triangle>& triangles);
+        
         explicit VAO(const std::vector<std::shared_ptr<Raytracing::Triangle>>& triangles);
+        
         VAO(const std::vector<float>& verts, const std::vector<float>& uvs, const std::vector<unsigned int>& indices);
+        
         VAO(const std::vector<float>& verts, const std::vector<float>& uvs);
         
         void bind() const;
+        
         void unbind();
+        
         // draws as if it where a fullscreen quad (literally used for that)
         void draw() const;
+        
         // draw as if it's a box that we need to bulk draw.
         void draw(Raytracing::Shader& shader, const std::vector<Raytracing::Vec4>& positions) const;
+        
         void draw(Raytracing::Shader& shader);
+        
         ~VAO();
 };
 

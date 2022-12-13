@@ -16,7 +16,9 @@
 
 #else
     #ifdef USE_OPENMP
+
         #include <omp.h>
+
     #endif
 #endif
 
@@ -96,17 +98,13 @@ namespace Raytracing {
         Vec4 color;
     };
     
-    Vec4 RayCaster::raycasti(const Ray& ray, int depth) {
-        return {};
-    }
-    
     Vec4 RayCaster::raycast(const Ray& ray) {
         Ray localRay = ray;
         Vec4 color{1.0, 1.0, 1.0};
         for (int CURRENT_BOUNCE = 0; CURRENT_BOUNCE < maxBounceDepth; CURRENT_BOUNCE++) {
             if (RTSignal->haltExecution || RTSignal->haltRaytracing)
                 return color;
-            while (RTSignal->pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame.
+            while (RTSignal->pauseRaytracing) // sleep for 1/60th of a second, or about 1 frame. Helps prevent busy waiting and using all system resources.
                 std::this_thread::sleep_for(std::chrono::milliseconds(16));
             
             auto hit = world.checkIfHit(localRay, 0.001, infinity);
@@ -138,7 +136,7 @@ namespace Raytracing {
         return color;
     }
     
-    void RayCaster::runRaycastingAlgorithm(RaycasterImageBounds imageBounds, int loopX, int loopY) {
+    void RayCaster::runRaycastingAlgorithm(RayCasterImageBounds imageBounds, int loopX, int loopY) {
         try {
             int x = imageBounds.x + loopX;
             int y = imageBounds.y + loopY;
@@ -175,7 +173,7 @@ namespace Raytracing {
                                 str << (i + 1);
                                 profiler::start("Raytracer Results", str.str());
                                 while (unprocessedQuads != nullptr) {
-                                    RaycasterImageBounds imageBoundingData{};
+                                    RayCasterImageBounds imageBoundingData{};
                                     // get the function for the quadrant
                                     queueSync.lock();
                                     if (unprocessedQuads->empty()) {
@@ -217,7 +215,7 @@ namespace Raytracing {
                 // run through all the quadrants
                 bool running = true;
                 while (running) {
-                    RaycasterImageBounds imageBoundingData{};
+                    RayCasterImageBounds imageBoundingData{};
 #pragma omp critical
                     {
                         if (unprocessedQuads->empty())
@@ -228,6 +226,8 @@ namespace Raytracing {
                         }
                     }
                     if (running) {
+                        // the loops here could be made parallel however it is much slower than the current way
+                        // unless you have 1440*720=1,036,800 cores.
                         for (int kx = 0; kx <= imageBoundingData.width; kx++) {
                             for (int ky = 0; ky < imageBoundingData.height; ky++) {
                                 runRaycastingAlgorithm(imageBoundingData, kx, ky);
@@ -247,10 +247,11 @@ namespace Raytracing {
 #endif
     }
     
-    void RayCaster::runMPI(std::queue<RaycasterImageBounds> bounds) {
+    void RayCaster::runMPI(std::queue<RayCasterImageBounds> bounds) {
 #ifdef USE_MPI
         ilog << "Running MPI\n";
         dlog << "We have " << bounds.size() << " bounds currently pending!\n";
+        profiler::start("Raytracer Results", ("Process Rank: " + std::to_string(currentProcessID)));
         while (!bounds.empty()) {
             auto region = bounds.front();
             for (int kx = 0; kx <= region.width; kx++) {
@@ -260,13 +261,14 @@ namespace Raytracing {
             }
             bounds.pop();
         }
+        profiler::end("Raytracer Results", ("Process Rank: " + std::to_string(currentProcessID)));
         dlog << "Finished running MPI on " << currentProcessID << "\n";
 #else
         flog << "Not compiled with MPI!\n";
 #endif
     }
     
-    std::vector<RaycasterImageBounds> RayCaster::partitionScreen(int threads) {
+    std::vector<RayCasterImageBounds> RayCaster::partitionScreen(int threads) {
         // if we are running single threaded, disable everything special
         // the reason we run single threaded in a seperate thread is because the GUI requires its own set of updating commands
         // which cannot be blocked by the raytracer, otherwise it would become unresponsive.
@@ -287,9 +289,9 @@ namespace Raytracing {
         
         ilog << "Generating multithreaded raytracer with " << threads << " threads and " << divs << " divisions! \n";
         
-        std::vector<RaycasterImageBounds> bounds;
+        std::vector<RayCasterImageBounds> bounds;
         
-        // we need to subdivide the image for the threads, since this is really quick it's fine to due sequentially
+        // we need to subdivide the image for the threads, since this is really quick it's fine to do sequentially
         for (int dx = 0; dx < divs; dx++) {
             for (int dy = 0; dy < divs; dy++) {
                 bounds.push_back(
@@ -305,9 +307,9 @@ namespace Raytracing {
         return bounds;
     }
     
-    void RayCaster::setupQueue(const std::vector<RaycasterImageBounds>& bounds) {
+    void RayCaster::setupQueue(const std::vector<RayCasterImageBounds>& bounds) {
         delete (unprocessedQuads);
-        unprocessedQuads = new std::queue<RaycasterImageBounds>();
+        unprocessedQuads = new std::queue<RayCasterImageBounds>();
         for (auto& b : bounds)
             unprocessedQuads->push(b);
     }

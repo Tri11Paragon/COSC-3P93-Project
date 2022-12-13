@@ -11,7 +11,9 @@
 #include <config.h>
 
 #ifdef COMPILE_GUI
+    
     #include <graphics/gl/gl.h>
+
 #endif
 
 
@@ -22,7 +24,7 @@
 // so I moved them here.
 
 namespace Raytracing {
-
+    
     struct HitData {
         // all the other values only matter if this is true
         bool hit{false};
@@ -35,7 +37,7 @@ namespace Raytracing {
         // Texture UV Coords.
         PRECISION_TYPE u, v;
     };
-
+    
     struct ScatterResults {
         // returns true to recast the ray with the provided ray
         bool scattered;
@@ -44,54 +46,67 @@ namespace Raytracing {
         // the color of the material
         Vec4 attenuationColor;
     };
-
+    
     class Material {
         protected:
             // most materials will need an albedo
             Vec4 baseColor;
         public:
             explicit Material(const Vec4& baseColor): baseColor(baseColor) {}
-
+            
             // returns true if the ray was scattered along with the scattered ray, otherwise will return false with empty ray.
             // the returned vec4 is the attenuation color
             [[nodiscard]] virtual ScatterResults scatter(const Ray& ray, const HitData& hitData) const = 0;
+            
             // emission value for this material
             // this allows for a material to glow slightly or emit full on light
             // the light can of course be of any color
             // and the UV coords along with the actual hit point are provided for your convince
             [[nodiscard]] virtual Vec4 emission(PRECISION_TYPE u, PRECISION_TYPE v, const Vec4& hitPoint) const { return {}; }
-
+            
             [[nodiscard]] Vec4 getBaseColor() const { return baseColor; }
+            
             virtual ~Material() = default;
     };
     
     struct DebugBVHData {
         void* bvhTree;
+        // I actually currently have no idea what this means
+        // I suspect it's legacy code from when I was debugging the BVHs
         bool isRegular;
     };
-
+    
     class Object {
         protected:
             AABB aabb;
             Vec4 position;
             Material* material;
-            #ifdef COMPILE_GUI
-                VAO* vao = nullptr;
-            #endif
+#ifdef COMPILE_GUI
+            VAO* vao = nullptr;
+#endif
         public:
             Object(Material* material, const Vec4& position): material(material), position(position), aabb({}) {};
+            
             // return true if the ray intersects with this object, only between min and max
             [[nodiscard]] virtual HitData checkIfHit(const Ray& ray, PRECISION_TYPE min, PRECISION_TYPE max) const = 0;
-
+            
             [[nodiscard]] Material* getMaterial() const { return material; }
+            
             [[nodiscard]] virtual AABB& getAABB() { return aabb; }
+            
             // FIXME: Use of void* is inadvisable. Although this is only for debug consider another method.
-            [[nodiscard]] virtual DebugBVHData getBVHTree(){ return {nullptr, false}; }
+            [[nodiscard]] virtual DebugBVHData getBVHTree() { return {nullptr, false}; }
+            
             [[nodiscard]] Vec4 getPosition() const { return position; }
+            
             virtual void setAABB(const AABB& ab) { this->aabb = ab; }
-            #ifdef COMPILE_GUI
-                [[nodiscard]] inline VAO* getVAO(){return vao;}
-            #endif
+
+#ifdef COMPILE_GUI
+            
+            [[nodiscard]] inline VAO* getVAO() { return vao; }
+
+#endif
+            
             virtual ~Object() = default;
     };
 }

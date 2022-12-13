@@ -9,6 +9,7 @@
 #include <utility>
 
 // this file is only included if the compile gui setting is enabled in CMake
+// Feel free to ignore this file, I'm not going to explain it. Purely for debugging the BVH
 namespace Raytracing {
     
     std::vector<std::pair<std::string, std::function<void()>>> tabs;
@@ -257,8 +258,8 @@ namespace Raytracing {
             m_shader.setInt("useWhite", 1);
             m_shader.setVec3("color", {1.0, 1.0, 1.0});
             {
-                ImGui::BeginChild("left pane", ImVec2(180, 0), true);
-                //guiNodesRecur(m_bvhTree->getRoot());
+                ImGui::BeginChild("left pane", ImVec2(250, 0), true);
+                guiNodesRecur(m_bvhTree->getRoot());
                 ImGui::EndChild();
             }
             ImGui::SameLine();
@@ -270,8 +271,7 @@ namespace Raytracing {
                         true,
                         ImGuiWindowFlags_AlwaysAutoResize
                 ); // Leave room for 1 line below us
-                tlog << m_bvhTree << "\n";
-                //drawNodesRecur(m_shader, m_bvhTree->getRoot());
+                drawNodesRecur(m_shader, m_bvhTree->getRoot());
                 ImGui::EndChild();
                 ImGui::EndGroup();
             }

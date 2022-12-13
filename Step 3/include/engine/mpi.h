@@ -30,7 +30,7 @@ namespace Raytracing {
             /**
              * @return the queue of image bounds which this process needs to do work on
              */
-            static std::queue<RaycasterImageBounds> getCurrentImageRegionAssociation(RayCaster& raycaster);
+            static std::queue<RayCasterImageBounds> getCurrentImageRegionAssociation(RayCaster& raycaster);
     };
 }
 #endif

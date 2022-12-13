@@ -69,22 +69,30 @@ namespace Raytracing {
                 
             }
             
+            /**
+             * Projects an xy coord into world space
+             * @param x image x coord
+             * @param y image y coord
+             * @return a Ray projected from camera position out into the world based on the relative position in the image.
+             */
             Ray projectRay(PRECISION_TYPE x, PRECISION_TYPE y);
             
             void setPosition(const Vec4& pos) { this->position = pos; }
             
-            // the follow utility functions are actually taking forever to get right
-            // I can't tell if my projection calculation is off or the view calc?
-            // got to install GLM to test which function works and which does. Maybe they are both bad. or Maybe it's my matrix impl
-            // or maybe the whole rendering stack sucks
-            [[nodiscard]] Mat4x4 project() const {
+            /**
+             * Creates a projection matrix for use in the OpenGL pipeline.
+             * @return Mat4x4 containing a standard perspective projection matrix
+             */
+            [[nodiscard]] inline Mat4x4 project() const {
                 Mat4x4 project{emptyMatrix};
                 
                 // this should be all it takes to create a mostly correct projection matrix
+                // the values are transposed because my matrix implementation is terrible.
+                // This is set up in such a way that it is 1:1 with the CPU ray projection. Meaning when you move the camera in "Debug" mode,
+                // the rays will be projected from that position and camera look direction.
                 project.m00(float(1.0 / (aspectRatio * tanFovHalf)));
                 project.m11(float(1.0 / tanFovHalf));
                 project.m22(float(-((FAR_PLANE + NEAR_PLANE) / frustumLength)));
-                // this has been transposed
                 project.m32(-1);
                 project.m23(float(-((2 * NEAR_PLANE * FAR_PLANE) / frustumLength)));
                 //project.m33(0);
@@ -95,6 +103,15 @@ namespace Raytracing {
                 //return Mat4x4{projectG};
             }
             
+            /**
+             * Creates a view matrix containing the camera rotation and inverse position.
+             * the view matrix is used to transform world coordinates into camera space,
+             * which can than be transformed into screen space using the projection matrix.
+             * @param yaw yaw of the camera
+             * @param pitch pitch of the camera
+             * @param roll NOT SUPPORTED
+             * @return Mat4x4 containing rotation in the first 3x3 values and -position in the last column
+             */
             Mat4x4 view(PRECISION_TYPE yaw, PRECISION_TYPE pitch);
             
             [[nodiscard]] inline Vec4 getPosition() const { return position; };
@@ -108,55 +125,79 @@ namespace Raytracing {
             // the camera's position must be set with setPosition(Vec4);
             // uses an internal up vector, assumed to be {0, 1, 0}
             // will make the camera look at provided position with respects to the current camera position.
+            // TODO: update the view matrix. Requires that the view matrix be stored in the camera.
             void lookAt(const Vec4& lookAtPos);
     };
     
     static Random rnd{-1.0, 1.0};
     
-    struct RaycasterImageBounds {
+    struct RayCasterImageBounds {
         int width, height, x, y;
     };
     
     class RayCaster {
         private:
-            int maxBounceDepth = 50;
-            int raysPerPixel = 50;
+            const unsigned int system_threads = std::thread::hardware_concurrency();
+            
+            int maxBounceDepth;
+            int raysPerPixel;
+            unsigned int finishedThreads = 0;
             
             Camera& camera;
             Image& image;
             World& world;
             
-            std::vector<std::unique_ptr<std::thread>> executors{};
-            // is the raytracer still running?
-            bool stillRunning = true;
-            unsigned int finishedThreads = 0;
-            unsigned int system_threads = std::thread::hardware_concurrency();
             // yes this is actually the only sync we need between the threads
             // and compared to the actual runtime of the raytracing it's very small!
             std::mutex queueSync;
-            std::queue<RaycasterImageBounds>* unprocessedQuads = nullptr;
+            // the queue containing the image bounds to be rendered.
+            std::queue<RayCasterImageBounds>* unprocessedQuads = nullptr;
+            std::vector<std::unique_ptr<std::thread>> executors{};
             
-            Vec4 raycasti(const Ray& ray, int depth);
-            
+            /**
+             * Does the actual ray casting algorithm. Simulates up to maxBounceDepth ray depth.
+             * @param ray ray to begin with
+             * @return the overall average color of the ray
+             */
             Vec4 raycast(const Ray& ray);
             
-            void runRaycastingAlgorithm(RaycasterImageBounds imageBounds, int loopX, int loopY);
+            /**
+             *
+             * @param imageBounds bounds to work on
+             * @param loopX the current x position to work on, between 0 and imageBounds.width
+             * @param loopY the current y position to work on, between 0 and imageBounds.height
+             */
+            void runRaycastingAlgorithm(RayCasterImageBounds imageBounds, int loopX, int loopY);
             
-            void setupQueue(const std::vector<RaycasterImageBounds>& bounds);
+            /**
+             * Creates the queue with the provided bounds
+             */
+            void setupQueue(const std::vector<RayCasterImageBounds>& bounds);
         
         public:
+            RayCaster(Camera& c, Image& i, World& world, Parser& p):
+                    camera(c), image(i), world(world) {
+                world.generateBVH();
+                maxBounceDepth = std::stoi(p.getOptionValue("--maxRayDepth"));
+                raysPerPixel = std::stoi(p.getOptionValue("--raysPerPixel"));
+            }
+            
             inline void updateRayInfo(int maxBounce, int perPixel) {
                 raysPerPixel = perPixel;
                 maxBounceDepth = maxBounce;
             }
             
-            inline void resetRayInfo() {
-                raysPerPixel = 50;
-                maxBounceDepth = 50;
-            }
+            /**
+             * divides the screen into image bounds
+             * @param threads number of threads that will determine how many cuts to the screen is required
+             * @return a list of bounds
+             */
+            std::vector<RayCasterImageBounds> partitionScreen(int threads = -1);
             
-            std::vector<RaycasterImageBounds> partitionScreen(int threads = -1);
-            
+            /**
+             * Updates the thread value based on conditions, used for setting up the actual threads for execution.
+             * @param threads reference to the value which will be updated.
+             */
             inline void updateThreadValue(int& threads) const {
                 if (threads < 0 || threads == 1)
                     threads = 1;
@@ -166,28 +207,42 @@ namespace Raytracing {
                 }
             }
             
+            /**
+             * Creates a random vector in the unit sphere.
+             */
             inline static Vec4 randomUnitVector() {
                 return Vec4(rnd.getDouble(), rnd.getDouble(), rnd.getDouble()).normalize();
             }
             
-            RayCaster(Camera& c, Image& i, World& world, const Parser& p):
-                    camera(c), image(i), world(world) {
-                world.generateBVH();
-            }
-            
+            /**
+             * Runs the std::thread implementation
+             * @param threads number of threads to use
+             */
             void runSTDThread(int threads = -1);
             
+            /**
+             * Runs the OpenMP implementation
+             * @param threads number of threads to use
+             */
             void runOpenMP(int threads = -1);
             
-            void runMPI(std::queue<RaycasterImageBounds> bounds);
+            /**
+             * ran by MPI
+             * @param bounds bounds that get processed by this process
+             */
+            void runMPI(std::queue<RayCasterImageBounds> bounds);
             
-            [[nodiscard]] inline bool areThreadsStillRunning() const { return finishedThreads == executors.size(); }
-            
+            /**
+             * Blocking call that waits for all the threads to finish exeuction
+             */
             inline void join() {
                 for (auto& p : executors)
                     p->join();
             }
             
+            /**
+             * Joins all joinable threads and clears the thread list.
+             */
             void deleteThreads() {
                 for (auto& p : executors) {
                     // wait for all threads to exit before trying to delete them.

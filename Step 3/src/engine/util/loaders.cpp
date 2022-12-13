@@ -73,12 +73,12 @@ namespace Raytracing {
         
         std::vector<std::string> returnLines;
         
-        // now combine all the loaded files while respecing the include's position in the file.
+        // now combine all the loaded files while respecting the include's position in the file.
         for (int i = 0; i < mainLines.size(); i++) {
             if (includes.contains(i)) {
                 auto includedFileLines = includes[i];
                 
-                for (const auto& line: includedFileLines)
+                for (const auto& line : includedFileLines)
                     returnLines.push_back(line);
             } else
                 returnLines.push_back(mainLines[i]);
@@ -91,7 +91,7 @@ namespace Raytracing {
         
         auto lines = includeDescent(path);
         
-        for (const auto& line: lines) {
+        for (const auto& line : lines) {
             // now process the defines, if they exist
             if (line.starts_with("#define")) {
                 auto defineParts = String::split(line, " ");

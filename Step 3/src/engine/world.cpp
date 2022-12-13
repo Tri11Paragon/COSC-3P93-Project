@@ -4,7 +4,7 @@
  */
 #include "engine/world.h"
 #include "engine/raytracing.h"
-#include "engine/image/stb_image.h"
+#include "engine/image/stb/stb_image.h"
 
 namespace Raytracing {
     
@@ -109,6 +109,9 @@ namespace Raytracing {
     
     void World::generateBVH() {
         bvhObjects = std::make_unique<BVHTree>(objects);
+#ifdef COMPILE_GUI
+        new DebugBVH(bvhObjects.get(), m_config.worldShader);
+#endif
     }
     
     ScatterResults DiffuseMaterial::scatter(const Ray& ray, const HitData& hitData) const {

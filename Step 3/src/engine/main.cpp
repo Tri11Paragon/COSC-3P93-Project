@@ -62,6 +62,15 @@ int main(int argc, char** args) {
                          "\tSet the max threads the ray tracer will attempt to use.\n"
                          "\tDefaults to all cores of your cpu.\n", "0"
     );
+    parser.addOption(
+            "--maxRayDepth", "Maximum depth a Ray can Traverse\n"
+                             "\tSets the max depth a ray is allowed to bounce\n", "50"
+    );
+    parser.addOption(
+            "--raysPerPixel", "Number of Rays to Cast per Pixel\n"
+                              "\tEvery pixel will generate this number of rays.\n"
+                              "\tHigher number = clearer image, longer compute times.\n", "50"
+    );
     // not implemented yet
     parser.addOption(
             {{"--gui"},
@@ -298,7 +307,9 @@ int main(int argc, char** args) {
         Raytracing::RayCaster rayCaster{camera, image, world, parser};
         ilog << "Running RayCaster (NO_GUI)!\n";
         // we don't actually have to check for --single since it's implied to be default true.
-        int threads = std::stoi(parser.getOptionValue("--threads"));
+        int threads = 1;
+        if (parser.hasOption("--multi"))
+            threads = std::stoi(parser.getOptionValue("--threads"));
         if (parser.hasOption("--mpi")) {
             // We need to make sure that if the user requests that MPI be run while not having MPI compiled, they get a helpful error warning.
 #ifdef USE_MPI

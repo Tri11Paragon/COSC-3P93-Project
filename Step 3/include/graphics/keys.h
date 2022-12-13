@@ -1,8 +1,3 @@
-/*
- * Created by Brett Terpstra 6920201 on 22/10/22.
- * Copyright (c) 2022 Brett Terpstra. All Rights Reserved.
- */
-
 #ifndef STEP_3_KEYS_H
 #define STEP_3_KEYS_H
 

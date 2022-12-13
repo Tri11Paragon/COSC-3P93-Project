@@ -9,13 +9,16 @@
 #include "engine/util/std.h"
 #include "engine/math/vectors.h"
 #include <config.h>
+
 #ifndef USE_GLFW
     #include <GL/gl.h>
     #include <GLES3/gl32.h>
     #include <GL/glx.h>
     #include <GL/glu.h>
 #else
+    
     #include <graphics/gl/glad/gl.h>
+
 #endif
 
 
@@ -37,29 +40,46 @@ namespace Raytracing {
             unsigned int geometryShaderID = 0;
             unsigned int tessalationShaderID = 0;
             std::unordered_map<std::string, IntDefaultedToMinusOne> uniformVars;
-            static unsigned int loadShader(const std::string &file, int type);
+            
+            static unsigned int loadShader(const std::string& file, int type);
+            
             // loads from a string rather than a file!
-            static unsigned int loadShaderString(const std::string &str, int type);
-            GLint getUniformLocation(const std::string &name);
-            static void checkCompileErrors(unsigned int shader, const std::string& type, const std::string& shaderPath);
+            static unsigned int loadShaderString(const std::string& str, int type);
+            
+            GLint getUniformLocation(const std::string& name);
+        
         public:
             Shader(const std::string& vertex, const std::string& fragment, bool loadString = false);
+            
             Shader(const std::string& vertex, const std::string& geometry, const std::string& fragment, bool loadString = false);
-            // used to set the location of VAOs to the in variables in opengl shaders.
+            
+            // used to set the location of VAOs to the in variables in opengl shaders. (using layouts instead)
             void bindAttribute(int attribute, const std::string& name);
-            // used to set location of shared UBOs
+            
+            // used to set location of shared UBOs (unused)
             void setUniformBlockLocation(const std::string& name, int location);
+            
             // set various data-types.
-            void setBool(const std::string &name, bool value);
-            void setInt(const std::string &name, int value);
-            void setFloat(const std::string &name, float value);
-            void setMatrix(const std::string &name, Mat4x4& matrix);
-            void setVec4(const std::string &name, const Vec4& vec);
-            void setVec3(const std::string &name, const Vec4& vec);
-            void setVec2(const std::string &name, float x, float y);
-            void setVec3(const std::string &name, float x, float y, float z);
-            void setVec4(const std::string &name, float x, float y, float z, float w);
+            void setBool(const std::string& name, bool value);
+            
+            void setInt(const std::string& name, int value);
+            
+            void setFloat(const std::string& name, float value);
+            
+            void setMatrix(const std::string& name, Mat4x4& matrix);
+            
+            void setVec4(const std::string& name, const Vec4& vec);
+            
+            void setVec3(const std::string& name, const Vec4& vec);
+            
+            void setVec2(const std::string& name, float x, float y);
+            
+            void setVec3(const std::string& name, float x, float y, float z);
+            
+            void setVec4(const std::string& name, float x, float y, float z, float w);
+            
             void use();
+            
             ~Shader();
     };
     

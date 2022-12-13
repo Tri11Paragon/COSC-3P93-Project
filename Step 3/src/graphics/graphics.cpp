@@ -5,7 +5,7 @@
 #include <graphics/graphics.h>
 #include <chrono>
 #include <graphics/gl/gl.h>
-#include "engine/image/stb_image.h"
+#include "engine/image/stb/stb_image.h"
 #include "graphics/debug_gui.h"
 #include <engine/util/std.h>
 
@@ -62,6 +62,7 @@ namespace Raytracing {
     }
 
 #ifdef USE_GLFW
+    
     XWindow::XWindow(int width, int height):
             m_displayWidth(width), m_displayHeight(height) {
         // OpenGL 4.6 is like 5 years old at this point and most systems support it
@@ -75,9 +76,11 @@ namespace Raytracing {
         glfwWindowHint(GLFW_DECORATED, GL_TRUE);
         glfwWindowHint(GLFW_FOCUSED, GL_TRUE);
         
-        glfwSetErrorCallback([](int error_code, const char* description) -> void {
-            elog << "GLFW Error: " << error_code << "\n\t" << description << "\n";
-        });
+        glfwSetErrorCallback(
+                [](int error_code, const char* description) -> void {
+                    elog << "GLFW Error: " << error_code << "\n\t" << description << "\n";
+                }
+        );
         
         if (!glfwInit())
             throw std::runtime_error("Unable to init GLFW!\n");
@@ -102,23 +105,29 @@ namespace Raytracing {
         stbi_image_free(imageData32.pixels);
         
         
-        glfwSetKeyCallback(window, [](GLFWwindow* _window, int key, int scancode, int action, int mods) -> void {
-            if (action == GLFW_PRESS)
-                Input::keyPressed(key);
-            else if (action == GLFW_RELEASE)
-                Input::keyReleased(key);
-        });
+        glfwSetKeyCallback(
+                window, [](GLFWwindow* _window, int key, int scancode, int action, int mods) -> void {
+                    if (action == GLFW_PRESS)
+                        Input::keyPressed(key);
+                    else if (action == GLFW_RELEASE)
+                        Input::keyReleased(key);
+                }
+        );
         
-        glfwSetMouseButtonCallback(window, [](GLFWwindow* _window, int button, int action, int mods) -> void {
-            if (action == GLFW_PRESS)
-                Input::mousePressed(button);
-            else if (action == GLFW_RELEASE)
-                Input::mouseReleased(button);
-        });
+        glfwSetMouseButtonCallback(
+                window, [](GLFWwindow* _window, int button, int action, int mods) -> void {
+                    if (action == GLFW_PRESS)
+                        Input::mousePressed(button);
+                    else if (action == GLFW_RELEASE)
+                        Input::mouseReleased(button);
+                }
+        );
         
-        glfwSetCursorPosCallback(window, [](GLFWwindow* _window, double x, double y) -> void {
-            Input::moveMove(x, y);
-        });
+        glfwSetCursorPosCallback(
+                window, [](GLFWwindow* _window, double x, double y) -> void {
+                    Input::moveMove(x, y);
+                }
+        );
         
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -137,6 +146,7 @@ namespace Raytracing {
         glfwShowWindow(window);
         ilog << "Loaded GL" << GLAD_VERSION_MAJOR(version) << "." << GLAD_VERSION_MINOR(version) << "!\n";
     }
+    
     void XWindow::closeWindow() {
         if (isCloseRequested)
             return;
@@ -149,6 +159,7 @@ namespace Raytracing {
         glfwDestroyWindow(window);
         glfwTerminate();
     }
+    
     void XWindow::beginUpdate() {
         // check for window events
         isCloseRequested = glfwWindowShouldClose(window);
@@ -168,6 +179,7 @@ namespace Raytracing {
         
         ImGui::ShowDemoWindow(nullptr);
     }
+    
     void XWindow::endUpdate() {
         // Render ImGUI
         ImGui::Render();
@@ -183,6 +195,7 @@ namespace Raytracing {
         frameTimeS = delta / 1000000000.0;
         fps = 1000 / frameTimeMs;
     }
+
 #else
     XWindow::XWindow(int width, int height): m_width(width), m_height(height) {
         // open the DEFAULT display. We don't want to open a specific screen as that is annoying.
@@ -466,13 +479,16 @@ namespace Raytracing {
         XCloseDisplay(display);
     }
 #endif
+    
     XWindow::~XWindow() {
         closeWindow();
         deleteKeys();
     }
+    
     void XWindow::setMouseGrabbed(bool grabbed) {
         glfwSetInputMode(window, GLFW_CURSOR, grabbed ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
     }
+    
     bool XWindow::isMouseGrabbed() {
         return glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
     }
@@ -539,33 +555,37 @@ namespace Raytracing {
         if (Input::isKeyDown(GLFW_KEY_ESCAPE) && Input::isState(GLFW_KEY_ESCAPE))
             m_window.setMouseGrabbed(!m_window.isMouseGrabbed());
         
-        DebugUI::render([this]() -> void {
-            if (ImGui::Button("Start") && !started) {
-                started = true;
-                RTSignal->haltRaytracing = false;
-                ilog << "Running raycaster!\n";
-                // we don't actually have to check for --single since it's implied to be default true.
-                int threads = std::stoi(m_parser.getOptionValue("--threads"));
-                if (m_parser.hasOption("--mpi")) {
-                    //m_raycaster.runMPI(raycaster.partitionScreen());
-                } else if (m_parser.hasOption("--openmp")) {
-                    m_raycaster.runOpenMP(threads);
-                } else {
-                    m_raycaster.runSTDThread(threads);
+        DebugUI::render(
+                [this]() -> void {
+                    if (ImGui::Button("Start") && !started) {
+                        started = true;
+                        RTSignal->haltRaytracing = false;
+                        ilog << "Running raycaster!\n";
+                        // we don't actually have to check for --single since it's implied to be default true.
+                        int threads = 1;
+                        if (m_parser.hasOption("--multi"))
+                            threads = std::stoi(m_parser.getOptionValue("--threads"));
+                        if (m_parser.hasOption("--mpi")) {
+                            //m_raycaster.runMPI(raycaster.partitionScreen());
+                        } else if (m_parser.hasOption("--openmp")) {
+                            m_raycaster.runOpenMP(threads);
+                        } else {
+                            m_raycaster.runSTDThread(threads);
+                        }
+                    }
+                    if (ImGui::Checkbox("Pause", &RTSignal->pauseRaytracing)) {}
+                    if (ImGui::Button("Stop") && started) {
+                        RTSignal->haltRaytracing = true;
+                        started = false;
+                        m_raycaster.deleteThreads();
+                    }
+                    ImGui::NewLine();
+                    ImGui::InputInt("Max Ray Bounce", &maxRayBounce);
+                    ImGui::InputInt("Rays Per Pixel", &raysPerPixel);
+                    m_raycaster.updateRayInfo(maxRayBounce, raysPerPixel);
+                    ImGui::Checkbox("Debug", &debug);
                 }
-            }
-            if (ImGui::Checkbox("Pause", &RTSignal->pauseRaytracing)) {}
-            if (ImGui::Button("Stop") && started) {
-                RTSignal->haltRaytracing = true;
-                started = false;
-                m_raycaster.deleteThreads();
-            }
-            ImGui::NewLine();
-            ImGui::InputInt("Max Ray Bounce", &maxRayBounce);
-            ImGui::InputInt("Rays Per Pixel", &raysPerPixel);
-            m_raycaster.updateRayInfo(maxRayBounce, raysPerPixel);
-            ImGui::Checkbox("Debug", &debug);
-        });
+        );
         
         // we want to be able to move around, and the camera matrix functions automatically recalculate image region & projection data.
         if (m_parser.hasOption("--gpu")) {
@@ -594,7 +614,7 @@ namespace Raytracing {
             m_worldShader.setMatrix("viewMatrix", matrices.second);
             m_worldShader.use();
             auto objs = m_world.getObjectsInWorld();
-            for (auto obj: objs) {
+            for (auto obj : objs) {
                 if (obj->getVAO() != nullptr) {
                     obj->getVAO()->bind();
                     obj->getVAO()->draw(m_worldShader, {obj->getPosition()});

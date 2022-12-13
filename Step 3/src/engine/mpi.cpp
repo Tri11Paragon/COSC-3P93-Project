@@ -17,8 +17,8 @@ namespace Raytracing {
         dlog << "Number of processes: " << numberOfProcesses << "\n";
     }
     
-    std::queue<RaycasterImageBounds> Raytracing::MPI::getCurrentImageRegionAssociation(RayCaster& raycaster) {
-        std::queue<RaycasterImageBounds> bounders{};
+    std::queue<RayCasterImageBounds> Raytracing::MPI::getCurrentImageRegionAssociation(RayCaster& raycaster) {
+        std::queue<RayCasterImageBounds> bounders{};
         
         auto bounds = raycaster.partitionScreen(numberOfProcesses);
         auto regionSize = bounds.size() / numberOfProcesses;

@@ -25,7 +25,7 @@ Raytracing::ModelData Raytracing::OBJLoader::loadModel(const std::string& file) 
     
     ModelData data;
     
-    for (const auto& line: lines) {
+    for (const auto& line : lines) {
         auto spaces = String::split(line, " ");
         if (line.starts_with("v ")) { // vertex
             data.vertices.emplace_back(std::stof(spaces[1]), std::stof(spaces[2]), std::stof(spaces[3]));
@@ -63,6 +63,7 @@ Raytracing::ModelData Raytracing::OBJLoader::loadModel(const std::string& file) 
     ilog << "Completed extracting vertex data from model file " << file << "!\n";
     return data;
 }
+
 Raytracing::TriangulatedModel::TriangulatedModel(const Raytracing::ModelData& data) {
     auto faces = data.faces;
     auto vertices = data.vertices;
@@ -71,11 +72,13 @@ Raytracing::TriangulatedModel::TriangulatedModel(const Raytracing::ModelData& da
     
     PRECISION_TYPE minX = infinity, minY = infinity, minZ = infinity, maxX = ninfinity, maxY = ninfinity, maxZ = ninfinity;
     
-    for (face f: faces) {
+    // create triangles from the faces
+    for (face f : faces) {
         auto t = std::make_shared<Triangle>(
                 vertices[f.v1], vertices[f.v2], vertices[f.v3],
                 uvs[f.uv1], uvs[f.uv2], uvs[f.uv3],
-                normals[f.n1], normals[f.n2], normals[f.n3]);
+                normals[f.n1], normals[f.n2], normals[f.n3]
+        );
         
         PRECISION_TYPE tMinX = infinity, tMinY = infinity, tMinZ = infinity, tMaxX = ninfinity, tMaxY = ninfinity, tMaxZ = ninfinity;
         // find the min and max of all the triangles

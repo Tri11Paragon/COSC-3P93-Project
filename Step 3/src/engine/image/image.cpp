@@ -5,24 +5,30 @@
 #include "engine/image/image.h"
 #include <ios>
 #include <fstream>
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "engine/image/stb_image_write.h"
+
+#include "engine/image/stb/stb_image_write.h"
+
 #define STB_IMAGE_IMPLEMENTATION
-#include "engine/image/stb_image.h"
+
+#include "engine/image/stb/stb_image.h"
+
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include "engine/image/stb_image_resize.h"
+
+#include "engine/image/stb/stb_image_resize.h"
 #include <config.h>
 
 namespace Raytracing {
-
-    Image::Image(unsigned long width, unsigned long height) : width(width), height(height), _width(width-1), _height(height-1) {
+    
+    Image::Image(unsigned long width, unsigned long height): width(width), height(height), _width(width - 1), _height(height - 1) {
         pixelData = new Vec4[(width + 1) * (height + 1)];
-        for (int i = 0; i < (width + 1) * (height + 1); i++){
-            pixelData[i] = Vec4{0,0,0,0};
+        for (int i = 0; i < (width + 1) * (height + 1); i++) {
+            pixelData[i] = Vec4{0, 0, 0, 0};
         }
     }
-
-    Image::Image(const Image& image) : width(image.width), height(image.height), _width(image._width), _height(image._height) {
+    
+    Image::Image(const Image& image): width(image.width), height(image.height), _width(image._width), _height(image._height) {
         pixelData = new Vec4[(image.width + 1) * (image.height + 1)];
         for (int i = 0; i < image.width; i++) {
             for (int j = 0; j < image.height; j++) {
@@ -30,11 +36,11 @@ namespace Raytracing {
             }
         }
     }
-
+    
     Image::~Image() {
         delete[](pixelData);
     }
-
+    
     std::vector<double> Image::toArray() {
         std::vector<double> doublin;
         for (int i = 0; i < (width + 1) * (height + 1); i++) {
@@ -46,36 +52,36 @@ namespace Raytracing {
         }
         return doublin;
     }
-
-    void Image::fromArray(double *array, int size, int id) {
-        for (int i = 0; i < size; i+=4){
+    
+    void Image::fromArray(double* array, int size, int id) {
+        for (int i = 0; i < size; i += 4) {
             // this is the one case where we can use the alpha value.
             // Data which has been set in the image has an alpha of 1 while the rest has 0
-            if (array[i+3] == 0)
+            if (array[i + 3] == 0)
                 continue;
             // if it was set and if the processes are properly isolated there should be no issue with overriding the pixel
-            pixelData[i/4] = Vec4{array[i], array[i+1], array[i+2], array[i+3]};
+            pixelData[i / 4] = Vec4{array[i], array[i + 1], array[i + 2], array[i + 3]};
         }
     }
-
+    
     void ImageOutput::write(const std::string& file, const std::string& formatExtension) {
         if (!image.modified())
             return;
         auto lowerExtension = Raytracing::String::toLowerCase(formatExtension);
         auto fullFile = file + "." + lowerExtension;
-
+        
         if (!lowerExtension.ends_with("hdr")) {
             // unfortunately we do have to put the data into a format that STB can read
-            auto* data = new unsigned char[(unsigned long)(image.getWidth()) * (unsigned long)image.getHeight() * 3];
+            auto* data = new unsigned char[(unsigned long) (image.getWidth()) * (unsigned long) image.getHeight() * 3];
             int pixelIndex = 0;
-            for (int j = image.getHeight()-1; j >= 0; j--) {
+            for (int j = image.getHeight() - 1; j >= 0; j--) {
                 for (int i = 0; i < image.getWidth(); i++) {
                     data[pixelIndex++] = image.getPixelR(i, j);
                     data[pixelIndex++] = image.getPixelG(i, j);
                     data[pixelIndex++] = image.getPixelB(i, j);
                 }
             }
-
+            
             // Writing a PPM was giving me issues, so I switched to using STB Image Write
             // It's a single threaded, public domain header only image writing library
             // I didn't want to use an external lib for this, however since it is public domain
@@ -106,10 +112,16 @@ namespace Raytracing {
             delete[](data);
         }
     }
+    
     ImageInput::ImageInput(const std::string& image) {
         data = stbi_load(image.c_str(), &width, &height, &channels, 4);
     }
+    
     unsigned long* ImageInput::getImageAsIconBuffer() {
+        // I don't think this mess works
+        // and I could never figure out why it wasn't
+        // was meant for X11.
+        // which is part of why I switched to GLFW.
         const int size = 32;
         unsigned char newData[size * size * channels];
         auto* returnData = new unsigned long[size * size + 2];
@@ -117,14 +129,15 @@ namespace Raytracing {
         int charPoint = 0;
         returnData[charPoint++] = size;
         returnData[charPoint++] = size;
-        for (int i = 0; i < size; i++){
-            for (int j = 0; j < size; j++){
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 unsigned long dtr = (((const unsigned long*) data)[i + j * size]);
-                returnData[i + j * size + 2] = (dtr >> 48) | (dtr << ((sizeof(unsigned long)*8) - 48));
+                returnData[i + j * size + 2] = (dtr >> 48) | (dtr << ((sizeof(unsigned long) * 8) - 48));
             }
         }
         return returnData;
     }
+    
     ImageInput::~ImageInput() {
         stbi_image_free(data);
     }
